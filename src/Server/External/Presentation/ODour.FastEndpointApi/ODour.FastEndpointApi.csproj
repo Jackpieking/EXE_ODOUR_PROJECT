@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Infrastructure\Persistence\Relational\ODour.PostgresRelationalDb\ODour.PostgresRelationalDb.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Persistence\Cache\ODour.RedisCacheDb\ODour.RedisCacheDb.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
