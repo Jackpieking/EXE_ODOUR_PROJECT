@@ -377,7 +377,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-src/Server/vscode/*
+.vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -402,3 +402,7 @@ src/Server/vscode/*
 # Setting files
 appsettings.json
 appsettings.Development.json
+src/Server/.vscode/launch.json
+src/Server/.vscode/tasks.json
+.vscode/launch.json
+.vscode/tasks.json

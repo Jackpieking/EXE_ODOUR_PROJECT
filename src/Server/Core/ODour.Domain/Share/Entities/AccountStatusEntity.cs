@@ -10,24 +10,38 @@ public sealed class AccountStatusEntity
         IUpdatedEntity,
         ITemporarilyRemovedEntity
 {
+    #region PrimaryKeys
     public Guid Id { get; set; }
+    #endregion
 
     public string Name { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public Guid CreatedBy { get; set; }
-
     public DateTime UpdatedAt { get; set; }
-
-    public Guid UpdatedBy { get; set; }
 
     public DateTime RemovedAt { get; set; }
 
+    #region ForeignKeys
+    public Guid CreatedBy { get; set; }
+
+    public Guid UpdatedBy { get; set; }
+
     public Guid RemovedBy { get; set; }
+    #endregion
 
     #region NavigationCollections
-    public IEnumerable<UserEntity> UserEntities { get; set; }
+    public IEnumerable<UserDetailEntity> UserDetails { get; set; }
+
+    public IEnumerable<SystemAccountEntity> SystemAccounts { get; set; }
+    #endregion
+
+    #region NavigationProperties
+    public SystemAccountEntity Creator { get; set; }
+
+    public SystemAccountEntity Updater { get; set; }
+
+    public SystemAccountEntity Remover { get; set; }
     #endregion
 
     #region MetaData

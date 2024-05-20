@@ -5,7 +5,9 @@ namespace ODour.Domain.Share.Entities;
 
 public sealed class ProductImageEntity : IEntity
 {
+    #region PrimaryKeys
     public Guid Id { get; set; }
+    #endregion
 
     #region ForeignKeys
     public Guid ProductId { get; set; }
@@ -16,7 +18,7 @@ public sealed class ProductImageEntity : IEntity
     public string StorageUrl { get; set; }
 
     #region NavigationProperties
-    public ProductEntity ProductEntity { get; set; }
+    public ProductEntity Product { get; set; }
     #endregion
 
     #region MetaData

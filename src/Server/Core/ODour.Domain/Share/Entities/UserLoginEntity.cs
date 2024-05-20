@@ -6,6 +6,10 @@ namespace ODour.Domain.Share.Entities;
 
 public sealed class UserLoginEntity : IdentityUserLogin<Guid>, IEntity
 {
+    #region NavigationProperties
+    public UserEntity User { get; set; }
+    #endregion
+
     #region MetaData
     public static class MetaData
     {

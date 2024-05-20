@@ -8,7 +8,9 @@ namespace ODour.Domain.Share.Entities;
 
 public sealed class OrderEntity : IEntity, ICreatedEntity, IUpdatedEntity
 {
+    #region PrimaryKeys
     public Guid Id { get; set; }
+    #endregion
 
     #region ForeignKeys
     public Guid OrderStatusId { get; set; }
@@ -16,6 +18,8 @@ public sealed class OrderEntity : IEntity, ICreatedEntity, IUpdatedEntity
     public Guid CreatedBy { get; set; }
 
     public Guid PaymentMethodId { get; set; }
+
+    public Guid UpdatedBy { get; set; }
     #endregion
 
     public long OrderCode { get; set; }
@@ -30,8 +34,6 @@ public sealed class OrderEntity : IEntity, ICreatedEntity, IUpdatedEntity
 
     public DateTime UpdatedAt { get; set; }
 
-    public Guid UpdatedBy { get; set; }
-
     public DateTime DeliveredAt { get; set; }
 
     #region NavigationProperties
@@ -39,13 +41,13 @@ public sealed class OrderEntity : IEntity, ICreatedEntity, IUpdatedEntity
 
     public UserDetailEntity Updater { get; set; }
 
-    public PaymentMethodEntity PaymentMethodEntity { get; set; }
+    public PaymentMethodEntity PaymentMethod { get; set; }
 
-    public OrderStatusEntity OrderStatusEntity { get; set; }
+    public OrderStatusEntity OrderStatus { get; set; }
     #endregion
 
     #region NavigationCollections
-    public IEnumerable<OrderItemEntity> OrderItemEntities { get; set; }
+    public IEnumerable<OrderItemEntity> OrderItems { get; set; }
     #endregion
 
     #region MetaData

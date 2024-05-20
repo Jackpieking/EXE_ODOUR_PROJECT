@@ -16,9 +16,9 @@ public sealed class OrderItemEntity : IEntity
     public int SellingQuantity { get; set; }
 
     #region NavigationProperties
-    public OrderEntity OrderEntity { get; set; }
+    public OrderEntity Order { get; set; }
 
-    public ProductEntity ProductEntity { get; set; }
+    public ProductEntity Product { get; set; }
     #endregion
 
     #region MetaData

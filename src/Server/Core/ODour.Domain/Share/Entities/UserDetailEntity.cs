@@ -12,13 +12,11 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
 
     public string FirstName { get; set; }
 
-    public string LasttName { get; set; }
+    public string LastName { get; set; }
 
     public string AvatarUrl { get; set; }
 
     public bool Gender { get; set; }
-
-    public Guid AccountStatusId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -26,10 +24,14 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
 
     public DateTime RemovedAt { get; set; }
 
+    #region ForeignKeys
     public Guid RemovedBy { get; set; }
 
+    public Guid AccountStatusId { get; set; }
+    #endregion
+
     #region NavigationProperties
-    public UserEntity UserEntity { get; set; }
+    public UserEntity User { get; set; }
 
     public AccountStatusEntity AccountStatus { get; set; }
 
@@ -37,7 +39,9 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
     #endregion
 
     #region NavigationCollections
-    public IEnumerable<OrderEntity> OrderEntities { get; set; }
+    public IEnumerable<OrderEntity> OrderCreators { get; set; }
+
+    public IEnumerable<OrderEntity> OrderUpdaters { get; set; }
     #endregion
 
     #region MetaData

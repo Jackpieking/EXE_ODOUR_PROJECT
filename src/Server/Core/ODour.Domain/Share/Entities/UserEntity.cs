@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using ODour.Domain.Share.Entities.Base;
 
@@ -6,8 +7,18 @@ namespace ODour.Domain.Share.Entities;
 
 public sealed class UserEntity : IdentityUser<Guid>, IEntity
 {
+    #region NavigationCollections
+    public IEnumerable<UserRoleEntity> UserRoles { get; set; }
+
+    public IEnumerable<UserClaimEntity> UserClaims { get; set; }
+
+    public IEnumerable<UserLoginEntity> UserLogins { get; set; }
+
+    public IEnumerable<UserTokenEntity> UserTokens { get; set; }
+    #endregion
+
     #region NavigationProperties
-    public UserDetailEntity UserDetailEntity { get; set; }
+    public UserDetailEntity UserDetail { get; set; }
     #endregion
 
     #region MetaData

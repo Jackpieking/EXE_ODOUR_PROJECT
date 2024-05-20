@@ -15,18 +15,20 @@ public sealed class RoleDetailEntity
 
     public DateTime CreatedAt { get; set; }
 
-    public Guid CreatedBy { get; set; }
-
     public DateTime UpdatedAt { get; set; }
-
-    public Guid UpdatedBy { get; set; }
 
     public DateTime RemovedAt { get; set; }
 
+    #region ForeignKeys
+    public Guid CreatedBy { get; set; }
+
+    public Guid UpdatedBy { get; set; }
+
     public Guid RemovedBy { get; set; }
+    #endregion
 
     #region NavigationProperties
-    public RoleEntity RoleEntity { get; set; }
+    public RoleEntity Role { get; set; }
 
     public SystemAccountEntity Creator { get; set; }
 

@@ -6,9 +6,9 @@ namespace ODour.Domain.Share.Entities;
 
 public sealed class SystemAccountEntity : IEntity
 {
+    #region PrimaryKeys
     public Guid Id { get; set; }
-
-    public Guid AccountStatusId { get; set; }
+    #endregion
 
     public string UserName { get; set; }
 
@@ -28,11 +28,23 @@ public sealed class SystemAccountEntity : IEntity
 
     public DateTime CreatedAt { get; set; }
 
+    #region ForeignKeys
+    public Guid AccountStatusId { get; set; }
+    #endregion
+
     #region NavigationProperties
-    public AccountStatusEntity AccountStatusEntity { get; set; }
+    public AccountStatusEntity AccountStatus { get; set; }
     #endregion
 
     #region NavigationCollections
+    #region AccountStatusEntity
+    public IEnumerable<AccountStatusEntity> AccountStatusCreators { get; set; }
+
+    public IEnumerable<AccountStatusEntity> AccountStatusUpdaters { get; set; }
+
+    public IEnumerable<AccountStatusEntity> AccountStatusRemovers { get; set; }
+    #endregion
+
     #region CategoryEntity
     public IEnumerable<CategoryEntity> CategoryCreators { get; set; }
 
@@ -86,7 +98,7 @@ public sealed class SystemAccountEntity : IEntity
     #endregion
 
     #region SystemAccountTokenEntity
-    public IEnumerable<SystemAccountTokenEntity> SystemAccountTokenEntities { get; set; }
+    public IEnumerable<SystemAccountTokenEntity> SystemAccountTokens { get; set; }
     #endregion
     #endregion
 

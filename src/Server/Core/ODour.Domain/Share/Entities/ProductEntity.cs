@@ -10,12 +10,20 @@ public sealed class ProductEntity
         IUpdatedEntity,
         ITemporarilyRemovedEntity
 {
+    #region PrimaryKeys
     public Guid Id { get; set; }
+    #endregion
 
     #region ForeignKeys
+    public Guid ProductStatusId { get; set; }
+
     public Guid CategoryId { get; set; }
 
-    public Guid ProductStatusId { get; set; }
+    public Guid CreatedBy { get; set; }
+
+    public Guid UpdatedBy { get; set; }
+
+    public Guid RemovedBy { get; set; }
     #endregion
 
     public string Name { get; set; }
@@ -28,19 +36,14 @@ public sealed class ProductEntity
 
     public DateTime CreatedAt { get; set; }
 
-    public Guid CreatedBy { get; set; }
-
     public DateTime UpdatedAt { get; set; }
-
-    public Guid UpdatedBy { get; set; }
 
     public DateTime RemovedAt { get; set; }
 
-    public Guid RemovedBy { get; set; }
     #region NavigationProperties
-    public CategoryEntity CategoryEntity { get; set; }
+    public CategoryEntity Category { get; set; }
 
-    public ProductStatusEntity ProductStatusEntity { get; set; }
+    public ProductStatusEntity ProductStatus { get; set; }
 
     public SystemAccountEntity Creator { get; set; }
 
@@ -50,9 +53,9 @@ public sealed class ProductEntity
     #endregion
 
     #region NavigationCollections
-    public IEnumerable<ProductImageEntity> ProductImageEntities { get; set; }
+    public IEnumerable<ProductImageEntity> ProductImages { get; set; }
 
-    public IEnumerable<OrderItemEntity> OrderItemEntities { get; set; }
+    public IEnumerable<OrderItemEntity> OrderItems { get; set; }
     #endregion
 
     #region MetaData

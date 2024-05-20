@@ -3,6 +3,10 @@
     <ProjectReference Include="..\..\..\..\..\Core\ODour.Application\ODour.Application.csproj" />
     <ProjectReference Include="..\..\..\..\Common\ODour.Configuration\ODour.Configuration.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>

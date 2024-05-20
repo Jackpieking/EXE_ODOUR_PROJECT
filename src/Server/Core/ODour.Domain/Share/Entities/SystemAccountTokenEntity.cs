@@ -5,7 +5,9 @@ namespace ODour.Domain.Share.Entities;
 
 public sealed class SystemAccountTokenEntity : IEntity
 {
+    #region PrimaryForeignKeys
     public Guid SystemAccountId { get; set; }
+    #endregion
 
     public string Name { get; set; }
 
@@ -16,7 +18,7 @@ public sealed class SystemAccountTokenEntity : IEntity
     public DateTime ExpiredAt { get; set; }
 
     #region NavigationProperties
-    public SystemAccountEntity SystemAccountEntity { get; set; }
+    public SystemAccountEntity SystemAccount { get; set; }
     #endregion
 
     #region MetaData
