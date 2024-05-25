@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.SystemAccount.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -12,10 +12,16 @@ internal sealed class SystemAccountTokenEntityConfiguration
     {
         builder.ToTable(
             name: SystemAccountTokenEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.SYSTEM_ACCOUNT}",
             buildAction: table => table.HasComment(comment: "Contain system account tokens.")
         );
 
         builder.HasKey(keyExpression: builder => builder.SystemAccountId);
+
+        builder
+            .Property(propertyExpression: builder => builder.LoginProvider)
+            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .IsRequired(required: true);
 
         builder
             .Property(propertyExpression: builder => builder.Name)
@@ -28,11 +34,8 @@ internal sealed class SystemAccountTokenEntityConfiguration
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .IsRequired(required: true);
-
-        builder
             .Property(propertyExpression: builder => builder.ExpiredAt)
+            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
             .IsRequired(required: true);
 
         #region Relationships

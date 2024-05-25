@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.Role.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,57 +11,17 @@ internal sealed class RoleDetailEntityConfiguration : IEntityTypeConfiguration<R
     {
         builder.ToTable(
             name: RoleDetailEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ROLE}",
             buildAction: table => table.HasComment(comment: "Contain role details.")
         );
 
         builder.HasKey(keyExpression: builder => builder.RoleId);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.CreatedBy)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedBy)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedBy)
+            .Property(propertyExpression: builder => builder.IsTemporarilyRemoved)
             .IsRequired(required: true);
 
         #region Relationships
-        builder
-            .HasOne(navigationExpression: roleDetail => roleDetail.Creator)
-            .WithMany(navigationExpression: systemAccount => systemAccount.RoleDetailCreators)
-            .HasForeignKey(foreignKeyExpression: roleDetail => roleDetail.CreatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: roleDetail => roleDetail.Updater)
-            .WithMany(navigationExpression: systemAccount => systemAccount.RoleDetailUpdaters)
-            .HasForeignKey(foreignKeyExpression: roleDetail => roleDetail.UpdatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: roleDetail => roleDetail.Remover)
-            .WithMany(navigationExpression: systemAccount => systemAccount.RoleDetailRemovers)
-            .HasForeignKey(foreignKeyExpression: roleDetail => roleDetail.RemovedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
         builder
             .HasOne(navigationExpression: roleDetail => roleDetail.Role)
             .WithOne(navigationExpression: role => role.RoleDetail)

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
+using ODour.Domain.Share.Role.Entities;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -17,7 +17,6 @@ internal sealed class RoleClaimEntityConfiguration : IEntityTypeConfiguration<Ro
         builder
             .HasOne(navigationExpression: roleClaim => roleClaim.Role)
             .WithMany(navigationExpression: role => role.RoleClaims)
-            .HasForeignKey(foreignKeyExpression: roleClaim => roleClaim.RoleId)
             .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
         #endregion
     }

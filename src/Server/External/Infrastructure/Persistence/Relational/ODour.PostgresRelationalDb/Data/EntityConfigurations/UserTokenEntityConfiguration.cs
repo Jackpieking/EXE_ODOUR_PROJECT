@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.User.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -15,11 +15,6 @@ internal sealed class UserTokenEntityConfiguration : IEntityTypeConfiguration<Us
         );
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
             .Property(propertyExpression: builder => builder.ExpiredAt)
             .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
             .IsRequired(required: true);
@@ -28,7 +23,6 @@ internal sealed class UserTokenEntityConfiguration : IEntityTypeConfiguration<Us
         builder
             .HasOne(navigationExpression: userToken => userToken.User)
             .WithMany(navigationExpression: user => user.UserTokens)
-            .HasForeignKey(foreignKeyExpression: userToken => userToken.UserId)
             .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
         #endregion
     }

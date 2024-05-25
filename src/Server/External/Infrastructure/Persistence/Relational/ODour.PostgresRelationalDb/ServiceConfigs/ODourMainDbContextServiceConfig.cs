@@ -8,12 +8,12 @@ namespace ODour.PostgresRelationalDb.ServiceConfigs;
 
 internal static class ODourMainDbContextServiceConfig
 {
-    internal static void Config(IServiceCollection services, IConfigurationManager configuration)
+    internal static void Config(IServiceCollection services, IConfiguration configurationManager)
     {
         services.AddDbContextPool<ODourContext>(
             optionsAction: (provider, config) =>
             {
-                var option = configuration
+                var option = configurationManager
                     .GetRequiredSection(key: "Database")
                     .GetRequiredSection(key: "ODourMainDb")
                     .Get<ODourDatabaseOption>();

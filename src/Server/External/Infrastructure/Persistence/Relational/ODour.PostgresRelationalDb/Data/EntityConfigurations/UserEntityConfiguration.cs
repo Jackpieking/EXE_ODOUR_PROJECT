@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
+using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 

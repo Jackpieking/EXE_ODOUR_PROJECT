@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
+using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -17,13 +17,11 @@ internal sealed class UserRoleEntityConfiguration : IEntityTypeConfiguration<Use
         builder
             .HasOne(navigationExpression: userRole => userRole.User)
             .WithMany(navigationExpression: user => user.UserRoles)
-            .HasForeignKey(foreignKeyExpression: userRole => userRole.UserId)
             .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
 
         builder
             .HasOne(navigationExpression: userRole => userRole.Role)
             .WithMany(navigationExpression: role => role.UserRoles)
-            .HasForeignKey(foreignKeyExpression: userRole => userRole.RoleId)
             .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
         #endregion
     }

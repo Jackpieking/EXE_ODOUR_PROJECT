@@ -16,7 +16,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:CollationDefinition:case_insensitive", "en-u-ks-primary,en-u-ks-primary,icu,False")
-                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("ProductVersion", "7.0.19")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -37,13 +37,14 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("character varying(34)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("RoleClaims", (string)null);
 
@@ -68,13 +69,14 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("character varying(34)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserClaims", (string)null);
 
@@ -93,8 +95,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("character varying(34)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("text");
@@ -103,6 +104,8 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserLogins", (string)null);
 
@@ -121,10 +124,11 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("character varying(34)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles", (string)null);
 
@@ -146,8 +150,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("character varying(34)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
                         .HasColumnType("text");
@@ -161,50 +164,29 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.AccountStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("RemovedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("RemovedBy");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("AccountStatuses", null, t =>
+                    b.ToTable("AccountStatuses", "main.account_status", t =>
                         {
                             t.HasComment("Contain account statuses.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.CategoryEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -215,39 +197,56 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("AccountStatusEvents", "main.account_status", t =>
+                        {
+                            t.HasComment("Contain account status events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("RemovedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("RemovedBy");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("Categories", null, t =>
+                    b.ToTable("Categories", "main.category", t =>
                         {
                             t.HasComment("Contain categories.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -257,6 +256,57 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .HasColumnType("TIMESTAMPTZ");
 
                     b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("CategoryEvents", "main.category", t =>
+                        {
+                            t.HasComment("Contain category events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.EventSnapshot.Entities.EventSnapshotEntity", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StreamId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("EventId", "StreamId");
+
+                    b.ToTable("EventSnapshots", "main.event_snapshot", t =>
+                        {
+                            t.HasComment("Contain event snapshots.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("DeliveredAddress")
@@ -285,35 +335,64 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
 
                     b.HasIndex("OrderStatusId");
 
                     b.HasIndex("PaymentMethodId");
 
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("Orders", null, t =>
+                    b.ToTable("Orders", "main.order", t =>
                         {
                             t.HasComment("Contain orders.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderItemEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderEventEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("OrderEvents", "main.order", t =>
+                        {
+                            t.HasComment("Contain order events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderItemEntity", b =>
                 {
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ProductId")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<decimal>("SellingPrice")
                         .HasPrecision(12, 2)
@@ -326,13 +405,13 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems", null, t =>
+                    b.ToTable("OrderItems", "main.order", t =>
                         {
                             t.HasComment("Contain order items.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderItemEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -343,39 +422,56 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("OrderItemEvents", "main.order", t =>
+                        {
+                            t.HasComment("Contain order item events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderStatusEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("RemovedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("RemovedBy");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("OrderStatuses", null, t =>
+                    b.ToTable("OrderStatuses", "main.order", t =>
                         {
                             t.HasComment("Contain order statuses.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.PaymentMethodEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderStatusEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -386,45 +482,59 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("OrderStatusEvents", "main.order", t =>
+                        {
+                            t.HasComment("Contain order status events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Payment.Entities.PaymentMethodEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("RemovedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("RemovedBy");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("PaymentMethods", null, t =>
+                    b.ToTable("PaymentMethods", "main.payment", t =>
                         {
                             t.HasComment("Contain payment methods.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Payment.Entities.PaymentMethodEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -433,9 +543,47 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("PaymentMethodEvents", "main.payment", t =>
+                        {
+                            t.HasComment("Contain payment method events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -448,48 +596,70 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<int>("QuantityInStock")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("RemovedBy")
-                        .HasColumnType("uuid");
-
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CreatedBy");
-
                     b.HasIndex("ProductStatusId");
 
-                    b.HasIndex("RemovedBy");
-
-                    b.HasIndex("UpdatedBy");
-
-                    b.ToTable("Products", null, t =>
+                    b.ToTable("Products", "main.product", t =>
                         {
                             t.HasComment("Contain products.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductImageEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProductId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("ProductEvents", "main.product", t =>
+                        {
+                            t.HasComment("Contain product events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductMediaEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("StorageUrl")
                         .IsRequired()
@@ -502,13 +672,13 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages", null, t =>
+                    b.ToTable("ProductMedias", "main.product", t =>
                         {
-                            t.HasComment("Contain product images.");
+                            t.HasComment("Contain product medias.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductMediaEventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -520,40 +690,58 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NewData")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<Guid>("RemovedBy")
+                    b.Property<Guid>("StreamId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
 
-                    b.HasIndex("RemovedBy");
+                    b.ToTable("ProductMediaEvents", "main.product", t =>
+                        {
+                            t.HasComment("Contain product media events.");
+                        });
+                });
 
-                    b.HasIndex("UpdatedBy");
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductStatusEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.ToTable("ProductStatuses", null, t =>
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductStatuses", "main.product", t =>
                         {
                             t.HasComment("Contain product statuses.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.RoleDetailEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductStatusEventEntity", b =>
                 {
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -562,33 +750,49 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<Guid>("RemovedBy")
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("RoleId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
 
-                    b.HasIndex("RemovedBy");
+                    b.ToTable("ProductStatusEvents", "main.product", t =>
+                        {
+                            t.HasComment("Contain product status events.");
+                        });
+                });
 
-                    b.HasIndex("UpdatedBy");
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleDetailEntity", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
-                    b.ToTable("RoleDetails", null, t =>
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("RoleId");
+
+                    b.ToTable("RoleDetails", "main.role", t =>
                         {
                             t.HasComment("Contain role details.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.RoleEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -612,10 +816,65 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles", null, t =>
+                        {
+                            t.HasComment("Contain roles.");
+                        });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.SystemAccountEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleEventEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("RoleEvents", "main.role", t =>
+                        {
+                            t.HasComment("Contain role events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.SeedFlag.Entities.SeedFlagEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SeedFlags", "main.seed_flag", t =>
+                        {
+                            t.HasComment("Contain seed flags.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -626,9 +885,6 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<Guid>("AccountStatusId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -652,9 +908,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -664,22 +917,59 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasIndex("AccountStatusId");
 
-                    b.ToTable("SystemAccounts", null, t =>
+                    b.ToTable("SystemAccounts", "main.system_account", t =>
                         {
                             t.HasComment("Contain system accounts.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.SystemAccountTokenEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEventEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemAccountEvents", "main.system_account", t =>
+                        {
+                            t.HasComment("Contain system account events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountTokenEntity", b =>
                 {
                     b.Property<Guid>("SystemAccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<string>("LoginProvider")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -692,13 +982,51 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasKey("SystemAccountId");
 
-                    b.ToTable("SystemAccountTokens", null, t =>
+                    b.ToTable("SystemAccountTokens", "main.system_account", t =>
                         {
                             t.HasComment("Contain system account tokens.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserDetailEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountTokenEventEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("SystemAccountTokenEvents", "main.system_account", t =>
+                        {
+                            t.HasComment("Contain system account token events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserDetailEntity", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -710,9 +1038,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -721,33 +1046,25 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<bool>("Gender")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime>("RemovedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
-                    b.Property<Guid>("RemovedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
                     b.HasKey("UserId");
 
                     b.HasIndex("AccountStatusId");
 
-                    b.HasIndex("RemovedBy");
-
-                    b.ToTable("UserDetails", null, t =>
+                    b.ToTable("UserDetails", "main.user", t =>
                         {
                             t.HasComment("Contain user details.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -815,11 +1132,88 @@ namespace ODour.PostgresRelationalDb.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.RoleClaimEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserEventEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserEvents", "main.user", t =>
+                        {
+                            t.HasComment("Contain user events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserTokenEventEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("UserTokenEvents", "main.user", t =>
+                        {
+                            t.HasComment("Contain user token events.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleClaimEntity", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>");
 
-                    b.HasIndex("RoleId");
+                    b.Property<Guid?>("RoleId1")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("RoleId1");
 
                     b.ToTable("RoleClaims", null, t =>
                         {
@@ -829,11 +1223,14 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("RoleClaimEntity");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserClaimEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserClaimEntity", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>");
 
-                    b.HasIndex("UserId");
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("UserClaims", null, t =>
                         {
@@ -843,11 +1240,14 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("UserClaimEntity");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserLoginEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserLoginEntity", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>");
 
-                    b.HasIndex("UserId");
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("UserLogins", null, t =>
                         {
@@ -857,11 +1257,19 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("UserLoginEntity");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserRoleEntity", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>");
 
-                    b.HasIndex("RoleId");
+                    b.Property<Guid?>("RoleId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("RoleId1");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("UserRoles", null, t =>
                         {
@@ -871,15 +1279,17 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("UserRoleEntity");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserTokenEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserTokenEntity", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("UserTokens", null, t =>
                         {
@@ -889,104 +1299,118 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("UserTokenEntity");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.AccountStatusEntity", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("AccountStatusCreators")
+                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEventEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("AccountStatusEventCreators")
                         .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("AccountStatusRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("AccountStatusUpdaters")
-                        .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.CategoryEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("CategoryCreators")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("CategoryEventCreators")
                         .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("CategoryRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("CategoryUpdaters")
-                        .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.UserDetailEntity", "Creator")
-                        .WithMany("OrderCreators")
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.OrderStatusEntity", "OrderStatus")
+                    b.HasOne("ODour.Domain.Share.Order.Entities.OrderStatusEntity", "OrderStatus")
                         .WithMany("Orders")
                         .HasForeignKey("OrderStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.PaymentMethodEntity", "PaymentMethod")
+                    b.HasOne("ODour.Domain.Share.Payment.Entities.PaymentMethodEntity", "PaymentMethod")
                         .WithMany("Orders")
                         .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.UserDetailEntity", "Updater")
-                        .WithMany("OrderUpdaters")
-                        .HasForeignKey("UpdatedBy")
+                    b.Navigation("OrderStatus");
+
+                    b.Navigation("PaymentMethod");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderEventEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserDetailEntity", "Creator")
+                        .WithMany("OrderEventCreators")
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("OrderStatus");
-
-                    b.Navigation("PaymentMethod");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderItemEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderItemEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.OrderEntity", "Order")
+                    b.HasOne("ODour.Domain.Share.Order.Entities.OrderEntity", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.ProductEntity", "Product")
+                    b.HasOne("ODour.Domain.Share.Product.Entities.ProductEntity", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -997,106 +1421,72 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderItemEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("OrderStatusCreators")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserDetailEntity", "Creator")
+                        .WithMany("OrderItemEventCreators")
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("OrderStatusRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("OrderStatusUpdaters")
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Creator");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.PaymentMethodEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderStatusEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("PaymentMethodCreators")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("OrderStatusEventCreators")
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("PaymentMethodRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Navigation("Creator");
+                });
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("PaymentMethodUpdaters")
-                        .HasForeignKey("UpdatedBy")
+            modelBuilder.Entity("ODour.Domain.Share.Payment.Entities.PaymentMethodEventEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("PaymentMethodEventCreators")
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.CategoryEntity", "Category")
+                    b.HasOne("ODour.Domain.Share.Category.Entities.CategoryEntity", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("ProductCreators")
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.ProductStatusEntity", "ProductStatus")
+                    b.HasOne("ODour.Domain.Share.Product.Entities.ProductStatusEntity", "ProductStatus")
                         .WithMany("Products")
                         .HasForeignKey("ProductStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("ProductRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("ProductUpdaters")
-                        .HasForeignKey("UpdatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Category");
 
-                    b.Navigation("Creator");
-
                     b.Navigation("ProductStatus");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductImageEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.ProductEntity", "Product")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("ProductEventCreators")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductMediaEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.Product.Entities.ProductEntity", "Product")
                         .WithMany("ProductImages")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1105,71 +1495,53 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductMediaEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("ProductStatusCreators")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("ProductMediaEventCreators")
                         .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("ProductStatusRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("ProductStatusUpdaters")
-                        .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.RoleDetailEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductStatusEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Creator")
-                        .WithMany("RoleDetailCreators")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("ProductStatusEventCreators")
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("RoleDetailRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Navigation("Creator");
+                });
 
-                    b.HasOne("ODour.Domain.Share.Entities.RoleEntity", "Role")
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleDetailEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", "Role")
                         .WithOne("RoleDetail")
-                        .HasForeignKey("ODour.Domain.Share.Entities.RoleDetailEntity", "RoleId")
+                        .HasForeignKey("ODour.Domain.Share.Role.Entities.RoleDetailEntity", "RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Updater")
-                        .WithMany("RoleDetailUpdaters")
-                        .HasForeignKey("UpdatedBy")
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleEventEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("RoleEventCreators")
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("Remover");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.SystemAccountEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.AccountStatusEntity", "AccountStatus")
+                    b.HasOne("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEntity", "AccountStatus")
                         .WithMany("SystemAccounts")
                         .HasForeignKey("AccountStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1178,9 +1550,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("AccountStatus");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.SystemAccountTokenEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountTokenEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "SystemAccount")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "SystemAccount")
                         .WithMany("SystemAccountTokens")
                         .HasForeignKey("SystemAccountId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1189,136 +1561,144 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("SystemAccount");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserDetailEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountTokenEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.AccountStatusEntity", "AccountStatus")
+                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "Creator")
+                        .WithMany("SystemAccountTokenEventCreators")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserDetailEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEntity", "AccountStatus")
                         .WithMany("UserDetails")
                         .HasForeignKey("AccountStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ODour.Domain.Share.Entities.SystemAccountEntity", "Remover")
-                        .WithMany("UserDetailRemovers")
-                        .HasForeignKey("RemovedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.Entities.UserEntity", "User")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithOne("UserDetail")
-                        .HasForeignKey("ODour.Domain.Share.Entities.UserDetailEntity", "UserId")
+                        .HasForeignKey("ODour.Domain.Share.User.Entities.UserDetailEntity", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AccountStatus");
 
-                    b.Navigation("Remover");
-
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.RoleClaimEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserTokenEventEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.RoleEntity", "Role")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserDetailEntity", "Creator")
+                        .WithMany("UserTokenEvents")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleClaimEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", "Role")
                         .WithMany("RoleClaims")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoleId1")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserClaimEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserClaimEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.UserEntity", "User")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserClaims")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserLoginEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserLoginEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.UserEntity", "User")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserLogins")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserRoleEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.RoleEntity", "Role")
+                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", "Role")
                         .WithMany("UserRoles")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoleId1")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("ODour.Domain.Share.Entities.UserEntity", "User")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Role");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserTokenEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserTokenEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Entities.UserEntity", "User")
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserTokens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.AccountStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEntity", b =>
                 {
                     b.Navigation("SystemAccounts");
 
                     b.Navigation("UserDetails");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.CategoryEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEntity", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderEntity", b =>
                 {
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.OrderStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderStatusEntity", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.PaymentMethodEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Payment.Entities.PaymentMethodEntity", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductEntity", b =>
                 {
                     b.Navigation("OrderItems");
 
                     b.Navigation("ProductImages");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.ProductStatusEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductStatusEntity", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.RoleEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Role.Entities.RoleEntity", b =>
                 {
                     b.Navigation("RoleClaims");
 
@@ -1327,63 +1707,39 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.SystemAccountEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", b =>
                 {
-                    b.Navigation("AccountStatusCreators");
+                    b.Navigation("AccountStatusEventCreators");
 
-                    b.Navigation("AccountStatusRemovers");
+                    b.Navigation("CategoryEventCreators");
 
-                    b.Navigation("AccountStatusUpdaters");
+                    b.Navigation("OrderStatusEventCreators");
 
-                    b.Navigation("CategoryCreators");
+                    b.Navigation("PaymentMethodEventCreators");
 
-                    b.Navigation("CategoryRemovers");
+                    b.Navigation("ProductEventCreators");
 
-                    b.Navigation("CategoryUpdaters");
+                    b.Navigation("ProductMediaEventCreators");
 
-                    b.Navigation("OrderStatusCreators");
+                    b.Navigation("ProductStatusEventCreators");
 
-                    b.Navigation("OrderStatusRemovers");
+                    b.Navigation("RoleEventCreators");
 
-                    b.Navigation("OrderStatusUpdaters");
-
-                    b.Navigation("PaymentMethodCreators");
-
-                    b.Navigation("PaymentMethodRemovers");
-
-                    b.Navigation("PaymentMethodUpdaters");
-
-                    b.Navigation("ProductCreators");
-
-                    b.Navigation("ProductRemovers");
-
-                    b.Navigation("ProductStatusCreators");
-
-                    b.Navigation("ProductStatusRemovers");
-
-                    b.Navigation("ProductStatusUpdaters");
-
-                    b.Navigation("ProductUpdaters");
-
-                    b.Navigation("RoleDetailCreators");
-
-                    b.Navigation("RoleDetailRemovers");
-
-                    b.Navigation("RoleDetailUpdaters");
+                    b.Navigation("SystemAccountTokenEventCreators");
 
                     b.Navigation("SystemAccountTokens");
-
-                    b.Navigation("UserDetailRemovers");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserDetailEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserDetailEntity", b =>
                 {
-                    b.Navigation("OrderCreators");
+                    b.Navigation("OrderEventCreators");
 
-                    b.Navigation("OrderUpdaters");
+                    b.Navigation("OrderItemEventCreators");
+
+                    b.Navigation("UserTokenEvents");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Entities.UserEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserEntity", b =>
                 {
                     b.Navigation("UserClaims");
 

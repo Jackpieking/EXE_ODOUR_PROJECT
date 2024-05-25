@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ODour.Configuration.Infrastructure.Persistence.AspNetCoreIdentity;
-using ODour.Domain.Share.Entities;
+using ODour.Domain.Share.Role.Entities;
+using ODour.Domain.Share.User.Entities;
 using ODour.PostgresRelationalDb.Data;
 
 namespace ODour.PostgresRelationalDb.ServiceConfigs;
 
 internal static class IdentityServiceConfig
 {
-    internal static void Config(IServiceCollection services, IConfigurationManager configuration)
+    internal static void Config(IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddIdentity<UserEntity, RoleEntity>(setupAction: config =>

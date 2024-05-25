@@ -406,3 +406,4 @@ src/Server/.vscode/launch.json
 src/Server/.vscode/tasks.json
 .vscode/launch.json
 .vscode/tasks.json
+.vscode/settings.json

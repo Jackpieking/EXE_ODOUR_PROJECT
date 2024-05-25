@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
+using ODour.Domain.Share.Order.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -10,10 +11,15 @@ internal sealed class OrderItemEntityConfiguration : IEntityTypeConfiguration<Or
     {
         builder.ToTable(
             name: OrderItemEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ORDER}",
             buildAction: table => table.HasComment(comment: "Contain order items.")
         );
 
         builder.HasKey(keyExpression: builder => new { builder.OrderId, builder.ProductId });
+
+        builder
+            .Property(propertyExpression: builder => builder.ProductId)
+            .HasMaxLength(maxLength: OrderItemEntity.MetaData.ProductId.MaxLength);
 
         builder
             .Property(propertyExpression: builder => builder.SellingPrice)

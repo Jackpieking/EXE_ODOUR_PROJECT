@@ -8,11 +8,14 @@ public static class DependencyInjection
 {
     public static void AddOdourPostgresRelationalDb(
         this IServiceCollection services,
-        IConfigurationManager configuration
+        IConfiguration configuration
     )
     {
         CoreServiceConfig.Config(services: services);
-        ODourMainDbContextServiceConfig.Config(services: services, configuration: configuration);
+        ODourMainDbContextServiceConfig.Config(
+            services: services,
+            configurationManager: configuration
+        );
         IdentityServiceConfig.Config(services: services, configuration: configuration);
     }
 }

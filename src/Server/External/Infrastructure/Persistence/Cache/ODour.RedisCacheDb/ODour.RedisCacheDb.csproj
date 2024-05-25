@@ -4,7 +4,7 @@
     <ProjectReference Include="..\..\..\..\Common\ODour.Configuration\ODour.Configuration.csproj" />
   </ItemGroup>
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>

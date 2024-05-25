@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.User.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,6 +11,7 @@ internal sealed class UserDetailEntityConfiguration : IEntityTypeConfiguration<U
     {
         builder.ToTable(
             name: UserDetailEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.USER}",
             buildAction: table => table.HasComment(comment: "Contain user details.")
         );
 
@@ -38,31 +39,10 @@ internal sealed class UserDetailEntityConfiguration : IEntityTypeConfiguration<U
         builder.Property(propertyExpression: builder => builder.Gender).IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedBy)
+            .Property(propertyExpression: builder => builder.IsTemporarilyRemoved)
             .IsRequired(required: true);
 
         #region Relationships
-        builder
-            .HasOne(navigationExpression: userDetail => userDetail.Remover)
-            .WithMany(navigationExpression: systemAccount => systemAccount.UserDetailRemovers)
-            .HasForeignKey(foreignKeyExpression: userDetail => userDetail.RemovedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
         builder
             .HasOne(navigationExpression: userDetail => userDetail.AccountStatus)
             .WithMany(navigationExpression: accountStatus => accountStatus.UserDetails)

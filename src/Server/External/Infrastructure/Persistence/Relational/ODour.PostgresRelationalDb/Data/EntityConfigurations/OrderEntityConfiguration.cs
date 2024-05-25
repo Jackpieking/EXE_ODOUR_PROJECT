@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.Order.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,6 +11,7 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
     {
         builder.ToTable(
             name: OrderEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ORDER}",
             buildAction: table => table.HasComment(comment: "Contain orders.")
         );
 
@@ -21,15 +22,7 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedBy)
-            .IsRequired(required: true);
-
-        builder
             .Property(propertyExpression: builder => builder.PaymentMethodId)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedBy)
             .IsRequired(required: true);
 
         builder
@@ -55,33 +48,11 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
             .Property(propertyExpression: builder => builder.DeliveredAt)
             .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
             .IsRequired(required: true);
 
         #region Relationships
-        builder
-            .HasOne(navigationExpression: order => order.Creator)
-            .WithMany(navigationExpression: userDetail => userDetail.OrderCreators)
-            .HasForeignKey(foreignKeyExpression: order => order.CreatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: order => order.Updater)
-            .WithMany(navigationExpression: userDetail => userDetail.OrderUpdaters)
-            .HasForeignKey(foreignKeyExpression: order => order.UpdatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
         builder
             .HasOne(navigationExpression: order => order.PaymentMethod)
             .WithMany(navigationExpression: paymentMethod => paymentMethod.Orders)

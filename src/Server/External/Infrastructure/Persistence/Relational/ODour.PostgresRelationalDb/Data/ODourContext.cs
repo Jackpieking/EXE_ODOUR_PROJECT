@@ -1,7 +1,8 @@
 using System;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ODour.Domain.Share.Entities;
+using ODour.Domain.Share.Role.Entities;
+using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Data;
 

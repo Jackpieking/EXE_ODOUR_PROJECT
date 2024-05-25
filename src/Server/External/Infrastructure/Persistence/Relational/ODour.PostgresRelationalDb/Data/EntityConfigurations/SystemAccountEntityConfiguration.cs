@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.SystemAccount.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -12,6 +12,7 @@ internal sealed class SystemAccountEntityConfiguration
     {
         builder.ToTable(
             name: SystemAccountEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.SYSTEM_ACCOUNT}",
             buildAction: table => table.HasComment(comment: "Contain system accounts.")
         );
 
@@ -52,16 +53,6 @@ internal sealed class SystemAccountEntityConfiguration
 
         builder
             .Property(propertyExpression: builder => builder.LockoutEnd)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
             .IsRequired(required: true);
 
         #region Relationships

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.Order.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,6 +11,7 @@ internal sealed class OrderStatusEntityConfiguration : IEntityTypeConfiguration<
     {
         builder.ToTable(
             name: OrderStatusEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ORDER}",
             buildAction: table => table.HasComment(comment: "Contain order statuses.")
         );
 
@@ -22,50 +23,7 @@ internal sealed class OrderStatusEntityConfiguration : IEntityTypeConfiguration<
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
+            .Property(propertyExpression: builder => builder.IsTemporarilyRemoved)
             .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.CreatedBy)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedBy)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedBy)
-            .IsRequired(required: true);
-
-        #region Relationships
-        builder
-            .HasOne(navigationExpression: orderStatus => orderStatus.Creator)
-            .WithMany(navigationExpression: systemAccount => systemAccount.OrderStatusCreators)
-            .HasForeignKey(foreignKeyExpression: orderStatus => orderStatus.CreatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: orderStatus => orderStatus.Updater)
-            .WithMany(navigationExpression: systemAccount => systemAccount.OrderStatusUpdaters)
-            .HasForeignKey(foreignKeyExpression: orderStatus => orderStatus.UpdatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: orderStatus => orderStatus.Remover)
-            .WithMany(navigationExpression: systemAccount => systemAccount.OrderStatusRemovers)
-            .HasForeignKey(foreignKeyExpression: orderStatus => orderStatus.RemovedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-        #endregion
     }
 }

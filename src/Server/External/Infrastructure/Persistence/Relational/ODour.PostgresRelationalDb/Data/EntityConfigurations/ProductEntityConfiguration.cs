@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Entities;
-using ODour.PostgresRelationalDb.Shared;
+using ODour.Domain.Share.Product.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,10 +11,15 @@ internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Prod
     {
         builder.ToTable(
             name: ProductEntity.MetaData.TableName,
+            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.PRODUCT}",
             buildAction: table => table.HasComment(comment: "Contain products.")
         );
 
         builder.HasKey(keyExpression: builder => builder.Id);
+
+        builder
+            .Property(propertyExpression: builder => builder.Id)
+            .HasMaxLength(maxLength: ProductEntity.MetaData.Id.MaxLength);
 
         builder
             .Property(propertyExpression: builder => builder.ProductStatusId)
@@ -22,18 +27,6 @@ internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Prod
 
         builder
             .Property(propertyExpression: builder => builder.CategoryId)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.CreatedBy)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedBy)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedBy)
             .IsRequired(required: true);
 
         builder
@@ -59,18 +52,7 @@ internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Prod
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: builder => builder.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.UpdatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
-            .IsRequired(required: true);
-
-        builder
-            .Property(propertyExpression: builder => builder.RemovedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
+            .Property(propertyExpression: builder => builder.IsTemporarilyRemoved)
             .IsRequired(required: true);
 
         #region Relationships
@@ -84,24 +66,6 @@ internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Prod
             .HasOne(navigationExpression: product => product.Category)
             .WithMany(navigationExpression: category => category.Products)
             .HasForeignKey(foreignKeyExpression: product => product.CategoryId)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: product => product.Creator)
-            .WithMany(navigationExpression: systemAccount => systemAccount.ProductCreators)
-            .HasForeignKey(foreignKeyExpression: product => product.CreatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: product => product.Updater)
-            .WithMany(navigationExpression: systemAccount => systemAccount.ProductUpdaters)
-            .HasForeignKey(foreignKeyExpression: product => product.UpdatedBy)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(navigationExpression: accountStatus => accountStatus.Remover)
-            .WithMany(navigationExpression: systemAccount => systemAccount.ProductRemovers)
-            .HasForeignKey(foreignKeyExpression: accountStatus => accountStatus.RemovedBy)
             .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
         #endregion
     }
