@@ -14,6 +14,8 @@ namespace ODour.PostgresRelationalDb.Migrations
         {
             migrationBuilder.EnsureSchema(name: "main.account_status");
 
+            migrationBuilder.EnsureSchema(name: "main.app_log");
+
             migrationBuilder.EnsureSchema(name: "main.category");
 
             migrationBuilder.EnsureSchema(name: "main.event_snapshot");
@@ -57,6 +59,24 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.PrimaryKey("PK_AccountStatuses", x => x.Id);
                 },
                 comment: "Contain account statuses."
+            );
+
+            migrationBuilder.CreateTable(
+                name: "AppExceptionLoggingEntities",
+                schema: "main.app_log",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: false),
+                    ErrorStackTrace = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    Data = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppExceptionLoggingEntities", x => x.Id);
+                },
+                comment: "Contain app exception loggings."
             );
 
             migrationBuilder.CreateTable(
@@ -442,8 +462,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
-                    RoleId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                    Discriminator = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -451,13 +470,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.ForeignKey(
                         name: "FK_RoleClaims_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_RoleClaims_Roles_RoleId1",
-                        column: x => x.RoleId1,
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
@@ -501,8 +513,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
-                    UserId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                    Discriminator = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -510,13 +521,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.ForeignKey(
                         name: "FK_UserClaims_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_UserClaims_Users_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
@@ -575,8 +579,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     ProviderKey = table.Column<string>(type: "text", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
-                    UserId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                    Discriminator = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -584,13 +587,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.ForeignKey(
                         name: "FK_UserLogins_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_UserLogins_Users_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
@@ -605,9 +601,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     RoleId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
-                    RoleId1 = table.Column<Guid>(type: "uuid", nullable: true),
-                    UserId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                    Discriminator = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -620,22 +614,8 @@ namespace ODour.PostgresRelationalDb.Migrations
                         onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
-                        name: "FK_UserRoles_Roles_RoleId1",
-                        column: x => x.RoleId1,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
                         name: "FK_UserRoles_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_UserRoles_Users_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
@@ -653,8 +633,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: true),
                     Discriminator = table.Column<string>(type: "text", nullable: false),
-                    ExpiredAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: true),
-                    UserId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                    ExpiredAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -670,13 +649,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.ForeignKey(
                         name: "FK_UserTokens_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_UserTokens_Users_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
@@ -1270,12 +1242,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleClaims_RoleId1",
-                table: "RoleClaims",
-                column: "RoleId1"
-            );
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RoleEvents_CreatedBy",
                 schema: "main.role",
                 table: "RoleEvents",
@@ -1326,12 +1292,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserClaims_UserId1",
-                table: "UserClaims",
-                column: "UserId1"
-            );
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserDetails_AccountStatusId",
                 schema: "main.user",
                 table: "UserDetails",
@@ -1345,27 +1305,9 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserLogins_UserId1",
-                table: "UserLogins",
-                column: "UserId1"
-            );
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 table: "UserRoles",
                 column: "RoleId"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId1",
-                table: "UserRoles",
-                column: "RoleId1"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId1",
-                table: "UserRoles",
-                column: "UserId1"
             );
 
             migrationBuilder.CreateIndex(
@@ -1387,18 +1329,14 @@ namespace ODour.PostgresRelationalDb.Migrations
                 table: "UserTokenEvents",
                 column: "CreatedBy"
             );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserTokens_UserId1",
-                table: "UserTokens",
-                column: "UserId1"
-            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(name: "AccountStatusEvents", schema: "main.account_status");
+
+            migrationBuilder.DropTable(name: "AppExceptionLoggingEntities", schema: "main.app_log");
 
             migrationBuilder.DropTable(name: "CategoryEvents", schema: "main.category");
 

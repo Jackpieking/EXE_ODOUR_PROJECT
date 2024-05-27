@@ -10,7 +10,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240525180648_M1_Init_Db")]
+    [Migration("20240527014836_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
@@ -47,8 +47,6 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoleId");
-
                     b.ToTable("RoleClaims", (string)null);
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRoleClaim<Guid>");
@@ -79,8 +77,6 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("UserClaims", (string)null);
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserClaim<Guid>");
@@ -108,8 +104,6 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("UserLogins", (string)null);
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserLogin<Guid>");
@@ -130,8 +124,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles", (string)null);
 
@@ -303,6 +295,36 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.ToTable("EventSnapshots", "main.event_snapshot", t =>
                         {
                             t.HasComment("Contain event snapshots.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Log.Entities.AppExceptionLoggingEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorStackTrace")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppExceptionLoggingEntities", "main.app_log", t =>
+                        {
+                            t.HasComment("Contain app exception loggings.");
                         });
                 });
 
@@ -1224,10 +1246,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>");
 
-                    b.Property<Guid?>("RoleId1")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("RoleId1");
+                    b.HasIndex("RoleId");
 
                     b.ToTable("RoleClaims", null, t =>
                         {
@@ -1241,10 +1260,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserClaims", null, t =>
                         {
@@ -1258,10 +1274,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserLogins", null, t =>
                         {
@@ -1275,15 +1288,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>");
 
-                    b.Property<Guid?>("RoleId1")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("RoleId1");
-
-                    b.HasIndex("UserId1");
+                    b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles", null, t =>
                         {
@@ -1300,68 +1305,12 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("TIMESTAMPTZ");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("UserId1");
-
                     b.ToTable("UserTokens", null, t =>
                         {
                             t.HasComment("Contain user tokens.");
                         });
 
                     b.HasDiscriminator().HasValue("UserTokenEntity");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
-                {
-                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
-                {
-                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
-                {
-                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
-                {
-                    b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEventEntity", b =>
@@ -1620,8 +1569,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", "Role")
                         .WithMany("RoleClaims")
-                        .HasForeignKey("RoleId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Role");
                 });
@@ -1630,8 +1580,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserClaims")
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -1640,8 +1591,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserLogins")
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -1650,13 +1602,15 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", "Role")
                         .WithMany("UserRoles")
-                        .HasForeignKey("RoleId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserRoles")
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Role");
 
@@ -1667,8 +1621,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.HasOne("ODour.Domain.Share.User.Entities.UserEntity", "User")
                         .WithMany("UserTokens")
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

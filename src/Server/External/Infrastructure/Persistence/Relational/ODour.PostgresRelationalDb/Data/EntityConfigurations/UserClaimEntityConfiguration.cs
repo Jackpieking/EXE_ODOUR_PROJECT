@@ -17,6 +17,7 @@ internal sealed class UserClaimEntityConfiguration : IEntityTypeConfiguration<Us
         builder
             .HasOne(navigationExpression: userClaim => userClaim.User)
             .WithMany(navigationExpression: user => user.UserClaims)
+            .HasForeignKey(foreignKeyExpression: userClaim => userClaim.UserId)
             .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
         #endregion
     }

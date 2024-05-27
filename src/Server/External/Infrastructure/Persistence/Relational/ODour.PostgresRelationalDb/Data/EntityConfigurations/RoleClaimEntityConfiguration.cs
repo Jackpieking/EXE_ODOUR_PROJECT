@@ -17,6 +17,7 @@ internal sealed class RoleClaimEntityConfiguration : IEntityTypeConfiguration<Ro
         builder
             .HasOne(navigationExpression: roleClaim => roleClaim.Role)
             .WithMany(navigationExpression: role => role.RoleClaims)
+            .HasForeignKey(foreignKeyExpression: roleClaim => roleClaim.RoleId)
             .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
         #endregion
     }
