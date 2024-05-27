@@ -55,12 +55,32 @@ internal sealed class SystemAccountEntityConfiguration
             .Property(propertyExpression: builder => builder.LockoutEnd)
             .IsRequired(required: true);
 
+        builder
+            .Property(propertyExpression: builder => builder.IsTemporarilyRemoved)
+            .IsRequired(required: true);
+
         #region Relationships
         builder
             .HasOne(navigationExpression: systemAccount => systemAccount.AccountStatus)
             .WithMany(navigationExpression: accountStatus => accountStatus.SystemAccounts)
             .HasForeignKey(foreignKeyExpression: systemAccount => systemAccount.AccountStatusId)
             .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+        #endregion
+
+        #region Indexes
+        builder
+            .HasIndex(
+                indexExpression: systemAccount => systemAccount.NormalizedUserName,
+                name: "IX_SystemAccount_NormalizedUserName"
+            )
+            .IsUnique(unique: true);
+
+        builder
+            .HasIndex(
+                indexExpression: systemAccount => systemAccount.NormalizedEmail,
+                name: "IX_SystemAccount_NormalizedEmail"
+            )
+            .IsUnique(unique: true);
         #endregion
     }
 }

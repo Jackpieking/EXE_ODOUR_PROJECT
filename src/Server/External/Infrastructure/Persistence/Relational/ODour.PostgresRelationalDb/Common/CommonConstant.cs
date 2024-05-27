@@ -34,5 +34,7 @@ internal static class CommonConstant
         internal const string CATEGORY = "category";
 
         internal const string ACCOUNT_STATUS = "account_status";
+
+        internal const string APP_LOG = "app_log";
     }
 }

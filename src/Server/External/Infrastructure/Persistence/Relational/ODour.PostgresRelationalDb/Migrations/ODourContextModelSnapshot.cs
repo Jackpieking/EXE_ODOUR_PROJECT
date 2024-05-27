@@ -632,8 +632,10 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("StreamId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("StreamId")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -891,6 +893,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
@@ -916,6 +921,12 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AccountStatusId");
+
+                    b.HasIndex(new[] { "NormalizedEmail" }, "IX_SystemAccount_NormalizedEmail")
+                        .IsUnique();
+
+                    b.HasIndex(new[] { "NormalizedUserName" }, "IX_SystemAccount_NormalizedUserName")
+                        .IsUnique();
 
                     b.ToTable("SystemAccounts", "main.system_account", t =>
                         {

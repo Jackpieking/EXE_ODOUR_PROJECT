@@ -22,8 +22,7 @@ internal sealed class UserTokenEntityConfiguration : IEntityTypeConfiguration<Us
         #region Relationships
         builder
             .HasOne(navigationExpression: userToken => userToken.User)
-            .WithMany(navigationExpression: user => user.UserTokens)
-            .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
+            .WithMany(navigationExpression: user => user.UserTokens);
         #endregion
     }
 }

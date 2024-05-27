@@ -24,6 +24,7 @@ internal sealed class ProductEventEntityConfiguration : IEntityTypeConfiguration
 
         builder
             .Property(propertyExpression: builder => builder.StreamId)
+            .HasMaxLength(maxLength: 16)
             .IsRequired(required: true);
 
         builder

@@ -10,7 +10,7 @@ using ODour.Domain.Share.Role.Entities;
 
 namespace ODour.Domain.Share.SystemAccount.Entities;
 
-public sealed class SystemAccountEntity : IEntity
+public sealed class SystemAccountEntity : IEntity, ITemporarilyRemovedEntity
 {
     #region PrimaryKeys
     public Guid Id { get; set; }
@@ -29,6 +29,8 @@ public sealed class SystemAccountEntity : IEntity
     public int AccessFailedCount { get; set; }
 
     public DateTime LockoutEnd { get; set; }
+
+    public bool IsTemporarilyRemoved { get; set; }
 
     #region ForeignKeys
     public Guid AccountStatusId { get; set; }

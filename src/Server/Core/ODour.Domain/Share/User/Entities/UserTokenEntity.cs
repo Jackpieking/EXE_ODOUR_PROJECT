@@ -16,6 +16,11 @@ public sealed class UserTokenEntity : IdentityUserToken<Guid>, IEntity
     public static class MetaData
     {
         public const string TableName = "UserTokens";
+
+        public static class Value
+        {
+            public const int MinLength = 1;
+        }
     }
     #endregion
 }

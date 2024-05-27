@@ -5,7 +5,7 @@ using ODour.Domain.Share.SystemAccount.Entities;
 
 namespace ODour.Domain.Share.Product.Entities;
 
-public sealed class ProductEventEntity : EventEntity<Guid>, IEntity, ICreatedEntity
+public sealed class ProductEventEntity : EventEntity<string>, IEntity, ICreatedEntity
 {
     public string OldData { get; set; }
 

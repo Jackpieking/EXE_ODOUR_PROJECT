@@ -12,7 +12,9 @@ using ODour.Domain.Share.Payment.Entities;
 using ODour.Domain.Share.Product.Entities;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.SeedFlag.Entities;
+using ODour.Domain.Share.SystemAccount.Entities;
 using ODour.Domain.Share.User.Entities;
+using static ODour.Application.Share.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data;
 
@@ -38,6 +40,8 @@ public static class EntityDataSeeding
         }
 
         // Start seeding.
+        await MarkAsAlreadySeedAsync(context: context, cancellationToken: cancellationToken);
+
         await SeedAccountStatusEntitiesAsync(
             context: context,
             cancellationToken: cancellationToken
@@ -59,14 +63,86 @@ public static class EntityDataSeeding
 
         await SeedProductEntitiesAsync(context: context, cancellationToken: cancellationToken);
 
+        await SeedSystemAccountEntitiesAsync(
+            context: context,
+            cancellationToken: cancellationToken
+        );
+
         var seedRoles = await GetSeedRoleEntitiesAsync(
             context: context,
             cancellationToken: cancellationToken
         );
 
-        var seedUsers = GetSeedUserEntities();
+        var seedUsers = await GetSeedUserEntitiesAsync(
+            context: context,
+            cancellationToken: cancellationToken
+        );
 
-        return true;
+        #region Transaction
+        var executedTransactionResult = false;
+
+        await context
+            .Database.CreateExecutionStrategy()
+            .ExecuteAsync(operation: async () =>
+            {
+                await using var dbTransaction = await context.Database.BeginTransactionAsync(
+                    cancellationToken: cancellationToken
+                );
+
+                try
+                {
+                    foreach (var newRole in seedRoles)
+                    {
+                        await roleManager.CreateAsync(role: newRole);
+                    }
+
+                    // test user.
+                    var user = seedUsers.Find(match: user =>
+                        user.UserName.Equals(value: "testUser", StringComparison.OrdinalIgnoreCase)
+                    );
+
+                    await userManager.CreateAsync(user: user, password: "Khoa1234");
+
+                    await userManager.AddToRoleAsync(user: user, role: "user");
+
+                    var emailConfirmationToken =
+                        await userManager.GenerateEmailConfirmationTokenAsync(user: user);
+
+                    await userManager.ConfirmEmailAsync(user: user, token: emailConfirmationToken);
+
+                    // banned user.
+                    user = seedUsers.Find(match: user =>
+                        user.UserName.Equals(
+                            value: "bannedUser",
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    );
+
+                    await userManager.CreateAsync(user: user, password: "Jackpie2003");
+
+                    await userManager.AddToRoleAsync(user: user, role: "user");
+
+                    emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(
+                        user: user
+                    );
+
+                    await userManager.ConfirmEmailAsync(user: user, token: emailConfirmationToken);
+
+                    // Save all changings.
+                    await context.SaveChangesAsync(cancellationToken: cancellationToken);
+
+                    await dbTransaction.CommitAsync(cancellationToken: cancellationToken);
+
+                    executedTransactionResult = true;
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync(cancellationToken: cancellationToken);
+                }
+            });
+        #endregion
+
+        return executedTransactionResult;
     }
 
     private static async Task<bool> AreAllTablesEmptyAsync(
@@ -84,6 +160,17 @@ public static class EntityDataSeeding
         }
 
         return true;
+    }
+
+    private static async Task MarkAsAlreadySeedAsync(
+        ODourContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        await context.AddAsync(
+            entity: new SeedFlagEntity { Id = Guid.NewGuid() },
+            cancellationToken: cancellationToken
+        );
     }
 
     private static async Task SeedAccountStatusEntitiesAsync(
@@ -125,12 +212,7 @@ public static class EntityDataSeeding
                 OldData = JsonSerializer.Serialize(value: string.Empty),
                 NewData = JsonSerializer.Serialize(
                     value: newAccountStatus,
-                    options: Application
-                        .Share
-                        .Common
-                        .CommonConstant
-                        .App
-                        .DefaultJsonSerializerOptions
+                    options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
@@ -181,12 +263,7 @@ public static class EntityDataSeeding
                 OldData = JsonSerializer.Serialize(value: string.Empty),
                 NewData = JsonSerializer.Serialize(
                     value: newCategory,
-                    options: Application
-                        .Share
-                        .Common
-                        .CommonConstant
-                        .App
-                        .DefaultJsonSerializerOptions
+                    options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
@@ -255,12 +332,7 @@ public static class EntityDataSeeding
                 OldData = JsonSerializer.Serialize(value: string.Empty),
                 NewData = JsonSerializer.Serialize(
                     value: newOrderStatus,
-                    options: Application
-                        .Share
-                        .Common
-                        .CommonConstant
-                        .App
-                        .DefaultJsonSerializerOptions
+                    options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
@@ -311,12 +383,7 @@ public static class EntityDataSeeding
                 OldData = JsonSerializer.Serialize(value: string.Empty),
                 NewData = JsonSerializer.Serialize(
                     value: newPaymentMethod,
-                    options: Application
-                        .Share
-                        .Common
-                        .CommonConstant
-                        .App
-                        .DefaultJsonSerializerOptions
+                    options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
@@ -373,12 +440,7 @@ public static class EntityDataSeeding
                 OldData = JsonSerializer.Serialize(value: string.Empty),
                 NewData = JsonSerializer.Serialize(
                     value: newProductStatus,
-                    options: Application
-                        .Share
-                        .Common
-                        .CommonConstant
-                        .App
-                        .DefaultJsonSerializerOptions
+                    options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
@@ -401,54 +463,294 @@ public static class EntityDataSeeding
         CancellationToken cancellationToken
     )
     {
-        List<ProductEntity> newProducts =
+        const string ProductAddedEventType = "ProductAdded";
+
+        var newProducts = new List<ProductEntity>
+        {
             new()
             {
-                new()
-                {
-                    Id = "LD01",
-                    ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
-                    CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
-                    Name = "CREED AVENTUS",
-                    UnitPrice = 199_000,
-                    Description =
-                        "{\"NHOM_HUONG\":[\"Chypre Fruity - hương trái cây Chypre.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamot, Quả lý chua đen, Quả dứa (quả thơm).\",\"HUONG_GIUA\":\"Gỗ Bu-lô, Cây hoắc hương, Hoa hồng.\",\"HUONG_CUOI\":\"Xạ hương, Rêu cây sồi, Hương vani, Long diên hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
-                    QuantityInStock = 10,
-                },
-                new()
-                {
-                    Id = "LD02",
-                    ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
-                    CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
-                    Name = "CK ONE GOLD",
-                    UnitPrice = 199_000,
-                    Description =
-                        "{\"NHOM_HUONG\":[\"Oriental - tông mùi phương đông.\",\"Floral - tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả sung, Cam Bergamot, Lá xô thơm.\",\"HUONG_GIUA\":\"Hoa trắng, Hoa nhài, Hoa violet.\",\"HUONG_CUOI\":\"Gỗ guaiac, Cỏ hương bài, Hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 16 giờ.\",\"TREN_VAI\":\"2 -3 ngày.\"}}",
-                    QuantityInStock = 10,
-                },
-                new()
-                {
-                    Id = "LD03",
-                    ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
-                    CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
-                    Name = "212 VIP MEN",
-                    UnitPrice = 199_000,
-                    Description =
-                        "{\"NHOM_HUONG\":[\"Leather - tông da thuộc.\",\"Fruity - hương trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Chanh, Tiêu, Gừng, Chanh dây.\",\"HUONG_GIUA\":\"Rượu Vodka, Rượu Gin, Bạc hà.\",\"HUONG_CUOI\":\"Hổ phách, Da thuộc.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 16 giờ.\",\"TREN_VAI\":\"2 -3 ngày.\"}}",
-                    QuantityInStock = 10,
-                },
-                new()
-                {
-                    Id = "LD04",
-                    ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
-                    CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
-                    Name = "BLEU DE CHANEL",
-                    UnitPrice = 199_000,
-                    Description =
-                        "{\"NHOM_HUONG\":[\"Oriental — tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Chanh vàng, Ớt hồng, Bạc hà.\",\"HUONG_GIUA\":\"Dưa vàng, Hoa nhài, Gừng.\",\"HUONG_CUOI\":\"Gỗ tuyết tùng, Hổ phách, Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 -3 ngày.\"}}",
-                    QuantityInStock = 10,
-                }
+                Id = "LD01",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "CREED AVENTUS",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Chypre Fruity - hương trái cây Chypre.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamot, Quả lý chua đen, Quả dứa (quả thơm).\",\"HUONG_GIUA\":\"Gỗ Bu-lô, Cây hoắc hương, Hoa hồng.\",\"HUONG_CUOI\":\"Xạ hương, Rêu cây sồi, Hương vani, Long diên hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD02",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "CK ONE GOLD",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi phương đông.\",\"Floral - tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả sung, Cam Bergamot, Lá xô thơm.\",\"HUONG_GIUA\":\"Hoa trắng, Hoa nhài, Hoa violet.\",\"HUONG_CUOI\":\"Gỗ guaiac, Cỏ hương bài, Hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD03",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "212 VIP MEN",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Leather - tông da thuộc.\",\"Fruity - hương trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Chanh, tiêu, Gừng, Chanh dây.\",\"HUONG_GIUA\":\"Rượu Vodka, Rượu Gin, Bạc hà.\",\"HUONG_CUOI\":\"Hổ phách, Da thuộc.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD04",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "BLEU DE CHANEL",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental — tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Chanh vàng, Ớt hồng, Bạc hà.\",\"HUONG_GIUA\":\"Dưa vàng, Hoa nhài, Gừng.\",\"HUONG_CUOI\":\"Gỗ tuyết tùng, Hổ phách, Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD05",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "SAUVAGE DIOR",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental — tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamot, Tiêu.\",\"HUONG_GIUA\":\"Tiêu Sichuan, Hoa oải Hương, Tiêu hồng, Cỏ hương bài, Hoắc hương, Phong lữ, Nhựa Elemi.\",\"HUONG_CUOI\":\"Ambroxan, Tuyết tùng, Labannum.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD06",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "BVL AQVA",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Aquatic — hương biển.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa cam Neroli, Quả bưởi, Quả quýt hồng.\",\"HUONG_GIUA\":\"Rong biển, Cây hương thảo, Hương nước.\",\"HUONG_CUOI\":\"Gỗ tuyết tùng Virginia, Hổ phách.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD07",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "POLO BLUE",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Aquatic — hương biển.\",\"Leather - tông da thuộc.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamot, Bạch đậu khấu, Hương nước biển.\",\"HUONG_GIUA\":\"Hoa diên vĩ (Orris), Cây húng quế, Cỏ đuôi ngựa, Cây đơn sâm.\",\"HUONG_CUOI\":\"Cỏ hương bài, Da lộn, Cây hoắc hương, Hương của gỗ.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 20 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD08",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "ACQUA DI GIÒ",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Aquatic — hương biển.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả cam, Quả chanh xanh, Cam Bergamot, Quả chanh vàng.\",\"HUONG_GIUA\":\"Hoa nước biển, Quả đào, Hoa nhài, Hương Calone.\",\"HUONG_CUOI\":\"Rêu sồi, Gỗ tuyết tùng, Xạ hương trắng.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 20 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD09",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "ALLURE HOMME SPORT",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Woody - tông mùi gỗ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Chanh vàng, Cam Bergamot.\",\"HUONG_GIUA\":\"Gỗ đàn hương, Hương gỗ.\",\"HUONG_CUOI\":\"Vani Madagascar, Cỏ Vetiver.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 22 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD10",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "REPLICA JAZZ CLUB",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Leather - tông da thuộc.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cây thuốc lá, Da thuộc, Chanh vàng, Hạt tiêu hồng, Hoa cam Neroli.\",\"HUONG_GIUA\":\"Rượu Rum, Cây đơn sâm, Dầu cỏ hương bài.\",\"HUONG_CUOI\":\"Cây thuốc lá, Bồ đề, Hương vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 22 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD11",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "VERSACE EROS",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Fresh - tông mùi tươi mát.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Táo xanh, Bạc hà.\",\"HUONG_GIUA\":\"Đậu Tonka, Hoa phong lữ.\",\"HUONG_CUOI\":\"Cỏ hương bài, Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 22 giờ.\",\"TREN_VAI\":\"3 - 5 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD12",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "GUCCI GUILTY INTENSE",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"White Floral - hương hoa trắng.\",\"Powdery - hương phấn.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa Lavender, Quả chanh vàng.\",\"HUONG_GIUA\":\"Hoa cam châu Phi, Hoa cam Neroli.\",\"HUONG_CUOI\":\"Cây hoắc hương, Gỗ tuyết tùng, Hổ phách.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"18 - 24 giờ.\",\"TREN_VAI\":\"3 - 5 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD13",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "42e48d19-b2f6-4112-b14f-0b0131b339d5"),
+                Name = "D&G KING",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Gourmand - món ăn.\",\"Oriental — tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam máu, Ớt Pimento, Quả bách xù, Quả chanh vàng, Bạch đậu khấu.\",\"HUONG_GIUA\":\"Rượu sung, Hoa phong lữ, Hoa oải hương, Xô thơm.\",\"HUONG_CUOI\":\"Gỗ tuyết tùng, Hoắc hương, Cỏ gấu, Cỏ hương bài.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 20 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD14",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "FANCY LOVE",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental — tông mùi Phương Đông.\",\"Floral - tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamot, Hoa đào, Lá Goji, Rượu sâm panh hồng.\",\"HUONG_GIUA\":\"Hoa sen, Hoa mẫu đơn, Hoa plumeria, Hoa nhài, Hoa hồng Thổ Nhĩ Kỳ.\",\"HUONG_CUOI\":\"Hoa phách kem, Xạ hương gỗ vàng, Hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD15",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "CHLOE'",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Green, Herb — tông mùi thảo dược, cây xanh.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa mẫu đơn, Hoa lan Nam Phi, Quả vải.\",\"HUONG_GIUA\":\"Hoa hồng, Hoa linh lan thung lũng, Hoa mộc lan.\",\"HUONG_CUOI\":\"Hổ phách, Gỗ tuyết tùng Virginia.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD16",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "VERSACE YELLOW",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"White Floral - hương hoa trắng.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Lê, Citron, Hoa cam.\",\"HUONG_GIUA\":\"Cam Bergamot, Neroli.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Hoa huệ.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD17",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "GUCCI GUILTY",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral Green - Hương hoa cỏ xanh tự nhiên.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Vải thiều, Ghi chú nước.\",\"HUONG_GIUA\":\"Dâu dại, Hoa huệ.\",\"HUONG_CUOI\":\"Xạ hương, Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD18",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "PARIS HILTON",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"White Floral - hương hoa trắng.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả mâm xôi, Hoa huệ của thung lũng.\",\"HUONG_GIUA\":\"Hoa diên vĩ, Hoa hồng trắng.\",\"HUONG_CUOI\":\"Vani, Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD19",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "LV CONTRE MOI",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental — tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamot, Quả chanh vàng, Hương thảo mộc.\",\"HUONG_GIUA\":\"Hoa mộc lan, Hoa cam, Quả lê, Hoa hồng.\",\"HUONG_CUOI\":\"Cây vông vang, Ca cao, Hương Vani Tahita, Hương Vani Madagascar.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD20",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "VERY SEXY",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral Fruity — hương hoa cỏ trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Trái quýt, Cà phê Cappuccino, Cây xương rồng, Tiêu đen.\",\"HUONG_GIUA\":\"Hoa tú cầu, Hoa trà (Camelia), Hoa phong lan.\",\"HUONG_CUOI\":\"Hương gỗ, Quả mâm xôi đen, Xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD21",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "FOR HER",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Woody — tông mùi gỗ.\", \"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa hồng, Quả đào.\",\"HUONG_GIUA\":\"Xạ hương, Hổ phách.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Cây hoắc hương, Gỗ trầm hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = "LD22",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "FOR HER",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Woody — tông mùi gỗ.\", \"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa hồng, Quả đào.\",\"HUONG_GIUA\":\"Xạ hương, Hổ phách.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Cây hoắc hương, Gỗ trầm hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false
+            }
+        };
+
+        foreach (var newProduct in newProducts)
+        {
+            var newProductEvent = new ProductEventEntity
+            {
+                Id = Guid.NewGuid(),
+                Type = ProductAddedEventType,
+                StreamId = newProduct.Id,
+                OldData = JsonSerializer.Serialize(value: string.Empty),
+                NewData = JsonSerializer.Serialize(
+                    value: newProduct,
+                    options: App.DefaultJsonSerializerOptions
+                ),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = AdminId
             };
+
+            await context.AddAsync(entity: newProductEvent, cancellationToken: cancellationToken);
+        }
 
         await context.AddRangeAsync(entities: newProducts, cancellationToken: cancellationToken);
     }
@@ -468,13 +770,13 @@ public static class EntityDataSeeding
             new()
             {
                 Id = adminRoleId,
-                Name = "Admin",
+                Name = "admin",
                 RoleDetail = new() { RoleId = adminRoleId, IsTemporarilyRemoved = false }
             },
             new()
             {
                 Id = userRoleId,
-                Name = "User",
+                Name = "user",
                 RoleDetail = new() { RoleId = userRoleId, IsTemporarilyRemoved = false }
             }
         };
@@ -489,12 +791,7 @@ public static class EntityDataSeeding
                 OldData = JsonSerializer.Serialize(value: string.Empty),
                 NewData = JsonSerializer.Serialize(
                     value: newRole,
-                    options: Application
-                        .Share
-                        .Common
-                        .CommonConstant
-                        .App
-                        .DefaultJsonSerializerOptions
+                    options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
@@ -506,30 +803,19 @@ public static class EntityDataSeeding
         return newRoles;
     }
 
-    private static List<UserEntity> GetSeedUserEntities()
+    private static async Task<List<UserEntity>> GetSeedUserEntitiesAsync(
+        ODourContext context,
+        CancellationToken cancellationToken
+    )
     {
+        const string UserAddedEventType = "UserAdded";
+        const string UserBannedEventType = "UserBanned";
+
         var testUserId = Guid.Parse(input: "8ebe29bc-4706-4fda-bb28-ed127d150c05");
         var bannedUserId = Guid.Parse(input: "9a2b6683-a16e-4270-a23c-3e09a6e27345");
 
-        return new()
+        var newUsers = new List<UserEntity>
         {
-            new()
-            {
-                Id = AdminId,
-                UserName = "khoaAdmin",
-                Email = "jaykhoale@gmail.com",
-                PhoneNumber = "0706042250",
-                UserDetail = new()
-                {
-                    UserId = AdminId,
-                    FirstName = "Khoa",
-                    LastName = "Lê Đình Đăng",
-                    Gender = true,
-                    AvatarUrl =
-                        "https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png",
-                    AccountStatusId = Guid.Parse(input: "4ac49b1d-eb67-4530-a919-4d9de312ee1f")
-                }
-            },
             new()
             {
                 Id = testUserId,
@@ -544,7 +830,8 @@ public static class EntityDataSeeding
                     Gender = true,
                     AvatarUrl =
                         "https://www.shutterstock.com/image-vector/young-smiling-man-avatar-brown-600nw-2261401207.jpg",
-                    AccountStatusId = Guid.Parse(input: "4ac49b1d-eb67-4530-a919-4d9de312ee1f")
+                    AccountStatusId = Guid.Parse(input: "4ac49b1d-eb67-4530-a919-4d9de312ee1f"),
+                    IsTemporarilyRemoved = false
                 }
             },
             new()
@@ -561,9 +848,102 @@ public static class EntityDataSeeding
                     Gender = true,
                     AvatarUrl =
                         "https://st3.depositphotos.com/3431221/13621/v/450/depositphotos_136216036-stock-illustration-man-avatar-icon-hipster-character.jpg",
-                    AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749")
+                    AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749"),
+                    IsTemporarilyRemoved = false
                 }
             }
         };
+
+        var newUserEvents = new List<UserEventEntity>();
+
+        // get the after banned user.
+        var user = newUsers.Find(match: user => user.Id == bannedUserId);
+
+        newUserEvents.Add(
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Type = UserBannedEventType,
+                StreamId = bannedUserId,
+                NewData = JsonSerializer.Serialize(
+                    value: user,
+                    options: App.DefaultJsonSerializerOptions
+                ),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = AdminId
+            }
+        );
+
+        // setting user the to unbanned status.
+        user.UserDetail.AccountStatusId = Guid.Parse(input: "4ac49b1d-eb67-4530-a919-4d9de312ee1f");
+
+        // adding old data.
+        newUserEvents[default].OldData = JsonSerializer.Serialize(
+            value: user,
+            options: App.DefaultJsonSerializerOptions
+        );
+
+        // setting user the to banned status.
+        user.UserDetail.AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749");
+
+        newUserEvents.Add(
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Type = UserAddedEventType,
+                StreamId = testUserId,
+                OldData = JsonSerializer.Serialize(value: string.Empty),
+                NewData = JsonSerializer.Serialize(
+                    value: newUsers.Find(match: user => user.Id == testUserId),
+                    options: App.DefaultJsonSerializerOptions
+                ),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = App.DefaultGuidValue
+            }
+        );
+
+        await context.AddRangeAsync(entities: newUserEvents, cancellationToken: cancellationToken);
+
+        return newUsers;
+    }
+
+    private static async Task SeedSystemAccountEntitiesAsync(
+        ODourContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        const string SystemAccountAddedEventType = "SystemAccountAdded";
+
+        var admin = new SystemAccountEntity
+        {
+            Id = AdminId,
+            UserName = "khoaAdmin",
+            NormalizedUserName = "KHOAADMIN",
+            Email = "jaykhoale@gmail.com",
+            NormalizedEmail = "JAYKHOALE@GMAIL.COM",
+            PasswordHash = string.Empty,
+            AccessFailedCount = default,
+            LockoutEnd = App.MinTimeInUTC,
+            AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749")
+        };
+
+        await context.AddAsync(
+            entity: new SystemAccountEventEntity
+            {
+                Id = Guid.NewGuid(),
+                Type = SystemAccountAddedEventType,
+                StreamId = admin.Id,
+                OldData = JsonSerializer.Serialize(value: string.Empty),
+                NewData = JsonSerializer.Serialize(
+                    value: admin,
+                    options: App.DefaultJsonSerializerOptions
+                ),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = App.DefaultGuidValue
+            },
+            cancellationToken: cancellationToken
+        );
+
+        await context.AddAsync(entity: admin, cancellationToken: cancellationToken);
     }
 }

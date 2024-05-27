@@ -316,6 +316,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                         type: "timestamp with time zone",
                         nullable: false
                     ),
+                    IsTemporarilyRemoved = table.Column<bool>(type: "boolean", nullable: false),
                     AccountStatusId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -823,7 +824,11 @@ namespace ODour.PostgresRelationalDb.Migrations
                         maxLength: 100,
                         nullable: false
                     ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StreamId = table.Column<string>(
+                        type: "character varying(16)",
+                        maxLength: 16,
+                        nullable: false
+                    )
                 },
                 constraints: table =>
                 {
@@ -1281,6 +1286,22 @@ namespace ODour.PostgresRelationalDb.Migrations
                 name: "RoleNameIndex",
                 table: "Roles",
                 column: "NormalizedName",
+                unique: true
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SystemAccount_NormalizedEmail",
+                schema: "main.system_account",
+                table: "SystemAccounts",
+                column: "NormalizedEmail",
+                unique: true
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SystemAccount_NormalizedUserName",
+                schema: "main.system_account",
+                table: "SystemAccounts",
+                column: "NormalizedUserName",
                 unique: true
             );
 
