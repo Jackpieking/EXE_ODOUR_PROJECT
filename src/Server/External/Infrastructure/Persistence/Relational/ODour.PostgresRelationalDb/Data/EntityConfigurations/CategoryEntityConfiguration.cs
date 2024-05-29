@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Category.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,7 +11,7 @@ internal sealed class CategoryEntityConfiguration : IEntityTypeConfiguration<Cat
     {
         builder.ToTable(
             name: CategoryEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.CATEGORY}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.CATEGORY}",
             buildAction: table => table.HasComment(comment: "Contain categories.")
         );
 

@@ -29,12 +29,14 @@ internal static class CommonConstant
 
         internal const string ORDER = "order";
 
-        internal const string EVENT_SNAPSHOT = "event_snapshot";
+        internal const string EVENT = "event";
 
         internal const string CATEGORY = "category";
 
         internal const string ACCOUNT_STATUS = "account_status";
 
         internal const string APP_LOG = "app_log";
+
+        internal const string VOUCHER = "voucher";
     }
 }

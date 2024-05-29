@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Role.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,7 +11,7 @@ internal sealed class RoleDetailEntityConfiguration : IEntityTypeConfiguration<R
     {
         builder.ToTable(
             name: RoleDetailEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ROLE}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.ROLE}",
             buildAction: table => table.HasComment(comment: "Contain role details.")
         );
 
@@ -26,7 +26,7 @@ internal sealed class RoleDetailEntityConfiguration : IEntityTypeConfiguration<R
             .HasOne(navigationExpression: roleDetail => roleDetail.Role)
             .WithOne(navigationExpression: role => role.RoleDetail)
             .HasForeignKey<RoleDetailEntity>(foreignKeyExpression: roleDetail => roleDetail.RoleId)
-            .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
+            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
         #endregion
     }
 }

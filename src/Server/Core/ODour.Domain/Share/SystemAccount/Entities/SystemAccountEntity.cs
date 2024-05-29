@@ -41,25 +41,7 @@ public sealed class SystemAccountEntity : IEntity, ITemporarilyRemovedEntity
     #endregion
 
     #region NavigationCollections
-    public IEnumerable<AccountStatusEventEntity> AccountStatusEventCreators { get; set; }
-
-    public IEnumerable<CategoryEventEntity> CategoryEventCreators { get; set; }
-
-    public IEnumerable<OrderStatusEventEntity> OrderStatusEventCreators { get; set; }
-
-    public IEnumerable<PaymentMethodEventEntity> PaymentMethodEventCreators { get; set; }
-
-    public IEnumerable<ProductEventEntity> ProductEventCreators { get; set; }
-
-    public IEnumerable<ProductMediaEventEntity> ProductMediaEventCreators { get; set; }
-
-    public IEnumerable<ProductStatusEventEntity> ProductStatusEventCreators { get; set; }
-
-    public IEnumerable<RoleEventEntity> RoleEventCreators { get; set; }
-
     public IEnumerable<SystemAccountTokenEntity> SystemAccountTokens { get; set; }
-
-    public IEnumerable<SystemAccountTokenEventEntity> SystemAccountTokenEventCreators { get; set; }
     #endregion
 
     #region MetaData

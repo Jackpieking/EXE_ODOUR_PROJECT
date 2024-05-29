@@ -1,26 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Payment.Entities;
+using ODour.Domain.Share.Voucher.Entities;
 using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
-internal sealed class PaymentMethodEntityConfiguration
-    : IEntityTypeConfiguration<PaymentMethodEntity>
+internal sealed class VoucherTypeEntityConfiguration : IEntityTypeConfiguration<VoucherTypeEntity>
 {
-    public void Configure(EntityTypeBuilder<PaymentMethodEntity> builder)
+    public void Configure(EntityTypeBuilder<VoucherTypeEntity> builder)
     {
         builder.ToTable(
-            name: PaymentMethodEntity.MetaData.TableName,
-            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.PAYMENT}",
-            buildAction: table => table.HasComment(comment: "Contain payment methods.")
+            name: VoucherTypeEntity.MetaData.TableName,
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.VOUCHER}",
+            buildAction: table => table.HasComment(comment: "Contain voucher types.")
         );
 
         builder.HasKey(keyExpression: builder => builder.Id);
 
         builder
             .Property(propertyExpression: builder => builder.Name)
-            .HasMaxLength(maxLength: PaymentMethodEntity.MetaData.Name.MaxLength)
+            .HasMaxLength(maxLength: VoucherTypeEntity.MetaData.Name.MaxLength)
             .IsRequired(required: true);
 
         builder

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.SystemAccount.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -12,7 +12,7 @@ internal sealed class SystemAccountEntityConfiguration
     {
         builder.ToTable(
             name: SystemAccountEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.SYSTEM_ACCOUNT}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.SYSTEM_ACCOUNT}",
             buildAction: table => table.HasComment(comment: "Contain system accounts.")
         );
 
@@ -44,7 +44,7 @@ internal sealed class SystemAccountEntityConfiguration
 
         builder
             .Property(propertyExpression: builder => builder.PasswordHash)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ODour.Domain.Share.AccountStatus.Entities;
 using ODour.Domain.Share.Base.Entities;
-using ODour.Domain.Share.Order.Entities;
+using ODour.Domain.Share.Voucher.Entities;
 
 namespace ODour.Domain.Share.User.Entities;
 
@@ -33,11 +33,7 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
     #endregion
 
     #region NavigationCollections
-    public IEnumerable<OrderEventEntity> OrderEventCreators { get; set; }
-
-    public IEnumerable<OrderItemEventEntity> OrderItemEventCreators { get; set; }
-
-    public IEnumerable<UserTokenEventEntity> UserTokenEvents { get; set; }
+    public IEnumerable<UserVoucherEntity> UserVouchers { get; set; }
     #endregion
 
 

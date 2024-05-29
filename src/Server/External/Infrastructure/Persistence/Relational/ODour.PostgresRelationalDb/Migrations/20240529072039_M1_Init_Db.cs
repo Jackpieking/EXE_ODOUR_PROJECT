@@ -18,13 +18,15 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.EnsureSchema(name: "main.category");
 
-            migrationBuilder.EnsureSchema(name: "main.event_snapshot");
+            migrationBuilder.EnsureSchema(name: "main.event");
 
             migrationBuilder.EnsureSchema(name: "main.order");
 
             migrationBuilder.EnsureSchema(name: "main.payment");
 
             migrationBuilder.EnsureSchema(name: "main.product");
+
+            migrationBuilder.EnsureSchema(name: "main.voucher");
 
             migrationBuilder.EnsureSchema(name: "main.role");
 
@@ -100,19 +102,29 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "EventSnapshots",
-                schema: "main.event_snapshot",
+                name: "Events",
+                schema: "main.event",
                 columns: table => new
                 {
-                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(
+                        type: "character varying(200)",
+                        maxLength: 200,
+                        nullable: false
+                    ),
                     StreamId = table.Column<string>(type: "TEXT", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Data = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EventSnapshots", x => new { x.EventId, x.StreamId });
+                    table.PrimaryKey("PK_Events", x => x.Id);
                 },
-                comment: "Contain event snapshots."
+                comment: "Contain events."
             );
 
             migrationBuilder.CreateTable(
@@ -211,54 +223,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "SystemAccountEvents",
-                schema: "main.system_account",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemAccountEvents", x => x.Id);
-                },
-                comment: "Contain system account events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "UserEvents",
-                schema: "main.user",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserEvents", x => x.Id);
-                },
-                comment: "Contain user events."
-            );
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -302,6 +266,26 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.PrimaryKey("PK_Users", x => x.Id);
                 },
                 comment: "Contain users."
+            );
+
+            migrationBuilder.CreateTable(
+                name: "VoucherTypes",
+                schema: "main.voucher",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(
+                        type: "character varying(100)",
+                        maxLength: 100,
+                        nullable: false
+                    ),
+                    IsTemporarilyRemoved = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VoucherTypes", x => x.Id);
+                },
+                comment: "Contain voucher types."
             );
 
             migrationBuilder.CreateTable(
@@ -351,6 +335,28 @@ namespace ODour.PostgresRelationalDb.Migrations
                     );
                 },
                 comment: "Contain system accounts."
+            );
+
+            migrationBuilder.CreateTable(
+                name: "EventSnapshots",
+                schema: "main.event",
+                columns: table => new
+                {
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EventSnapshots", x => x.EventId);
+                    table.ForeignKey(
+                        name: "FK_EventSnapshots_Events_EventId",
+                        column: x => x.EventId,
+                        principalSchema: "main.event",
+                        principalTable: "Events",
+                        principalColumn: "Id"
+                    );
+                },
+                comment: "Contain event snapshots."
             );
 
             migrationBuilder.CreateTable(
@@ -493,8 +499,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                         name: "FK_RoleDetails_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
+                        principalColumn: "Id"
                     );
                 },
                 comment: "Contain role details."
@@ -564,8 +569,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                         name: "FK_UserDetails_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
+                        principalColumn: "Id"
                     );
                 },
                 comment: "Contain user details."
@@ -658,286 +662,45 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "AccountStatusEvents",
-                schema: "main.account_status",
+                name: "Vouchers",
+                schema: "main.voucher",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
+                    Code = table.Column<string>(
+                        type: "character varying(30)",
+                        maxLength: 30,
+                        nullable: false
+                    ),
+                    Name = table.Column<string>(
                         type: "character varying(100)",
                         maxLength: 100,
                         nullable: false
                     ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AccountStatusEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AccountStatusEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain account status events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "CategoryEvents",
-                schema: "main.category",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
+                    QuantityInStock = table.Column<int>(type: "integer", nullable: false),
+                    DiscountPercentage = table.Column<decimal>(
+                        type: "numeric(7,2)",
+                        precision: 7,
+                        scale: 2,
                         nullable: false
                     ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    IsTemporarilyRemoved = table.Column<bool>(type: "boolean", nullable: false),
+                    VoucherTypeId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryEvents", x => x.Id);
+                    table.PrimaryKey("PK_Vouchers", x => x.Code);
                     table.ForeignKey(
-                        name: "FK_CategoryEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
+                        name: "FK_Vouchers_VoucherTypes_VoucherTypeId",
+                        column: x => x.VoucherTypeId,
+                        principalSchema: "main.voucher",
+                        principalTable: "VoucherTypes",
                         principalColumn: "Id"
                     );
                 },
-                comment: "Contain category events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "OrderStatusEvents",
-                schema: "main.order",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderStatusEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderStatusEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain order status events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "PaymentMethodEvents",
-                schema: "main.payment",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentMethodEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PaymentMethodEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain payment method events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "ProductEvents",
-                schema: "main.product",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<string>(
-                        type: "character varying(16)",
-                        maxLength: 16,
-                        nullable: false
-                    )
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain product events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "ProductMediaEvents",
-                schema: "main.product",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductMediaEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductMediaEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain product media events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "ProductStatusEvents",
-                schema: "main.product",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductStatusEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductStatusEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain product status events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "RoleEvents",
-                schema: "main.role",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RoleEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RoleEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain role events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "SystemAccountTokenEvents",
-                schema: "main.system_account",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemAccountTokenEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SystemAccountTokenEvents_SystemAccounts_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.system_account",
-                        principalTable: "SystemAccounts",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain system account token events."
+                comment: "Contain vouchers."
             );
 
             migrationBuilder.CreateTable(
@@ -1038,124 +801,73 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "OrderEvents",
-                schema: "main.order",
+                name: "ProductVouchers",
+                schema: "main.voucher",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
+                    ProductId = table.Column<string>(
+                        type: "character varying(10)",
+                        maxLength: 10,
                         nullable: false
                     ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
+                    VoucherCode = table.Column<string>(
+                        type: "character varying(30)",
+                        maxLength: 30,
+                        nullable: false
+                    )
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderEvents", x => x.Id);
+                    table.PrimaryKey("PK_ProductVouchers", x => new { x.ProductId, x.VoucherCode });
                     table.ForeignKey(
-                        name: "FK_OrderEvents_UserDetails_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.user",
-                        principalTable: "UserDetails",
-                        principalColumn: "UserId"
+                        name: "FK_ProductVouchers_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalSchema: "main.product",
+                        principalTable: "Products",
+                        principalColumn: "Id"
+                    );
+                    table.ForeignKey(
+                        name: "FK_ProductVouchers_Vouchers_VoucherCode",
+                        column: x => x.VoucherCode,
+                        principalSchema: "main.voucher",
+                        principalTable: "Vouchers",
+                        principalColumn: "Code"
                     );
                 },
-                comment: "Contain order events."
+                comment: "Contain product vouchers."
             );
 
             migrationBuilder.CreateTable(
-                name: "OrderItemEvents",
-                schema: "main.order",
+                name: "UserVouchers",
+                schema: "main.voucher",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VoucherCode = table.Column<string>(
+                        type: "character varying(30)",
+                        maxLength: 30,
                         nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
+                    )
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItemEvents", x => x.Id);
+                    table.PrimaryKey("PK_UserVouchers", x => new { x.UserId, x.VoucherCode });
                     table.ForeignKey(
-                        name: "FK_OrderItemEvents_UserDetails_CreatedBy",
-                        column: x => x.CreatedBy,
+                        name: "FK_UserVouchers_UserDetails_UserId",
+                        column: x => x.UserId,
                         principalSchema: "main.user",
                         principalTable: "UserDetails",
                         principalColumn: "UserId"
                     );
-                },
-                comment: "Contain order item events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "UserTokenEvents",
-                schema: "main.user",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OldData = table.Column<string>(type: "TEXT", nullable: false),
-                    NewData = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(
-                        type: "character varying(100)",
-                        maxLength: 100,
-                        nullable: false
-                    ),
-                    StreamId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserTokenEvents", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserTokenEvents_UserDetails_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalSchema: "main.user",
-                        principalTable: "UserDetails",
-                        principalColumn: "UserId"
+                        name: "FK_UserVouchers_Vouchers_VoucherCode",
+                        column: x => x.VoucherCode,
+                        principalSchema: "main.voucher",
+                        principalTable: "Vouchers",
+                        principalColumn: "Code"
                     );
                 },
-                comment: "Contain user token events."
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AccountStatusEvents_CreatedBy",
-                schema: "main.account_status",
-                table: "AccountStatusEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CategoryEvents_CreatedBy",
-                schema: "main.category",
-                table: "CategoryEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderEvents_CreatedBy",
-                schema: "main.order",
-                table: "OrderEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderItemEvents_CreatedBy",
-                schema: "main.order",
-                table: "OrderItemEvents",
-                column: "CreatedBy"
+                comment: "Contain user vouchers."
             );
 
             migrationBuilder.CreateIndex(
@@ -1180,34 +892,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderStatusEvents_CreatedBy",
-                schema: "main.order",
-                table: "OrderStatusEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentMethodEvents_CreatedBy",
-                schema: "main.payment",
-                table: "PaymentMethodEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductEvents_CreatedBy",
-                schema: "main.product",
-                table: "ProductEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductMediaEvents_CreatedBy",
-                schema: "main.product",
-                table: "ProductMediaEvents",
-                column: "CreatedBy"
-            );
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ProductMedias_ProductId",
                 schema: "main.product",
                 table: "ProductMedias",
@@ -1229,23 +913,16 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductStatusEvents_CreatedBy",
-                schema: "main.product",
-                table: "ProductStatusEvents",
-                column: "CreatedBy"
+                name: "IX_ProductVouchers_VoucherCode",
+                schema: "main.voucher",
+                table: "ProductVouchers",
+                column: "VoucherCode"
             );
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
                 table: "RoleClaims",
                 column: "RoleId"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoleEvents_CreatedBy",
-                schema: "main.role",
-                table: "RoleEvents",
-                column: "CreatedBy"
             );
 
             migrationBuilder.CreateIndex(
@@ -1276,13 +953,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                 schema: "main.system_account",
                 table: "SystemAccounts",
                 column: "AccountStatusId"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SystemAccountTokenEvents_CreatedBy",
-                schema: "main.system_account",
-                table: "SystemAccountTokenEvents",
-                column: "CreatedBy"
             );
 
             migrationBuilder.CreateIndex(
@@ -1324,70 +994,52 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserTokenEvents_CreatedBy",
-                schema: "main.user",
-                table: "UserTokenEvents",
-                column: "CreatedBy"
+                name: "IX_UserVouchers_VoucherCode",
+                schema: "main.voucher",
+                table: "UserVouchers",
+                column: "VoucherCode"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vouchers_VoucherTypeId",
+                schema: "main.voucher",
+                table: "Vouchers",
+                column: "VoucherTypeId"
             );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "AccountStatusEvents", schema: "main.account_status");
-
             migrationBuilder.DropTable(name: "AppExceptionLoggingEntities", schema: "main.app_log");
 
-            migrationBuilder.DropTable(name: "CategoryEvents", schema: "main.category");
-
-            migrationBuilder.DropTable(name: "EventSnapshots", schema: "main.event_snapshot");
-
-            migrationBuilder.DropTable(name: "OrderEvents", schema: "main.order");
-
-            migrationBuilder.DropTable(name: "OrderItemEvents", schema: "main.order");
+            migrationBuilder.DropTable(name: "EventSnapshots", schema: "main.event");
 
             migrationBuilder.DropTable(name: "OrderItems", schema: "main.order");
 
-            migrationBuilder.DropTable(name: "OrderStatusEvents", schema: "main.order");
-
-            migrationBuilder.DropTable(name: "PaymentMethodEvents", schema: "main.payment");
-
-            migrationBuilder.DropTable(name: "ProductEvents", schema: "main.product");
-
-            migrationBuilder.DropTable(name: "ProductMediaEvents", schema: "main.product");
-
             migrationBuilder.DropTable(name: "ProductMedias", schema: "main.product");
 
-            migrationBuilder.DropTable(name: "ProductStatusEvents", schema: "main.product");
+            migrationBuilder.DropTable(name: "ProductVouchers", schema: "main.voucher");
 
             migrationBuilder.DropTable(name: "RoleClaims");
 
             migrationBuilder.DropTable(name: "RoleDetails", schema: "main.role");
 
-            migrationBuilder.DropTable(name: "RoleEvents", schema: "main.role");
-
             migrationBuilder.DropTable(name: "SeedFlags", schema: "main.seed_flag");
-
-            migrationBuilder.DropTable(name: "SystemAccountEvents", schema: "main.system_account");
-
-            migrationBuilder.DropTable(
-                name: "SystemAccountTokenEvents",
-                schema: "main.system_account"
-            );
 
             migrationBuilder.DropTable(name: "SystemAccountTokens", schema: "main.system_account");
 
             migrationBuilder.DropTable(name: "UserClaims");
 
-            migrationBuilder.DropTable(name: "UserEvents", schema: "main.user");
-
             migrationBuilder.DropTable(name: "UserLogins");
 
             migrationBuilder.DropTable(name: "UserRoles");
 
-            migrationBuilder.DropTable(name: "UserTokenEvents", schema: "main.user");
-
             migrationBuilder.DropTable(name: "UserTokens");
+
+            migrationBuilder.DropTable(name: "UserVouchers", schema: "main.voucher");
+
+            migrationBuilder.DropTable(name: "Events", schema: "main.event");
 
             migrationBuilder.DropTable(name: "Orders", schema: "main.order");
 
@@ -1398,6 +1050,8 @@ namespace ODour.PostgresRelationalDb.Migrations
             migrationBuilder.DropTable(name: "Roles");
 
             migrationBuilder.DropTable(name: "UserDetails", schema: "main.user");
+
+            migrationBuilder.DropTable(name: "Vouchers", schema: "main.voucher");
 
             migrationBuilder.DropTable(name: "OrderStatuses", schema: "main.order");
 
@@ -1410,6 +1064,8 @@ namespace ODour.PostgresRelationalDb.Migrations
             migrationBuilder.DropTable(name: "AccountStatuses", schema: "main.account_status");
 
             migrationBuilder.DropTable(name: "Users");
+
+            migrationBuilder.DropTable(name: "VoucherTypes", schema: "main.voucher");
         }
     }
 }

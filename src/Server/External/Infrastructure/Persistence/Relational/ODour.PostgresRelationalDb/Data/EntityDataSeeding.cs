@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Share.AccountStatus.Entities;
+using ODour.Domain.Share.Base.Events;
 using ODour.Domain.Share.Category.Entities;
 using ODour.Domain.Share.Order.Entities;
 using ODour.Domain.Share.Payment.Entities;
@@ -14,6 +15,7 @@ using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.SeedFlag.Entities;
 using ODour.Domain.Share.SystemAccount.Entities;
 using ODour.Domain.Share.User.Entities;
+using ODour.Domain.Share.Voucher.Entities;
 using static ODour.Application.Share.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data;
@@ -67,6 +69,10 @@ public static class EntityDataSeeding
             context: context,
             cancellationToken: cancellationToken
         );
+
+        await SeedVoucherTypeEntitiesAsync(context: context, cancellationToken: cancellationToken);
+
+        await SeedVoucherEntitiesAsync(context: context, cancellationToken: cancellationToken);
 
         var seedRoles = await GetSeedRoleEntitiesAsync(
             context: context,
@@ -204,13 +210,12 @@ public static class EntityDataSeeding
 
         foreach (var newAccountStatus in newAccountStatuses)
         {
-            var newAccountStatusEvent = new AccountStatusEventEntity
+            var newAccountStatusEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = AccountStatusAddedEventType,
-                StreamId = newAccountStatus.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = newAccountStatus.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newAccountStatus,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -255,13 +260,12 @@ public static class EntityDataSeeding
 
         foreach (var newCategory in newCategories)
         {
-            var newCategoryEvent = new CategoryEventEntity
+            var newCategoryEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = CategoryAddedEventType,
-                StreamId = newCategory.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = newCategory.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newCategory,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -324,13 +328,12 @@ public static class EntityDataSeeding
 
         foreach (var newOrderStatus in newOrderStatuses)
         {
-            var newOrderStatusEvent = new OrderStatusEventEntity
+            var newOrderStatusEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = OrderStatusAddedEventType,
-                StreamId = newOrderStatus.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = newOrderStatus.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newOrderStatus,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -375,13 +378,12 @@ public static class EntityDataSeeding
 
         foreach (var newPaymentMethod in newPaymentMethods)
         {
-            var newPaymentMethodEvent = new PaymentMethodEventEntity
+            var newPaymentMethodEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = PayemntMethodAddedEventType,
-                StreamId = newPaymentMethod.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = newPaymentMethod.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newPaymentMethod,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -432,13 +434,12 @@ public static class EntityDataSeeding
 
         foreach (var newProductStatus in newProductStatuses)
         {
-            var newProductStatusEvent = new ProductStatusEventEntity
+            var newProductStatusEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = ProductStatusAddedEventType,
-                StreamId = newProductStatus.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = newProductStatus.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newProductStatus,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -735,13 +736,12 @@ public static class EntityDataSeeding
 
         foreach (var newProduct in newProducts)
         {
-            var newProductEvent = new ProductEventEntity
+            var newProductEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = ProductAddedEventType,
                 StreamId = newProduct.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                Data = JsonSerializer.Serialize(
                     value: newProduct,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -783,13 +783,12 @@ public static class EntityDataSeeding
 
         foreach (var newRole in newRoles)
         {
-            var newRoleEvent = new RoleEventEntity
+            var newRoleEvent = new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = RoleAddedEventType,
-                StreamId = newRole.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = newRole.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newRole,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -854,55 +853,37 @@ public static class EntityDataSeeding
             }
         };
 
-        var newUserEvents = new List<UserEventEntity>();
-
-        // get the after banned user.
-        var user = newUsers.Find(match: user => user.Id == bannedUserId);
-
-        newUserEvents.Add(
-            new()
+        await context.AddAsync(
+            new EventEntity()
             {
                 Id = Guid.NewGuid(),
                 Type = UserBannedEventType,
-                StreamId = bannedUserId,
-                NewData = JsonSerializer.Serialize(
-                    value: user,
+                StreamId = bannedUserId.ToString(),
+                Data = JsonSerializer.Serialize(
+                    value: newUsers.Find(match: user => user.Id == bannedUserId),
                     options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = AdminId
-            }
+            },
+            cancellationToken: cancellationToken
         );
 
-        // setting user the to unbanned status.
-        user.UserDetail.AccountStatusId = Guid.Parse(input: "4ac49b1d-eb67-4530-a919-4d9de312ee1f");
-
-        // adding old data.
-        newUserEvents[default].OldData = JsonSerializer.Serialize(
-            value: user,
-            options: App.DefaultJsonSerializerOptions
-        );
-
-        // setting user the to banned status.
-        user.UserDetail.AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749");
-
-        newUserEvents.Add(
-            new()
+        await context.AddAsync(
+            new EventEntity()
             {
                 Id = Guid.NewGuid(),
                 Type = UserAddedEventType,
-                StreamId = testUserId,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = testUserId.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: newUsers.Find(match: user => user.Id == testUserId),
                     options: App.DefaultJsonSerializerOptions
                 ),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = App.DefaultGuidValue
-            }
+            },
+            cancellationToken: cancellationToken
         );
-
-        await context.AddRangeAsync(entities: newUserEvents, cancellationToken: cancellationToken);
 
         return newUsers;
     }
@@ -928,13 +909,12 @@ public static class EntityDataSeeding
         };
 
         await context.AddAsync(
-            entity: new SystemAccountEventEntity
+            entity: new EventEntity
             {
                 Id = Guid.NewGuid(),
                 Type = SystemAccountAddedEventType,
-                StreamId = admin.Id,
-                OldData = JsonSerializer.Serialize(value: string.Empty),
-                NewData = JsonSerializer.Serialize(
+                StreamId = admin.Id.ToString(),
+                Data = JsonSerializer.Serialize(
                     value: admin,
                     options: App.DefaultJsonSerializerOptions
                 ),
@@ -945,5 +925,100 @@ public static class EntityDataSeeding
         );
 
         await context.AddAsync(entity: admin, cancellationToken: cancellationToken);
+    }
+
+    private static async Task SeedVoucherTypeEntitiesAsync(
+        ODourContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        const string VoucherTypeAddedEventType = "VoucherTypeAdded";
+
+        var newVoucherTypes = new List<VoucherTypeEntity>
+        {
+            new()
+            {
+                Id = Guid.Parse(input: "cd67f5e8-aa8b-4285-b58c-303ec26bf947"),
+                Name = "Sự kiện",
+                IsTemporarilyRemoved = false
+            },
+            new()
+            {
+                Id = Guid.Parse(input: "d0b05d89-51c8-4d01-b6f8-4dbe62db58dc"),
+                Name = "Tích lũy",
+                IsTemporarilyRemoved = false
+            }
+        };
+
+        foreach (var newVoucherType in newVoucherTypes)
+        {
+            var newVoucherTypeEvent = new EventEntity
+            {
+                Id = Guid.NewGuid(),
+                Type = VoucherTypeAddedEventType,
+                StreamId = newVoucherType.Id.ToString(),
+                Data = JsonSerializer.Serialize(
+                    value: newVoucherType,
+                    options: App.DefaultJsonSerializerOptions
+                ),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = AdminId
+            };
+
+            await context.AddAsync(
+                entity: newVoucherTypeEvent,
+                cancellationToken: cancellationToken
+            );
+        }
+
+        await context.AddRangeAsync(
+            entities: newVoucherTypes,
+            cancellationToken: cancellationToken
+        );
+    }
+
+    private static async Task SeedVoucherEntitiesAsync(
+        ODourContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        const string VoucherAddedEventType = "VoucherAdded";
+
+        var newVouchers = new List<VoucherEntity>
+        {
+            new()
+            {
+                Code = "chQNlXetJYmssKxjoHks",
+                Name = "Giảm 10% cho tất cả sản phẩm",
+                QuantityInStock = 10_000,
+                DiscountPercentage = 0.1M,
+                Description =
+                    "Tất cả sản phẩm trong shop đều sẽ được giảm 10%, mỗi sản phẩm chỉ được áp dụng 1 lần",
+                DueDate = DateTime.MaxValue.ToUniversalTime(),
+                StartDate = DateTime.UtcNow,
+                IsTemporarilyRemoved = false,
+                VoucherTypeId = Guid.Parse(input: "cd67f5e8-aa8b-4285-b58c-303ec26bf947")
+            }
+        };
+
+        foreach (var newVoucher in newVouchers)
+        {
+            var newVoucherEvent = new EventEntity
+            {
+                Id = Guid.NewGuid(),
+                Type = VoucherAddedEventType,
+                StreamId = newVoucher.Code.ToString(),
+                Data = JsonSerializer.Serialize(
+                    value: newVoucher,
+                    options: App.DefaultJsonSerializerOptions
+                ),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = AdminId
+            };
+
+            await context.AddAsync(entity: newVoucherEvent, cancellationToken: cancellationToken);
+        }
+
+        await context.AddRangeAsync(entities: newVouchers, cancellationToken: cancellationToken);
     }
 }

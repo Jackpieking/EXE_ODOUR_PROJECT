@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.User.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,7 +11,7 @@ internal sealed class UserDetailEntityConfiguration : IEntityTypeConfiguration<U
     {
         builder.ToTable(
             name: UserDetailEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.USER}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.USER}",
             buildAction: table => table.HasComment(comment: "Contain user details.")
         );
 
@@ -33,7 +33,7 @@ internal sealed class UserDetailEntityConfiguration : IEntityTypeConfiguration<U
 
         builder
             .Property(propertyExpression: builder => builder.AvatarUrl)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder.Property(propertyExpression: builder => builder.Gender).IsRequired(required: true);
@@ -53,7 +53,7 @@ internal sealed class UserDetailEntityConfiguration : IEntityTypeConfiguration<U
             .HasOne(navigationExpression: userDetail => userDetail.User)
             .WithOne(navigationExpression: user => user.UserDetail)
             .HasForeignKey<UserDetailEntity>(foreignKeyExpression: userDetail => userDetail.UserId)
-            .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
+            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
         #endregion
     }
 }

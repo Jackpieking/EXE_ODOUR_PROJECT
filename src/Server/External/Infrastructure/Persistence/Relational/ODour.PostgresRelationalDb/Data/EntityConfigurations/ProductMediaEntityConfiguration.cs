@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Product.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,7 +11,7 @@ internal sealed class ProductMediaEntityConfiguration : IEntityTypeConfiguration
     {
         builder.ToTable(
             name: ProductMediaEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.PRODUCT}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.PRODUCT}",
             buildAction: table => table.HasComment(comment: "Contain product medias.")
         );
 
@@ -28,7 +28,7 @@ internal sealed class ProductMediaEntityConfiguration : IEntityTypeConfiguration
 
         builder
             .Property(propertyExpression: builder => builder.StorageUrl)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         #region Relationships

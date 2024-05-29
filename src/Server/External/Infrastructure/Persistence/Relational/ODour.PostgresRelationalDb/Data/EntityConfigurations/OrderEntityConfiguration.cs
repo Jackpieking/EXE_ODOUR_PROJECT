@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Order.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,7 +11,7 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
     {
         builder.ToTable(
             name: OrderEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ORDER}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.ORDER}",
             buildAction: table => table.HasComment(comment: "Contain orders.")
         );
 
@@ -49,7 +49,7 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
 
         builder
             .Property(propertyExpression: builder => builder.DeliveredAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TIMESTAMPTZ)
+            .HasColumnType(typeName: DatabaseNativeType.TIMESTAMPTZ)
             .IsRequired(required: true);
 
         #region Relationships

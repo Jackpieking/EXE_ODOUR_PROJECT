@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ODour.Domain.Share.Base.Entities;
 using ODour.Domain.Share.Category.Entities;
 using ODour.Domain.Share.Order.Entities;
+using ODour.Domain.Share.Voucher.Entities;
 
 namespace ODour.Domain.Share.Product.Entities;
 
@@ -38,6 +39,8 @@ public sealed class ProductEntity : IEntity, ITemporarilyRemovedEntity
     public IEnumerable<ProductMediaEntity> ProductImages { get; set; }
 
     public IEnumerable<OrderItemEntity> OrderItems { get; set; }
+
+    public IEnumerable<ProductVoucherEntity> ProductVouchers { get; set; }
     #endregion
 
     #region MetaData

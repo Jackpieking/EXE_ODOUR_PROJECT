@@ -1,27 +1,25 @@
 using System;
+using System.Collections.Generic;
 using ODour.Domain.Share.Base.Entities;
 
-namespace ODour.Domain.Share.EventSnapshot.Entities;
+namespace ODour.Domain.Share.Base.Events;
 
 public sealed class EventSnapshotEntity : IEntity
 {
-    #region PrimaryKeys
+    #region PrimaryForeignKeys
     public Guid EventId { get; set; }
-
-    public string StreamId { get; set; }
+    #endregion
 
     public bool IsCompleted { get; set; }
+
+    #region NavigationProperties
+    public EventEntity Event { get; set; }
     #endregion
 
     #region MetaData
     public static class MetaData
     {
         public const string TableName = "EventSnapshots";
-
-        public static class StreamId
-        {
-            public const int MinLength = 1;
-        }
     }
     #endregion
 }

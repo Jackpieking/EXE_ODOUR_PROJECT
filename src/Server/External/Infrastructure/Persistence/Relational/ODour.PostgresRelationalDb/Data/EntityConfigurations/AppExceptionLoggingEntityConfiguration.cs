@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Log.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -12,7 +12,7 @@ internal sealed class AppExceptionLoggingEntityConfiguration
     {
         builder.ToTable(
             name: AppExceptionLoggingEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.APP_LOG}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.APP_LOG}",
             buildAction: table => table.HasComment(comment: "Contain app exception loggings.")
         );
 
@@ -20,22 +20,22 @@ internal sealed class AppExceptionLoggingEntityConfiguration
 
         builder
             .Property(propertyExpression: userDetail => userDetail.ErrorMessage)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder
             .Property(propertyExpression: userDetail => userDetail.ErrorStackTrace)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder
             .Property(propertyExpression: userDetail => userDetail.CreatedAt)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder
             .Property(propertyExpression: userDetail => userDetail.Data)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
     }
 }

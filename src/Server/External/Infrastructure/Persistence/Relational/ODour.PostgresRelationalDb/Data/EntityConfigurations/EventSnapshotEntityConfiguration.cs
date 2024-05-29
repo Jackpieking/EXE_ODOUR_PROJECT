@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.EventSnapshot.Entities;
-using ODour.PostgresRelationalDb.Common;
+using ODour.Domain.Share.Base.Events;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -12,19 +12,22 @@ internal sealed class EventSnapshotEntityConfiguration
     {
         builder.ToTable(
             name: EventSnapshotEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.EVENT_SNAPSHOT}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.EVENT}",
             buildAction: table => table.HasComment(comment: "Contain event snapshots.")
         );
 
-        builder.HasKey(keyExpression: builder => new { builder.EventId, builder.StreamId });
-
-        builder
-            .Property(propertyExpression: builder => builder.StreamId)
-            .HasColumnType(typeName: CommonConstant.DatabaseNativeType.TEXT)
-            .IsRequired(required: true);
+        builder.HasKey(keyExpression: builder => builder.EventId);
 
         builder
             .Property(propertyExpression: builder => builder.IsCompleted)
             .IsRequired(required: true);
+
+        builder
+            .HasOne(navigationExpression: eventSnapshot => eventSnapshot.Event)
+            .WithOne(navigationExpression: myEvent => myEvent.EventSnapshot)
+            .HasForeignKey<EventSnapshotEntity>(foreignKeyExpression: eventSnapshot =>
+                eventSnapshot.EventId
+            )
+            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
     }
 }

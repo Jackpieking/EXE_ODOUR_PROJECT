@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Order.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -11,7 +11,7 @@ internal sealed class OrderStatusEntityConfiguration : IEntityTypeConfiguration<
     {
         builder.ToTable(
             name: OrderStatusEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.ORDER}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.ORDER}",
             buildAction: table => table.HasComment(comment: "Contain order statuses.")
         );
 

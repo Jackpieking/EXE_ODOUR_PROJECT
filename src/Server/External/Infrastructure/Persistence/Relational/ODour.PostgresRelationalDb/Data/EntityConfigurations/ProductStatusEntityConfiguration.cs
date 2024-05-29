@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ODour.Domain.Share.Product.Entities;
-using ODour.PostgresRelationalDb.Common;
+using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
 
@@ -12,7 +12,7 @@ internal sealed class ProductStatusEntityConfiguration
     {
         builder.ToTable(
             name: ProductStatusEntity.MetaData.TableName,
-            schema: $"{CommonConstant.DatabaseSchemaName.MAIN}.{CommonConstant.DatabaseSchemaName.PRODUCT}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.PRODUCT}",
             buildAction: table => table.HasComment(comment: "Contain product statuses.")
         );
 
