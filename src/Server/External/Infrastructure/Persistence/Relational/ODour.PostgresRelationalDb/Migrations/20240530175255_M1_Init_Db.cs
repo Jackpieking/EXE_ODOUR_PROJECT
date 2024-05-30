@@ -14,7 +14,7 @@ namespace ODour.PostgresRelationalDb.Migrations
         {
             migrationBuilder.EnsureSchema(name: "main.account_status");
 
-            migrationBuilder.EnsureSchema(name: "main.app_log");
+            migrationBuilder.EnsureSchema(name: "main.system");
 
             migrationBuilder.EnsureSchema(name: "main.category");
 
@@ -29,10 +29,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             migrationBuilder.EnsureSchema(name: "main.voucher");
 
             migrationBuilder.EnsureSchema(name: "main.role");
-
-            migrationBuilder.EnsureSchema(name: "main.seed_flag");
-
-            migrationBuilder.EnsureSchema(name: "main.system_account");
 
             migrationBuilder.EnsureSchema(name: "main.user");
 
@@ -65,7 +61,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AppExceptionLoggingEntities",
-                schema: "main.app_log",
+                schema: "main.system",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -125,6 +121,25 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.PrimaryKey("PK_Events", x => x.Id);
                 },
                 comment: "Contain events."
+            );
+
+            migrationBuilder.CreateTable(
+                name: "JobRecords",
+                schema: "main.system",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    QueueID = table.Column<string>(type: "TEXT", nullable: false),
+                    ExecuteAfter = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    ExpireOn = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    IsComplete = table.Column<bool>(type: "boolean", nullable: false),
+                    CommandJson = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JobRecords", x => x.Id);
+                },
+                comment: "Contain job records."
             );
 
             migrationBuilder.CreateTable(
@@ -213,7 +228,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.CreateTable(
                 name: "SeedFlags",
-                schema: "main.seed_flag",
+                schema: "main.system",
                 columns: table => new { Id = table.Column<Guid>(type: "uuid", nullable: false) },
                 constraints: table =>
                 {
@@ -290,7 +305,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.CreateTable(
                 name: "SystemAccounts",
-                schema: "main.system_account",
+                schema: "main.system",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -704,8 +719,39 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
+                name: "SystemAccountRoles",
+                schema: "main.system",
+                columns: table => new
+                {
+                    SystemAccountId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey(
+                        "PK_SystemAccountRoles",
+                        x => new { x.SystemAccountId, x.RoleId }
+                    );
+                    table.ForeignKey(
+                        name: "FK_SystemAccountRoles_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id"
+                    );
+                    table.ForeignKey(
+                        name: "FK_SystemAccountRoles_SystemAccounts_SystemAccountId",
+                        column: x => x.SystemAccountId,
+                        principalSchema: "main.system",
+                        principalTable: "SystemAccounts",
+                        principalColumn: "Id"
+                    );
+                },
+                comment: "Contain system account roles."
+            );
+
+            migrationBuilder.CreateTable(
                 name: "SystemAccountTokens",
-                schema: "main.system_account",
+                schema: "main.system",
                 columns: table => new
                 {
                     SystemAccountId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -724,7 +770,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.ForeignKey(
                         name: "FK_SystemAccountTokens_SystemAccounts_SystemAccountId",
                         column: x => x.SystemAccountId,
-                        principalSchema: "main.system_account",
+                        principalSchema: "main.system",
                         principalTable: "SystemAccounts",
                         principalColumn: "Id"
                     );
@@ -933,8 +979,15 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateIndex(
+                name: "IX_SystemAccountRoles_RoleId",
+                schema: "main.system",
+                table: "SystemAccountRoles",
+                column: "RoleId"
+            );
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SystemAccount_NormalizedEmail",
-                schema: "main.system_account",
+                schema: "main.system",
                 table: "SystemAccounts",
                 column: "NormalizedEmail",
                 unique: true
@@ -942,7 +995,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_SystemAccount_NormalizedUserName",
-                schema: "main.system_account",
+                schema: "main.system",
                 table: "SystemAccounts",
                 column: "NormalizedUserName",
                 unique: true
@@ -950,7 +1003,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_SystemAccounts_AccountStatusId",
-                schema: "main.system_account",
+                schema: "main.system",
                 table: "SystemAccounts",
                 column: "AccountStatusId"
             );
@@ -1011,9 +1064,11 @@ namespace ODour.PostgresRelationalDb.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "AppExceptionLoggingEntities", schema: "main.app_log");
+            migrationBuilder.DropTable(name: "AppExceptionLoggingEntities", schema: "main.system");
 
             migrationBuilder.DropTable(name: "EventSnapshots", schema: "main.event");
+
+            migrationBuilder.DropTable(name: "JobRecords", schema: "main.system");
 
             migrationBuilder.DropTable(name: "OrderItems", schema: "main.order");
 
@@ -1025,9 +1080,11 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.DropTable(name: "RoleDetails", schema: "main.role");
 
-            migrationBuilder.DropTable(name: "SeedFlags", schema: "main.seed_flag");
+            migrationBuilder.DropTable(name: "SeedFlags", schema: "main.system");
 
-            migrationBuilder.DropTable(name: "SystemAccountTokens", schema: "main.system_account");
+            migrationBuilder.DropTable(name: "SystemAccountRoles", schema: "main.system");
+
+            migrationBuilder.DropTable(name: "SystemAccountTokens", schema: "main.system");
 
             migrationBuilder.DropTable(name: "UserClaims");
 
@@ -1045,7 +1102,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.DropTable(name: "Products", schema: "main.product");
 
-            migrationBuilder.DropTable(name: "SystemAccounts", schema: "main.system_account");
+            migrationBuilder.DropTable(name: "SystemAccounts", schema: "main.system");
 
             migrationBuilder.DropTable(name: "Roles");
 

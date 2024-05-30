@@ -3,8 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ODour.PostgresRelationalDb.Data;
 
 #nullable disable
@@ -12,7 +10,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240529072039_M1_Init_Db")]
+    [Migration("20240530175255_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
@@ -183,7 +181,29 @@ namespace ODour.PostgresRelationalDb.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Base.Events.EventEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsTemporarilyRemoved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories", "main.category", t =>
+                        {
+                            t.HasComment("Contain categories.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Events.EventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -216,7 +236,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Base.Events.EventSnapshotEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Events.EventSnapshotEntity", b =>
                 {
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
@@ -229,58 +249,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.ToTable("EventSnapshots", "main.event", t =>
                         {
                             t.HasComment("Contain event snapshots.");
-                        });
-                });
-
-            modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsTemporarilyRemoved")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories", "main.category", t =>
-                        {
-                            t.HasComment("Contain categories.");
-                        });
-                });
-
-            modelBuilder.Entity("ODour.Domain.Share.Log.Entities.AppExceptionLoggingEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedAt")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Data")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ErrorStackTrace")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppExceptionLoggingEntities", "main.app_log", t =>
-                        {
-                            t.HasComment("Contain app exception loggings.");
                         });
                 });
 
@@ -537,7 +505,68 @@ namespace ODour.PostgresRelationalDb.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.SeedFlag.Entities.SeedFlagEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.AppExceptionLoggingEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorStackTrace")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppExceptionLoggingEntities", "main.system", t =>
+                        {
+                            t.HasComment("Contain app exception loggings.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.JobRecordEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CommandJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExecuteAfter")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<DateTime>("ExpireOn")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("QueueID")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JobRecords", "main.system", t =>
+                        {
+                            t.HasComment("Contain job records.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SeedFlagEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -545,13 +574,13 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SeedFlags", "main.seed_flag", t =>
+                    b.ToTable("SeedFlags", "main.system", t =>
                         {
                             t.HasComment("Contain seed flags.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -603,13 +632,31 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasIndex(new[] { "NormalizedUserName" }, "IX_SystemAccount_NormalizedUserName")
                         .IsUnique();
 
-                    b.ToTable("SystemAccounts", "main.system_account", t =>
+                    b.ToTable("SystemAccounts", "main.system", t =>
                         {
                             t.HasComment("Contain system accounts.");
                         });
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountTokenEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountRoleEntity", b =>
+                {
+                    b.Property<Guid>("SystemAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("SystemAccountId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("SystemAccountRoles", "main.system", t =>
+                        {
+                            t.HasComment("Contain system account roles.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountTokenEntity", b =>
                 {
                     b.Property<Guid>("SystemAccountId")
                         .HasColumnType("uuid");
@@ -632,7 +679,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.HasKey("SystemAccountId");
 
-                    b.ToTable("SystemAccountTokens", "main.system_account", t =>
+                    b.ToTable("SystemAccountTokens", "main.system", t =>
                         {
                             t.HasComment("Contain system account tokens.");
                         });
@@ -920,11 +967,11 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("UserTokenEntity");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Base.Events.EventSnapshotEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.Events.EventSnapshotEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.Base.Events.EventEntity", "Event")
+                    b.HasOne("ODour.Domain.Share.Events.EventEntity", "Event")
                         .WithOne("EventSnapshot")
-                        .HasForeignKey("ODour.Domain.Share.Base.Events.EventSnapshotEntity", "EventId")
+                        .HasForeignKey("ODour.Domain.Share.Events.EventSnapshotEntity", "EventId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -1010,7 +1057,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountEntity", b =>
                 {
                     b.HasOne("ODour.Domain.Share.AccountStatus.Entities.AccountStatusEntity", "AccountStatus")
                         .WithMany("SystemAccounts")
@@ -1021,9 +1068,28 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("AccountStatus");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountTokenEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountRoleEntity", b =>
                 {
-                    b.HasOne("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", "SystemAccount")
+                    b.HasOne("ODour.Domain.Share.Role.Entities.RoleEntity", "Role")
+                        .WithMany("SystemAccountRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ODour.Domain.Share.System.Entities.SystemAccountEntity", "SystemAccount")
+                        .WithMany("SystemAccountRoles")
+                        .HasForeignKey("SystemAccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("SystemAccount");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountTokenEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.System.Entities.SystemAccountEntity", "SystemAccount")
                         .WithMany("SystemAccountTokens")
                         .HasForeignKey("SystemAccountId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1170,14 +1236,14 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Navigation("UserDetails");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.Base.Events.EventEntity", b =>
-                {
-                    b.Navigation("EventSnapshot");
-                });
-
             modelBuilder.Entity("ODour.Domain.Share.Category.Entities.CategoryEntity", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Events.EventEntity", b =>
+                {
+                    b.Navigation("EventSnapshot");
                 });
 
             modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderEntity", b =>
@@ -1215,11 +1281,15 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Navigation("RoleDetail");
 
+                    b.Navigation("SystemAccountRoles");
+
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("ODour.Domain.Share.SystemAccount.Entities.SystemAccountEntity", b =>
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.SystemAccountEntity", b =>
                 {
+                    b.Navigation("SystemAccountRoles");
+
                     b.Navigation("SystemAccountTokens");
                 });
 

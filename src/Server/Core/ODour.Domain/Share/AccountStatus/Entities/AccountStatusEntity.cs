@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ODour.Domain.Share.Base.Entities;
-using ODour.Domain.Share.SystemAccount.Entities;
+using ODour.Domain.Share.System.Entities;
 using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Share.AccountStatus.Entities;

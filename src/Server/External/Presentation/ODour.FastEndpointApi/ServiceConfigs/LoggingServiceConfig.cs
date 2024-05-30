@@ -8,7 +8,7 @@ namespace ODour.FastEndpointApi.ServiceConfigs;
 /// </summary>
 internal static class LoggingServiceConfig
 {
-    internal static void ConfigLogging(this IServiceCollection services)
+    internal static void Config(IServiceCollection services)
     {
         services.AddLogging(configure: config =>
         {

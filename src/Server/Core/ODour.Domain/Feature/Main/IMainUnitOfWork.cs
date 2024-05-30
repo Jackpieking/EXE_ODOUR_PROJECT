@@ -1,0 +1,9 @@
+using ODour.Domain.Feature.Main.Repository.Auth;
+
+namespace ODour.Domain.Feature.Main
+{
+    public interface IMainUnitOfWork
+    {
+        IRegisterAsUserRepository RegisterAsUserRepository { get; }
+    }
+}

@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ODour.Configuration.Presentation.WebApi.SecurityKey;
 using ODour.Domain.Share.AccountStatus.Entities;
-using ODour.Domain.Share.Base.Events;
 using ODour.Domain.Share.Category.Entities;
+using ODour.Domain.Share.Events;
 using ODour.Domain.Share.Order.Entities;
 using ODour.Domain.Share.Payment.Entities;
 using ODour.Domain.Share.Product.Entities;
 using ODour.Domain.Share.Role.Entities;
-using ODour.Domain.Share.SeedFlag.Entities;
-using ODour.Domain.Share.SystemAccount.Entities;
+using ODour.Domain.Share.System.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.Domain.Share.Voucher.Entities;
 using static ODour.Application.Share.Common.CommonConstant;
@@ -27,9 +28,11 @@ public static class EntityDataSeeding
     );
 
     public static async Task<bool> SeedAsync(
-        ODourContext context,
-        UserManager<UserEntity> userManager,
-        RoleManager<RoleEntity> roleManager,
+        DbContext context,
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<RoleManager<RoleEntity>> roleManager,
+        Lazy<IDataProtectionProvider> dataProtectionProvider,
+        Lazy<AppBaseProtectionSecurityKeyOption> protectionSecurityKeyOption,
         CancellationToken cancellationToken
     )
     {
@@ -38,7 +41,7 @@ public static class EntityDataSeeding
 
         if (!areTablesEmtpy)
         {
-            return false;
+            return true;
         }
 
         // Start seeding.
@@ -67,6 +70,8 @@ public static class EntityDataSeeding
 
         await SeedSystemAccountEntitiesAsync(
             context: context,
+            protectionProvider: dataProtectionProvider.Value,
+            protectionSecurityKeyOption: protectionSecurityKeyOption.Value,
             cancellationToken: cancellationToken
         );
 
@@ -81,6 +86,8 @@ public static class EntityDataSeeding
 
         var seedUsers = await GetSeedUserEntitiesAsync(
             context: context,
+            protectionProvider: dataProtectionProvider.Value,
+            protectionSecurityKeyOption: protectionSecurityKeyOption.Value,
             cancellationToken: cancellationToken
         );
 
@@ -99,7 +106,7 @@ public static class EntityDataSeeding
                 {
                     foreach (var newRole in seedRoles)
                     {
-                        await roleManager.CreateAsync(role: newRole);
+                        await roleManager.Value.CreateAsync(role: newRole);
                     }
 
                     // test user.
@@ -107,14 +114,17 @@ public static class EntityDataSeeding
                         user.UserName.Equals(value: "testUser", StringComparison.OrdinalIgnoreCase)
                     );
 
-                    await userManager.CreateAsync(user: user, password: "Khoa1234");
+                    await userManager.Value.CreateAsync(user: user);
 
-                    await userManager.AddToRoleAsync(user: user, role: "user");
+                    await userManager.Value.AddToRoleAsync(user: user, role: "user");
 
                     var emailConfirmationToken =
-                        await userManager.GenerateEmailConfirmationTokenAsync(user: user);
+                        await userManager.Value.GenerateEmailConfirmationTokenAsync(user: user);
 
-                    await userManager.ConfirmEmailAsync(user: user, token: emailConfirmationToken);
+                    await userManager.Value.ConfirmEmailAsync(
+                        user: user,
+                        token: emailConfirmationToken
+                    );
 
                     // banned user.
                     user = seedUsers.Find(match: user =>
@@ -124,15 +134,17 @@ public static class EntityDataSeeding
                         )
                     );
 
-                    await userManager.CreateAsync(user: user, password: "Jackpie2003");
+                    await userManager.Value.CreateAsync(user: user);
 
-                    await userManager.AddToRoleAsync(user: user, role: "user");
+                    await userManager.Value.AddToRoleAsync(user: user, role: "user");
 
-                    emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(
-                        user: user
+                    emailConfirmationToken =
+                        await userManager.Value.GenerateEmailConfirmationTokenAsync(user: user);
+
+                    await userManager.Value.ConfirmEmailAsync(
+                        user: user,
+                        token: emailConfirmationToken
                     );
-
-                    await userManager.ConfirmEmailAsync(user: user, token: emailConfirmationToken);
 
                     // Save all changings.
                     await context.SaveChangesAsync(cancellationToken: cancellationToken);
@@ -152,15 +164,15 @@ public static class EntityDataSeeding
     }
 
     private static async Task<bool> AreAllTablesEmptyAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
-        var isTableEmtpy = await context
+        var areTablesNotEmtpy = await context
             .Set<SeedFlagEntity>()
             .AnyAsync(cancellationToken: cancellationToken);
 
-        if (!isTableEmtpy)
+        if (areTablesNotEmtpy)
         {
             return false;
         }
@@ -169,7 +181,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task MarkAsAlreadySeedAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -180,7 +192,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedAccountStatusEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -236,7 +248,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedCategoryEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -280,7 +292,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedOrderStatusEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -320,7 +332,7 @@ public static class EntityDataSeeding
             },
             new()
             {
-                Id = Guid.Parse(input: "37eb8293-c17a-45a6-89ab-ba640d4001ff"),
+                Id = Guid.Parse(input: "2f3eae5b-d4ed-4fff-ab1c-6a538721ffca"),
                 Name = "Đã hủy",
                 IsTemporarilyRemoved = false
             }
@@ -354,7 +366,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedPaymentMethodEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -404,7 +416,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedProductStatusEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -460,7 +472,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedProductEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -756,7 +768,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task<List<RoleEntity>> GetSeedRoleEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -803,7 +815,9 @@ public static class EntityDataSeeding
     }
 
     private static async Task<List<UserEntity>> GetSeedUserEntitiesAsync(
-        ODourContext context,
+        DbContext context,
+        IDataProtectionProvider protectionProvider,
+        AppBaseProtectionSecurityKeyOption protectionSecurityKeyOption,
         CancellationToken cancellationToken
     )
     {
@@ -813,6 +827,14 @@ public static class EntityDataSeeding
         var testUserId = Guid.Parse(input: "8ebe29bc-4706-4fda-bb28-ed127d150c05");
         var bannedUserId = Guid.Parse(input: "9a2b6683-a16e-4270-a23c-3e09a6e27345");
 
+        var testUserProtector = protectionProvider.CreateProtector(
+            purpose: $"{protectionSecurityKeyOption.Value}<{testUserId}>"
+        );
+
+        var bannedUserProtector = protectionProvider.CreateProtector(
+            purpose: $"{protectionSecurityKeyOption.Value}<{bannedUserId}>"
+        );
+
         var newUsers = new List<UserEntity>
         {
             new()
@@ -821,6 +843,7 @@ public static class EntityDataSeeding
                 UserName = "testUser",
                 Email = "khoaprovn041@gmail.com",
                 PhoneNumber = "0706042250",
+                PasswordHash = testUserProtector.Protect(plaintext: "Khoa1234"),
                 UserDetail = new()
                 {
                     UserId = testUserId,
@@ -839,6 +862,7 @@ public static class EntityDataSeeding
                 UserName = "bannedUser",
                 Email = "khoamapdit03@gmail.com",
                 PhoneNumber = "0706042250",
+                PasswordHash = bannedUserProtector.Protect(plaintext: "Khoa1234"),
                 UserDetail = new()
                 {
                     UserId = bannedUserId,
@@ -889,11 +913,17 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedSystemAccountEntitiesAsync(
-        ODourContext context,
+        DbContext context,
+        IDataProtectionProvider protectionProvider,
+        AppBaseProtectionSecurityKeyOption protectionSecurityKeyOption,
         CancellationToken cancellationToken
     )
     {
         const string SystemAccountAddedEventType = "SystemAccountAdded";
+
+        var protector = protectionProvider.CreateProtector(
+            purpose: $"{protectionSecurityKeyOption.Value}<{AdminId}>"
+        );
 
         var admin = new SystemAccountEntity
         {
@@ -902,10 +932,14 @@ public static class EntityDataSeeding
             NormalizedUserName = "KHOAADMIN",
             Email = "jaykhoale@gmail.com",
             NormalizedEmail = "JAYKHOALE@GMAIL.COM",
-            PasswordHash = string.Empty,
+            PasswordHash = protector.Protect(plaintext: "Admin123@"),
             AccessFailedCount = default,
             LockoutEnd = App.MinTimeInUTC,
-            AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749")
+            AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749"),
+            SystemAccountRoles = new List<SystemAccountRoleEntity>
+            {
+                new() { RoleId = Guid.Parse(input: "c95f4aae-2a41-4c76-9cc4-f1d632409525"), }
+            }
         };
 
         await context.AddAsync(
@@ -928,7 +962,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedVoucherTypeEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {
@@ -978,7 +1012,7 @@ public static class EntityDataSeeding
     }
 
     private static async Task SeedVoucherEntitiesAsync(
-        ODourContext context,
+        DbContext context,
         CancellationToken cancellationToken
     )
     {

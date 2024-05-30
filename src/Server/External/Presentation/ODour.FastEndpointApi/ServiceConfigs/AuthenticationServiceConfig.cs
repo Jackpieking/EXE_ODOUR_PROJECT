@@ -13,10 +13,7 @@ namespace ODour.FastEndpointApi.ServiceConfigs;
 /// </summary>
 internal static class AuthenticationServiceConfig
 {
-    internal static void ConfigAuthentication(
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
+    internal static void Config(IServiceCollection services, IConfiguration configuration)
     {
         var option = configuration
             .GetRequiredSection(key: "Authentication")

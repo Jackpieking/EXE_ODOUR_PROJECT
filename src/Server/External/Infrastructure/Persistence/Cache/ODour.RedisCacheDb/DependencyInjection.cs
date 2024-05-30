@@ -24,8 +24,8 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
-        CoreServiceConfig.ConfigCore(services: services);
-        StackExchangeRedisCacheServiceConfig.ConfigStackExchangeRedisCache(
+        CoreServiceConfig.ConfigC(services: services);
+        StackExchangeRedisCacheServiceConfig.Config(
             services: services,
             configuration: configuration
         );

@@ -1,42 +1,39 @@
-namespace ODour.PostgresRelationalDb.Common;
-
-internal static class CommonConstant
+namespace ODour.PostgresRelationalDb.Common
 {
-    internal static class DatabaseNativeType
+    internal static class CommonConstant
     {
-        internal const string TEXT = "TEXT";
+        internal static class DatabaseNativeType
+        {
+            internal const string TEXT = "TEXT";
 
-        internal const string TIMESTAMPTZ = "TIMESTAMPTZ";
-    }
+            internal const string TIMESTAMPTZ = "TIMESTAMPTZ";
+        }
 
-    internal static class DatabaseSchemaName
-    {
-        internal const string MAIN = "main";
+        internal static class DatabaseSchemaName
+        {
+            internal const string MAIN = "main";
 
-        internal const string REPLICA = "replica";
+            internal const string SLAVE = "slave";
 
-        internal const string USER = "user";
+            internal const string USER = "user";
 
-        internal const string SYSTEM_ACCOUNT = "system_account";
+            internal const string SYSTEM = "system";
 
-        internal const string SEED_FLAG = "seed_flag";
+            internal const string ROLE = "role";
 
-        internal const string ROLE = "role";
+            internal const string PRODUCT = "product";
 
-        internal const string PRODUCT = "product";
+            internal const string PAYMENT = "payment";
 
-        internal const string PAYMENT = "payment";
+            internal const string ORDER = "order";
 
-        internal const string ORDER = "order";
+            internal const string EVENT = "event";
 
-        internal const string EVENT = "event";
+            internal const string CATEGORY = "category";
 
-        internal const string CATEGORY = "category";
+            internal const string ACCOUNT_STATUS = "account_status";
 
-        internal const string ACCOUNT_STATUS = "account_status";
-
-        internal const string APP_LOG = "app_log";
-
-        internal const string VOUCHER = "voucher";
+            internal const string VOUCHER = "voucher";
+        }
     }
 }

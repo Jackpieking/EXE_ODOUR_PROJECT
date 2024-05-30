@@ -10,7 +10,7 @@ namespace ODour.AppIdentityService.ServiceConfigs;
 /// </summary>
 internal static class CoreServiceConfig
 {
-    internal static void ConfigCore(IServiceCollection services)
+    internal static void Config(IServiceCollection services)
     {
         services
             .AddSingleton<IAccessTokenHandler, AccessTokenHandler>()

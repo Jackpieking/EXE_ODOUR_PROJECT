@@ -7,7 +7,7 @@ namespace ODour.FastEndpointApi.ServiceConfigs;
 /// </summary>
 internal static class ResponseCachingServiceConfig
 {
-    internal static void ConfigResponseCaching(this IServiceCollection services)
+    internal static void Config(IServiceCollection services)
     {
         services.AddResponseCaching();
     }

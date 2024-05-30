@@ -8,7 +8,7 @@ namespace ODour.Application.Share.ServiceConfigs;
 /// </summary>
 internal static class FastEndpointServiceConfig
 {
-    internal static void ConfigFastEndpoint(this IServiceCollection services)
+    internal static void Config(IServiceCollection services)
     {
         services.AddFastEndpoints();
     }

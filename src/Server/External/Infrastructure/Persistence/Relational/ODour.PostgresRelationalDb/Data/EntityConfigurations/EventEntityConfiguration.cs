@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Base.Events;
+using ODour.Domain.Share.Events;
 using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;

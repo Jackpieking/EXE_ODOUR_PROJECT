@@ -21,6 +21,6 @@ public static class DependencyInjection
     /// </param>
     public static void AddApplication(this IServiceCollection services)
     {
-        services.ConfigFastEndpoint();
+        FastEndpointServiceConfig.Config(services: services);
     }
 }

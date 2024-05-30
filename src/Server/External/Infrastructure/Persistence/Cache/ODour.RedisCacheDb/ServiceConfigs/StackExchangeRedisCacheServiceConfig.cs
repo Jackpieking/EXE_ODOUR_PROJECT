@@ -9,10 +9,7 @@ namespace ODour.RedisCacheDb.ServiceConfigs;
 /// </summary>
 internal static class StackExchangeRedisCacheServiceConfig
 {
-    internal static void ConfigStackExchangeRedisCache(
-        IServiceCollection services,
-        IConfiguration configuration
-    )
+    internal static void Config(IServiceCollection services, IConfiguration configuration)
     {
         var option = configuration
             .GetRequiredSection(key: "Cache")

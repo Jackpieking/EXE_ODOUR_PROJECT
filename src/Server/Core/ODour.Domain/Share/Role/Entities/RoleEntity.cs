@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using ODour.Domain.Share.Base.Entities;
+using ODour.Domain.Share.System.Entities;
 using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Share.Role.Entities;
@@ -16,6 +17,8 @@ public sealed class RoleEntity : IdentityRole<Guid>, IEntity
     public IEnumerable<UserRoleEntity> UserRoles { get; set; }
 
     public IEnumerable<RoleClaimEntity> RoleClaims { get; set; }
+
+    public IEnumerable<SystemAccountRoleEntity> SystemAccountRoles { get; set; }
     #endregion
 
     #region MetaData

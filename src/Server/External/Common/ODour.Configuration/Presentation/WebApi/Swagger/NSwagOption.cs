@@ -1,64 +1,65 @@
-namespace ODour.Configuration.Presentation.WebApi.Swagger;
-
-public sealed class NSwagOption
+namespace ODour.Configuration.Presentation.WebApi.Swagger
 {
-    public DocOption Doc { get; set; } = new();
-
-    public bool EnableJWTBearerAuth { get; set; }
-
-    public sealed class DocOption
+    public sealed class NSwagOption
     {
-        public PostProcessOption PostProcess { get; set; } = new();
+        public DocOption Doc { get; set; } = new();
 
-        public AuthOption Auth { get; set; } = new();
+        public bool EnableJWTBearerAuth { get; set; }
 
-        public sealed class PostProcessOption
+        public sealed class DocOption
         {
-            public InfoOption Info { get; set; } = new();
+            public PostProcessOption PostProcess { get; set; } = new();
 
-            public sealed class InfoOption
+            public AuthOption Auth { get; set; } = new();
+
+            public sealed class PostProcessOption
             {
-                public string Version { get; set; }
+                public InfoOption Info { get; set; } = new();
 
-                public string Title { get; set; }
-
-                public string Description { get; set; }
-
-                public ContactOption Contact { get; set; } = new();
-
-                public LicenseOption License { get; set; } = new();
-
-                public sealed class ContactOption
+                public sealed class InfoOption
                 {
-                    public string Name { get; set; }
+                    public string Version { get; set; }
 
-                    public string Email { get; set; }
-                }
+                    public string Title { get; set; }
 
-                public sealed class LicenseOption
-                {
-                    public string Name { get; set; }
+                    public string Description { get; set; }
 
-                    public string Url { get; set; }
+                    public ContactOption Contact { get; set; } = new();
+
+                    public LicenseOption License { get; set; } = new();
+
+                    public sealed class ContactOption
+                    {
+                        public string Name { get; set; }
+
+                        public string Email { get; set; }
+                    }
+
+                    public sealed class LicenseOption
+                    {
+                        public string Name { get; set; }
+
+                        public string Url { get; set; }
+                    }
                 }
             }
-        }
 
-        public sealed class AuthOption
-        {
-            public BearerOption Bearer { get; set; } = new();
-
-            public sealed class BearerOption
+            public sealed class AuthOption
             {
-                public int Type { get; set; }
+                public BearerOption Bearer { get; set; } = new();
 
-                public int In { get; set; }
+                public sealed class BearerOption
+                {
+                    public int Type { get; set; }
 
-                public string Scheme { get; set; }
+                    public int In { get; set; }
 
-                public string BearerFormat { get; set; }
+                    public string Scheme { get; set; }
 
-                public string Description { get; set; }
+                    public string BearerFormat { get; set; }
+
+                    public string Description { get; set; }
+                }
             }
         }
     }

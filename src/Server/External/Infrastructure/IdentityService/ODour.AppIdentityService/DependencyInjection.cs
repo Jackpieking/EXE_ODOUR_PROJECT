@@ -16,6 +16,6 @@ public static class DependencyInjection
     /// </param>
     public static void AddAppIdentityService(this IServiceCollection services)
     {
-        CoreServiceConfig.ConfigCore(services: services);
+        CoreServiceConfig.Config(services: services);
     }
 }

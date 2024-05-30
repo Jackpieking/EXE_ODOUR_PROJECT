@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ODour.Domain.Share.Log.Entities;
+using ODour.Domain.Share.System.Entities;
 using static ODour.PostgresRelationalDb.Common.CommonConstant;
 
 namespace ODour.PostgresRelationalDb.Data.EntityConfigurations;
@@ -12,7 +12,7 @@ internal sealed class AppExceptionLoggingEntityConfiguration
     {
         builder.ToTable(
             name: AppExceptionLoggingEntity.MetaData.TableName,
-            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.APP_LOG}",
+            schema: $"{DatabaseSchemaName.MAIN}.{DatabaseSchemaName.SYSTEM}",
             buildAction: table => table.HasComment(comment: "Contain app exception loggings.")
         );
 

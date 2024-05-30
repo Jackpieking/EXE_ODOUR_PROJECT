@@ -7,7 +7,7 @@ namespace ODour.FastEndpointApi.ServiceConfigs;
 /// </summary>
 public static class AuthorizationServiceConfig
 {
-    internal static void ConfigAuthorization(this IServiceCollection services)
+    internal static void Config(IServiceCollection services)
     {
         services.AddAuthorization();
     }

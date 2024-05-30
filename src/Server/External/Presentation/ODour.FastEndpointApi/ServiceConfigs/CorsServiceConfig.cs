@@ -7,7 +7,7 @@ namespace ODour.FastEndpointApi.ServiceConfigs;
 /// </summary>
 internal static class CorsServiceConfig
 {
-    internal static void ConfigCors(this IServiceCollection services)
+    internal static void Config(IServiceCollection services)
     {
         services.AddCors(setupAction: config =>
         {

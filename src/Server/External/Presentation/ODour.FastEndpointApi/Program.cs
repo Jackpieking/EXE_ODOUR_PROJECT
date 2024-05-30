@@ -4,13 +4,17 @@ using System.Threading;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.JsonWebTokens;
+using ODour.AppBackgroundJob;
 using ODour.AppIdentityService;
 using ODour.Application;
 using ODour.AppNotification;
+using ODour.Configuration.Presentation.WebApi.SecurityKey;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi;
@@ -34,14 +38,15 @@ services.AddOdourPostgresRelationalDb(configuration: configuration);
 services.AddApplication();
 services.AddWebApi(configuration: configuration);
 services.AddAppIdentityService();
-services.AddAppNotification(configuration: configuration);
+services.AddAppNotification();
+services.AddAppBackgroundJob();
 
 var app = builder.Build();
 
 // Data seeding.
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var context = scope.Resolve<ODourContext>();
+    var context = scope.TryResolve<DbContext>();
 
     // Can database be connected.
     var canConnect = await context.Database.CanConnectAsync();
@@ -55,8 +60,10 @@ await using (var scope = app.Services.CreateAsyncScope())
     // Try seed data.
     var seedResult = await EntityDataSeeding.SeedAsync(
         context: context,
-        userManager: scope.Resolve<UserManager<UserEntity>>(),
-        roleManager: scope.Resolve<RoleManager<RoleEntity>>(),
+        userManager: scope.TryResolve<Lazy<UserManager<UserEntity>>>(),
+        roleManager: scope.TryResolve<Lazy<RoleManager<RoleEntity>>>(),
+        dataProtectionProvider: scope.TryResolve<Lazy<IDataProtectionProvider>>(),
+        protectionSecurityKeyOption: scope.TryResolve<Lazy<AppBaseProtectionSecurityKeyOption>>(),
         cancellationToken: CancellationToken.None
     );
 

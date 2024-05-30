@@ -13,10 +13,7 @@ namespace ODour.FastEndpointApi.ServiceConfigs;
 /// </summary>
 internal static class SwaggerServiceConfig
 {
-    internal static void ConfigSwagger(
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
+    internal static void Config(IServiceCollection services, IConfiguration configuration)
     {
         var option = configuration
             .GetRequiredSection(key: "Swagger")

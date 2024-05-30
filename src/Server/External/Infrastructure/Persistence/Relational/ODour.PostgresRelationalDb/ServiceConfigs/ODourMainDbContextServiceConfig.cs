@@ -10,7 +10,7 @@ internal static class ODourMainDbContextServiceConfig
 {
     internal static void Config(IServiceCollection services, IConfiguration configurationManager)
     {
-        services.AddDbContextPool<ODourContext>(
+        services.AddDbContextPool<DbContext, ODourContext>(
             optionsAction: (provider, config) =>
             {
                 var option = configurationManager

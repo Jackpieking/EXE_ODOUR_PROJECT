@@ -15,9 +15,9 @@ namespace ODour.AppIdentityService.Handlers;
 /// </summary>
 internal sealed class AccessTokenHandler : IAccessTokenHandler
 {
-    private readonly JwtAuthenticationOption _jwtAuthenticationOption;
+    private readonly Lazy<JwtAuthenticationOption> _jwtAuthenticationOption;
 
-    public AccessTokenHandler(JwtAuthenticationOption jwtAuthenticationOption)
+    public AccessTokenHandler(Lazy<JwtAuthenticationOption> jwtAuthenticationOption)
     {
         _jwtAuthenticationOption = jwtAuthenticationOption;
     }
@@ -32,11 +32,11 @@ internal sealed class AccessTokenHandler : IAccessTokenHandler
 
         return JwtBearer.CreateToken(options: option =>
         {
-            option.SigningKey = _jwtAuthenticationOption.Jwt.IssuerSigningKey;
+            option.SigningKey = _jwtAuthenticationOption.Value.Jwt.IssuerSigningKey;
             option.ExpireAt = DateTime.UtcNow.AddMinutes(value: 15);
             option.User.Claims.AddRange(collection: claims);
-            option.Audience = _jwtAuthenticationOption.Jwt.ValidAudience;
-            option.Issuer = _jwtAuthenticationOption.Jwt.ValidIssuer;
+            option.Audience = _jwtAuthenticationOption.Value.Jwt.ValidAudience;
+            option.Issuer = _jwtAuthenticationOption.Value.Jwt.ValidIssuer;
             option.SigningAlgorithm = SecurityAlgorithms.HmacSha256;
             option.CompressionAlgorithm = CompressionAlgorithms.Deflate;
             option.User.Claims.Add(

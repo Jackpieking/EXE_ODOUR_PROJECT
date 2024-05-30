@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,11 +14,11 @@ namespace ODour.AppNotification.Handlers;
 
 internal sealed class GoogleSendingMailHandler : ISendingMailHandler
 {
-    private readonly GoogleGmailSendingOption _googleGmailSendingOption;
+    private readonly Lazy<GoogleGmailSendingOption> _googleGmailSendingOption;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
     public GoogleSendingMailHandler(
-        GoogleGmailSendingOption googleGmailSendingOption,
+        Lazy<GoogleGmailSendingOption> googleGmailSendingOption,
         IWebHostEnvironment webHostEnvironment
     )
     {
@@ -54,7 +55,7 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
         var mailBody = new StringBuilder(value: htmlTemplate)
             .Replace(
                 oldValue: "{verify-link}",
-                newValue: _googleGmailSendingOption.WebUrl + verifyLink
+                newValue: _googleGmailSendingOption.Value.WebUrl + verifyLink
             )
             .ToString();
 
@@ -144,14 +145,14 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
             new()
             {
                 Sender = new(
-                    name: _googleGmailSendingOption.DisplayName,
-                    address: _googleGmailSendingOption.Mail
+                    name: _googleGmailSendingOption.Value.DisplayName,
+                    address: _googleGmailSendingOption.Value.Mail
                 ),
                 From =
                 {
                     new MailboxAddress(
-                        name: _googleGmailSendingOption.DisplayName,
-                        address: _googleGmailSendingOption.Mail
+                        name: _googleGmailSendingOption.Value.DisplayName,
+                        address: _googleGmailSendingOption.Value.Mail
                     )
                 },
                 To = { MailboxAddress.Parse(text: mailContent.To) },
@@ -164,15 +165,15 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
             using SmtpClient smtp = new();
 
             await smtp.ConnectAsync(
-                host: _googleGmailSendingOption.Host,
-                port: _googleGmailSendingOption.Port,
+                host: _googleGmailSendingOption.Value.Host,
+                port: _googleGmailSendingOption.Value.Port,
                 options: SecureSocketOptions.StartTlsWhenAvailable,
                 cancellationToken: cancellationToken
             );
 
             await smtp.AuthenticateAsync(
-                userName: _googleGmailSendingOption.Mail,
-                password: _googleGmailSendingOption.Password,
+                userName: _googleGmailSendingOption.Value.Mail,
+                password: _googleGmailSendingOption.Value.Password,
                 cancellationToken: cancellationToken
             );
 
