@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace ODour.Application.Share.Tokens.AccessToken;
+namespace ODour.Application.Share.Tokens;
 
 /// <summary>
 ///     Represent jwt generator interface.

@@ -23,18 +23,4 @@ public interface IDataProtectionHandler
     ///     The plain text.
     /// </returns>
     string Unprotect(string ciphertext);
-
-    /// <summary>
-    ///     Encrypts the plain text with key.
-    /// </summary>
-    /// <param name="key">
-    ///     The key.
-    /// </param>
-    /// <param name="plaintext">
-    ///     The plain text.
-    /// </param>
-    /// <returns>
-    ///     The encrypted text.
-    /// </returns>
-    string Protect(string key, string plaintext);
 }

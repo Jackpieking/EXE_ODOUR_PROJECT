@@ -2,8 +2,7 @@
 using ODour.AppIdentityService.Handlers;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.DataProtection;
-using ODour.Application.Share.Tokens.AccessToken;
-using ODour.Application.Share.Tokens.RefreshToken;
+using ODour.Application.Share.Tokens;
 
 namespace ODour.AppIdentityService.ServiceConfigs;
 
@@ -22,6 +21,9 @@ internal static class CoreServiceConfig
             .MakeSingletonLazy<IRefreshTokenHandler>()
             // ====
             .AddSingleton<IDataProtectionHandler, AppDataProtectionHandler>()
-            .MakeSingletonLazy<IDataProtectionHandler>();
+            .MakeSingletonLazy<IDataProtectionHandler>()
+            // ====
+            .AddSingleton<IAdminAccessKeyHandler, AppAdminAccessKeyHandler>()
+            .MakeSingletonLazy<IAdminAccessKeyHandler>();
     }
 }

@@ -1,4 +1,4 @@
-namespace ODour.Application.Share.Tokens.RefreshToken;
+namespace ODour.Application.Share.Tokens;
 
 /// <summary>
 ///     Represent refresh token generator interface.

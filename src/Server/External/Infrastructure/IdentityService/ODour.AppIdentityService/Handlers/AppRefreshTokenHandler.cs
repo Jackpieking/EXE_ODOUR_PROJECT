@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using ODour.Application.Share.Tokens.RefreshToken;
+using ODour.Application.Share.Tokens;
 
 namespace ODour.AppIdentityService.Handlers;
 

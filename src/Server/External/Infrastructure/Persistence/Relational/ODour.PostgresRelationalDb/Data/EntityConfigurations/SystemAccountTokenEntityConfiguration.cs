@@ -16,7 +16,12 @@ internal sealed class SystemAccountTokenEntityConfiguration
             buildAction: table => table.HasComment(comment: "Contain system account tokens.")
         );
 
-        builder.HasKey(keyExpression: builder => builder.SystemAccountId);
+        builder.HasKey(keyExpression: builder => new
+        {
+            builder.SystemAccountId,
+            builder.LoginProvider,
+            builder.Name
+        });
 
         builder
             .Property(propertyExpression: builder => builder.LoginProvider)

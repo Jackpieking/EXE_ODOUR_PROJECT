@@ -766,7 +766,15 @@ namespace ODour.PostgresRelationalDb.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SystemAccountTokens", x => x.SystemAccountId);
+                    table.PrimaryKey(
+                        "PK_SystemAccountTokens",
+                        x => new
+                        {
+                            x.SystemAccountId,
+                            x.LoginProvider,
+                            x.Name
+                        }
+                    );
                     table.ForeignKey(
                         name: "FK_SystemAccountTokens_SystemAccounts_SystemAccountId",
                         column: x => x.SystemAccountId,

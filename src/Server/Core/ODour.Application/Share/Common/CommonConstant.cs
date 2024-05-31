@@ -24,5 +24,7 @@ public static class CommonConstant
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
+
+        public const string DefaultStringSeparator = "<||>";
     }
 }

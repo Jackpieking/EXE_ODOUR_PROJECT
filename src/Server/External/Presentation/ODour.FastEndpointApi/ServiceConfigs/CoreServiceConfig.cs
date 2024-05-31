@@ -15,6 +15,11 @@ internal static class CoreServiceConfig
 {
     internal static void Config(IServiceCollection services, IConfiguration configuration)
     {
+        var a = configuration
+            .GetRequiredSection(key: "SecurityKey")
+            .GetRequiredSection(key: "AppBaseProtection")
+            .Get<AppBaseProtectionSecurityKeyOption>();
+
         // Add config from json.
         services
             .AddSingleton(
@@ -38,7 +43,15 @@ internal static class CoreServiceConfig
                     .GetRequiredSection(key: "AppBaseProtection")
                     .Get<AppBaseProtectionSecurityKeyOption>()
             )
-            .MakeSingletonLazy<AppBaseProtectionSecurityKeyOption>();
+            .MakeSingletonLazy<AppBaseProtectionSecurityKeyOption>()
+            // ====
+            .AddSingleton(
+                implementationInstance: configuration
+                    .GetRequiredSection(key: "SecurityKey")
+                    .GetRequiredSection(key: "AdminAccess")
+                    .Get<AdminAccessSecurityKeyOption>()
+            )
+            .MakeSingletonLazy<AdminAccessSecurityKeyOption>();
 
         // Config other services.
         services.MakeSingletonLazy<IDataProtectionProvider>();

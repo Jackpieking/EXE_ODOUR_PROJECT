@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using FastEndpoints.Security;
 using Microsoft.IdentityModel.Tokens;
-using ODour.Application.Share.Tokens.AccessToken;
+using ODour.Application.Share.Tokens;
 using ODour.Configuration.Presentation.WebApi.Authentication;
 
 namespace ODour.AppIdentityService.Handlers;

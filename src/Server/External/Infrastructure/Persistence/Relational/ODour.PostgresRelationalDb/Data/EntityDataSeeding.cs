@@ -828,11 +828,11 @@ public static class EntityDataSeeding
         var bannedUserId = Guid.Parse(input: "9a2b6683-a16e-4270-a23c-3e09a6e27345");
 
         var testUserProtector = protectionProvider.CreateProtector(
-            purpose: $"{protectionSecurityKeyOption.Value}<{testUserId}>"
+            purpose: $"{protectionSecurityKeyOption.Value}{App.DefaultStringSeparator}{testUserId}"
         );
 
         var bannedUserProtector = protectionProvider.CreateProtector(
-            purpose: $"{protectionSecurityKeyOption.Value}<{bannedUserId}>"
+            purpose: $"{protectionSecurityKeyOption.Value}{App.DefaultStringSeparator}{bannedUserId}"
         );
 
         var newUsers = new List<UserEntity>
@@ -922,7 +922,7 @@ public static class EntityDataSeeding
         const string SystemAccountAddedEventType = "SystemAccountAdded";
 
         var protector = protectionProvider.CreateProtector(
-            purpose: $"{protectionSecurityKeyOption.Value}<{AdminId}>"
+            purpose: $"{protectionSecurityKeyOption.Value}{App.DefaultStringSeparator}{AdminId}"
         );
 
         var admin = new SystemAccountEntity

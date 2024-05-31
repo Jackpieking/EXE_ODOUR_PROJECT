@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main.Repository.Auth;
 using ODour.Domain.Share.AccountStatus.Entities;
+using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.System.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.Auth;
@@ -18,35 +20,45 @@ internal sealed class RegisterAsAdminRepository : IRegisterAsAdminRepository
         _context = context;
     }
 
-    public async Task<bool> CreateAndAddUserToRoleCommandAsync(
-        SystemAccountEntity newUser,
-        string password,
+    public async Task<bool> CreateAdminCommandAsync(
+        SystemAccountEntity newAdmin,
+        List<SystemAccountRoleEntity> adminRoles,
+        List<SystemAccountTokenEntity> adminTokens,
         CancellationToken ct
     )
     {
-        var executedTransactionResult = false;
+        try
+        {
+            await _context
+                .Value.Set<SystemAccountRoleEntity>()
+                .AddRangeAsync(entities: adminRoles, cancellationToken: ct);
 
-        await _context
-            .Value.Database.CreateExecutionStrategy()
-            .ExecuteAsync(operation: async () =>
-            {
-                await using var dbTransaction = await _context.Value.Database.BeginTransactionAsync(
-                    cancellationToken: ct
-                );
+            await _context
+                .Value.Set<SystemAccountTokenEntity>()
+                .AddRangeAsync(entities: adminTokens, cancellationToken: ct);
 
-                try
-                {
-                    await dbTransaction.CommitAsync(cancellationToken: ct);
+            await _context
+                .Value.Set<SystemAccountEntity>()
+                .AddAsync(entity: newAdmin, cancellationToken: ct);
 
-                    executedTransactionResult = true;
-                }
-                catch
-                {
-                    await dbTransaction.RollbackAsync(cancellationToken: ct);
-                }
-            });
+            await _context.Value.SaveChangesAsync(cancellationToken: ct);
+        }
+        catch
+        {
+            return false;
+        }
 
-        return executedTransactionResult;
+        return true;
+    }
+
+    public Task<RoleEntity> GetAdminRoleQueryAsync(CancellationToken ct)
+    {
+        return _context
+            .Value.Set<RoleEntity>()
+            .AsNoTracking()
+            .Where(predicate: entity => entity.Name.Equals("admin"))
+            .Select(selector: entity => new RoleEntity { Id = entity.Id })
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
     public Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct)

@@ -10,7 +10,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240530175255_M1_Init_Db")]
+    [Migration("20240531170626_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
@@ -661,23 +661,21 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<Guid>("SystemAccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("TIMESTAMPTZ");
-
                     b.Property<string>("LoginProvider")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)");
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("TIMESTAMPTZ");
 
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("SystemAccountId");
+                    b.HasKey("SystemAccountId", "LoginProvider", "Name");
 
                     b.ToTable("SystemAccountTokens", "main.system", t =>
                         {

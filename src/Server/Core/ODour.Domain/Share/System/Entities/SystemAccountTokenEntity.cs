@@ -9,9 +9,11 @@ namespace ODour.Domain.Share.System.Entities
         public Guid SystemAccountId { get; set; }
         #endregion
 
+        #region PrimaryKeys
         public string LoginProvider { get; set; }
 
         public string Name { get; set; }
+        #endregion
 
         public string Value { get; set; }
 

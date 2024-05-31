@@ -21,9 +21,7 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     {
         get
         {
-            _registerAsUserRepository ??= new RegisterAsUserRepository(context: _context);
-
-            return _registerAsUserRepository;
+            return _registerAsUserRepository ??= new RegisterAsUserRepository(context: _context);
         }
     }
 
@@ -31,9 +29,7 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     {
         get
         {
-            _registerAsAdminRepository ??= new RegisterAsAdminRepository(context: _context);
-
-            return _registerAsAdminRepository;
+            return _registerAsAdminRepository ??= new RegisterAsAdminRepository(context: _context);
         }
     }
 }

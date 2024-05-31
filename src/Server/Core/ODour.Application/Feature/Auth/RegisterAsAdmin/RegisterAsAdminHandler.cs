@@ -4,11 +4,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.WebUtilities;
 using ODour.Application.Share.Common;
+using ODour.Application.Share.DataProtection;
 using ODour.Application.Share.Features;
 using ODour.Application.Share.Mail;
+using ODour.Application.Share.Tokens;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.System.Entities;
 
@@ -19,15 +20,20 @@ internal sealed class RegisterAsAdminHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
-    private readonly Lazy<IDataProtectionProvider> dataProtectionProvider;
+    private readonly Lazy<IDataProtectionHandler> _dataProtectionHandler;
+    private readonly Lazy<IAdminAccessKeyHandler> _adminAccessKeyHandler;
 
     public RegisterAsAdminHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<ISendingMailHandler> sendingMailHandler
+        Lazy<ISendingMailHandler> sendingMailHandler,
+        Lazy<IDataProtectionHandler> dataProtectionHandler,
+        Lazy<IAdminAccessKeyHandler> adminAccessKeyHandler
     )
     {
         _unitOfWork = unitOfWork;
         _sendingMailHandler = sendingMailHandler;
+        _dataProtectionHandler = dataProtectionHandler;
+        _adminAccessKeyHandler = adminAccessKeyHandler;
     }
 
     /// <summary>
@@ -49,6 +55,14 @@ internal sealed class RegisterAsAdminHandler
         CancellationToken ct
     )
     {
+        #region Validation
+        // If user is not granted with admin access key.
+        if (!command.AdminConfirmedKey.Equals(value: _adminAccessKeyHandler.Value.Get()))
+        {
+            return new() { StatusCode = RegisterAsAdminResponseStatusCode.FORBIDDEN };
+        }
+        #endregion
+
         // Does user exist by email.
         var isUserFound =
             await _unitOfWork.Value.RegisterAsAdminRepository.IsUserFoundByNormalizedEmailQueryAsync(
@@ -64,89 +78,166 @@ internal sealed class RegisterAsAdminHandler
 
         // Get account status for new user.
         var newAccountStatus =
-            await _unitOfWork.Value.RegisterAsUserRepository.GetPendingConfirmedStatusQueryAsync(
+            await _unitOfWork.Value.RegisterAsAdminRepository.GetPendingConfirmedStatusQueryAsync(
                 ct: ct
             );
 
-        // Completing new user.
-        InitAdmin(command: command, newAccountStatus: newAccountStatus.Id);
+        // Get admin role include id for new user.
+        var adminRole = await _unitOfWork.Value.RegisterAsAdminRepository.GetAdminRoleQueryAsync(
+            ct: ct
+        );
 
-        // // Create and add user to role.
-        // var dbResult =
-        //     await _unitOfWork.Value.RegisterAsUserRepository.CreateAndAddUserToRoleCommandAsync(
-        //         newUser: newUser,
-        //         password: command.Password,
-        //         userManager: _userManager.Value,
-        //         ct: ct
-        //     );
+        // Init new admin id.
+        var newAdminId = Guid.NewGuid();
 
-        // // Cannot create or add user to role.
-        // if (!dbResult)
-        // {
-        //     return new() { StatusCode = RegisterAsAdminResponseStatusCode.OPERATION_FAIL };
-        // }
+        // Get admin email confirmed tokens.
+        var adminEmailConfirmedTokens = GenerateAdminEmailConfirmedToken(adminId: newAdminId);
 
-        // // Getting mail content and sending.
-        // var mainAccountConfirmedCode = WebEncoders.Base64UrlEncode(
-        //     input: Encoding.UTF8.GetBytes(
-        //         s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
-        //     )
-        // );
+        // Add admin to database.
+        var dbResult = await _unitOfWork.Value.RegisterAsAdminRepository.CreateAdminCommandAsync(
+            newAdmin: InitAdmin(
+                command: command,
+                adminId: newAdminId,
+                newUserAccountStatusId: newAccountStatus.Id
+            ),
+            adminRoles: new List<SystemAccountRoleEntity>
+            {
+                new() { RoleId = adminRole.Id, SystemAccountId = newAdminId }
+            },
+            adminTokens: new List<SystemAccountTokenEntity>
+            {
+                adminEmailConfirmedTokens["MainToken"],
+                adminEmailConfirmedTokens["AlternateToken"]
+            },
+            ct: ct
+        );
 
-        // var alternateAccountConfirmedCode = WebEncoders.Base64UrlEncode(
-        //     input: Encoding.UTF8.GetBytes(
-        //         s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
-        //     )
-        // );
+        // Cannot add.
+        if (!dbResult)
+        {
+            return new() { StatusCode = RegisterAsAdminResponseStatusCode.OPERATION_FAIL };
+        }
 
-        // var mainContent =
-        //     await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
-        //         to: command.Email,
-        //         subject: "Xác nhận tài khoản",
-        //         mainLink: mainAccountConfirmedCode,
-        //         alternateLink: alternateAccountConfirmedCode,
-        //         cancellationToken: ct
-        //     );
-
-        // // Try to send mail.
-        // var sendingUserConfirmationCommand = new BackgroundJob.SendingUserConfirmationCommand
-        // {
-        //     MailContent = mainContent
-        // };
-
-        // await sendingUserConfirmationCommand.QueueJobAsync(
-        //     executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
-        //     expireOn: DateTime.UtcNow.AddMinutes(value: 5),
-        //     ct: ct
-        // );
+        // Sending add confirmation mail.
+        await SendingUserConfirmationMailAsync(
+            command: command,
+            emailConfirmedTokens: adminEmailConfirmedTokens,
+            ct: ct
+        );
 
         return new() { StatusCode = RegisterAsAdminResponseStatusCode.OPERATION_SUCCESS };
     }
 
-    /// <summary>
-    ///     Finishes filling the user with default
-    ///     values for the newly created user.
-    /// </summary>
-    private static SystemAccountEntity InitAdmin(
+    private SystemAccountEntity InitAdmin(
         RegisterAsAdminRequest command,
-        Guid newAccountStatus
+        Guid newUserAccountStatusId,
+        Guid adminId
     )
     {
+        var upperCaseEmail = command.Email.ToUpper();
+
         return new()
         {
-            Id = Guid.NewGuid(),
+            Id = adminId,
             UserName = command.Email,
-            NormalizedUserName = command.Email.ToUpper(),
+            NormalizedUserName = upperCaseEmail,
             Email = command.Email,
-            NormalizedEmail = command.Email.ToUpper(),
-            //PasswordHash = protector.Protect(plaintext: "Admin123@"),
+            NormalizedEmail = upperCaseEmail,
+            PasswordHash = _dataProtectionHandler.Value.Protect(
+                plaintext: $"{upperCaseEmail}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
+            ),
             AccessFailedCount = default,
             LockoutEnd = CommonConstant.App.MinTimeInUTC,
-            AccountStatusId = newAccountStatus,
-            SystemAccountRoles = new List<SystemAccountRoleEntity>
-            {
-                new() { RoleId = Guid.Parse(input: "c95f4aae-2a41-4c76-9cc4-f1d632409525"), }
-            }
+            AccountStatusId = newUserAccountStatusId
         };
+    }
+
+    private Dictionary<string, SystemAccountTokenEntity> GenerateAdminEmailConfirmedToken(
+        Guid adminId
+    )
+    {
+        Dictionary<string, SystemAccountTokenEntity> emailConfirmedTokens = new(capacity: 2);
+
+        // Add new token for email confirmed.
+        emailConfirmedTokens.Add(
+            key: "MainToken",
+            value: new()
+            {
+                SystemAccountId = adminId,
+                Name = "AdminEmailConfirmedToken",
+                Value = WebEncoders.Base64UrlEncode(
+                    input: Encoding.UTF8.GetBytes(
+                        s: _dataProtectionHandler.Value.Protect(
+                            plaintext: $"main{CommonConstant.App.DefaultStringSeparator}{adminId}"
+                        )
+                    )
+                ),
+                ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
+                LoginProvider = Guid.NewGuid().ToString()
+            }
+        );
+
+        emailConfirmedTokens.Add(
+            key: "AlternateToken",
+            value: new()
+            {
+                SystemAccountId = adminId,
+                Name = "AdminEmailConfirmedToken",
+                Value = WebEncoders.Base64UrlEncode(
+                    input: Encoding.UTF8.GetBytes(
+                        s: _dataProtectionHandler.Value.Protect(
+                            plaintext: $"alternate{CommonConstant.App.DefaultStringSeparator}{adminId}"
+                        )
+                    )
+                ),
+                ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
+                LoginProvider = Guid.NewGuid().ToString()
+            }
+        );
+
+        return emailConfirmedTokens;
+    }
+
+    /// <summary>
+    ///     Sending user confirmation mail.
+    /// </summary>
+    /// <param name="command">
+    ///     Request model.
+    /// </param>
+    /// <param name="emailConfirmedTokens">
+    ///     Email confirmed tokens.
+    /// </param>
+    /// <param name="ct">
+    ///     The token to monitor cancellation requests.
+    /// </param>
+    /// <returns>
+    ///     Nothing
+    /// </returns>
+    private async Task SendingUserConfirmationMailAsync(
+        RegisterAsAdminRequest command,
+        Dictionary<string, SystemAccountTokenEntity> emailConfirmedTokens,
+        CancellationToken ct
+    )
+    {
+        var mainContent =
+            await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
+                to: command.Email,
+                subject: "Xác nhận tài khoản",
+                mainLink: emailConfirmedTokens["MainToken"].Value,
+                alternateLink: emailConfirmedTokens["AlternateToken"].Value,
+                cancellationToken: ct
+            );
+
+        // Try to send mail.
+        var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
+        {
+            MailContent = mainContent
+        };
+
+        await sendingAnyEmailCommand.QueueJobAsync(
+            executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
+            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+            ct: ct
+        );
     }
 }

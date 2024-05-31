@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.DataProtection;
 using ODour.Application.Share.DataProtection;
 using ODour.Configuration.Presentation.WebApi.SecurityKey;
@@ -8,46 +7,33 @@ namespace ODour.AppIdentityService.Handlers;
 
 internal sealed class AppDataProtectionHandler : IDataProtectionHandler
 {
-    private readonly Dictionary<string, IDataProtector> _pairs = new(capacity: default);
-    private readonly Lazy<IDataProtectionProvider> _dataProtectionProvider;
-    private readonly Lazy<AppBaseProtectionSecurityKeyOption> _options;
+    private readonly IDataProtector _protector;
 
     public AppDataProtectionHandler(
         Lazy<IDataProtectionProvider> dataProtectionProvider,
         Lazy<AppBaseProtectionSecurityKeyOption> options
     )
     {
-        _pairs.Add(
-            _options.Value.Value,
-            _dataProtectionProvider.Value.CreateProtector(purpose: _options.Value.Value)
-        );
-        _dataProtectionProvider = dataProtectionProvider;
-        _options = options;
+        _protector = dataProtectionProvider.Value.CreateProtector(purpose: options.Value.Value);
     }
 
     public string Protect(string plaintext)
     {
-        return _pairs[_options.Value.Value].Protect(plaintext: plaintext);
-    }
-
-    public string Protect(string key, string plaintext)
-    {
-        var encryptKey = $"{_options.Value.Value}<{key}>";
-
-        if (_pairs.TryGetValue(key: encryptKey, value: out var dataProtector))
+        if (string.IsNullOrWhiteSpace(value: plaintext))
         {
-            return dataProtector.Protect(plaintext: plaintext);
+            return default;
         }
 
-        var newProtector = _dataProtectionProvider.Value.CreateProtector(purpose: encryptKey);
-
-        _pairs.Add(key: encryptKey, value: newProtector);
-
-        return newProtector.Protect(plaintext: plaintext);
+        return _protector.Protect(plaintext: plaintext);
     }
 
     public string Unprotect(string ciphertext)
     {
-        return _pairs[_options.Value.Value].Unprotect(protectedData: ciphertext);
+        if (string.IsNullOrWhiteSpace(value: ciphertext))
+        {
+            return default;
+        }
+
+        return _protector.Unprotect(protectedData: ciphertext);
     }
 }
