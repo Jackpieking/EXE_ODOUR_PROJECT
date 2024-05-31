@@ -108,39 +108,8 @@ internal sealed class RegisterAsUserHandler
             return new() { StatusCode = RegisterAsUserResponseStatusCode.OPERATION_FAIL };
         }
 
-        // Getting mail content and sending.
-        var mainAccountConfirmedCode = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(
-                s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
-            )
-        );
-
-        var alternateAccountConfirmedCode = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(
-                s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
-            )
-        );
-
-        var mainContent =
-            await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
-                to: command.Email,
-                subject: "Xác nhận tài khoản",
-                mainLink: mainAccountConfirmedCode,
-                alternateLink: alternateAccountConfirmedCode,
-                cancellationToken: ct
-            );
-
-        // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
-        {
-            MailContent = mainContent
-        };
-
-        await sendingAnyEmailCommand.QueueJobAsync(
-            executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
-            ct: ct
-        );
+        // Sending user confirmation mail.
+        await SendingUserConfirmationMailAsync(newUser: newUser, command: command, ct: ct);
 
         return new() { StatusCode = RegisterAsUserResponseStatusCode.OPERATION_SUCCESS };
     }
@@ -185,6 +154,15 @@ internal sealed class RegisterAsUserHandler
     /// <param name="newUser">
     ///     The newly created user.
     /// </param>
+    /// <param name="command">
+    ///     Request model.
+    /// </param>
+    /// <param name="newAccountStatus">
+    ///     The new account status.
+    /// </param>
+    /// <returns>
+    ///     Nothing
+    /// </returns>
     private static void FinishFillingUser(
         UserEntity newUser,
         RegisterAsUserRequest command,
@@ -203,5 +181,61 @@ internal sealed class RegisterAsUserHandler
             IsTemporarilyRemoved = false,
             AccountStatusId = newAccountStatus
         };
+    }
+
+    /// <summary>
+    ///     Sending user confirmation mail.
+    /// </summary>
+    /// <param name="command">
+    ///     Request model.
+    /// </param>
+    /// <param name="newUser">
+    ///     New user.
+    /// </param>
+    /// <param name="ct">
+    ///     The token to monitor cancellation requests.
+    /// </param>
+    /// <returns>
+    ///     Nothing
+    /// </returns>
+    private async Task SendingUserConfirmationMailAsync(
+        RegisterAsUserRequest command,
+        UserEntity newUser,
+        CancellationToken ct
+    )
+    {
+        // Getting mail content and sending.
+        var mainAccountConfirmedCode = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(
+                s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
+            )
+        );
+
+        var alternateAccountConfirmedCode = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(
+                s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
+            )
+        );
+
+        var mainContent =
+            await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
+                to: command.Email,
+                subject: "Xác nhận tài khoản",
+                mainLink: mainAccountConfirmedCode,
+                alternateLink: alternateAccountConfirmedCode,
+                cancellationToken: ct
+            );
+
+        // Try to send mail.
+        var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
+        {
+            MailContent = mainContent
+        };
+
+        await sendingAnyEmailCommand.QueueJobAsync(
+            executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
+            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+            ct: ct
+        );
     }
 }
