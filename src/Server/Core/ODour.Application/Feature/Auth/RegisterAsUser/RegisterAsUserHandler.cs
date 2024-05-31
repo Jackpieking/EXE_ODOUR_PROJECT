@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using ODour.Application.Feature.Auth.RegisterAsUser.BackgroundJob;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.Features;
 using ODour.Application.Share.Mail;
@@ -132,7 +131,7 @@ internal sealed class RegisterAsUserHandler
             );
 
         // Try to send mail.
-        var sendingAnyEmailCommand = new SendingUserConfirmationCommand
+        var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
             MailContent = mainContent
         };
