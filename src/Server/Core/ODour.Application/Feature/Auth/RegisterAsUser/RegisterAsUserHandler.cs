@@ -2,8 +2,11 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using ODour.Application.Feature.Auth.RegisterAsUser.BackgroundJob;
+using ODour.Application.Share.Common;
 using ODour.Application.Share.Features;
 using ODour.Application.Share.Mail;
 using ODour.Domain.Feature.Main;
@@ -16,7 +19,6 @@ internal sealed class RegisterAsUserHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
-
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
     public RegisterAsUserHandler(
@@ -108,7 +110,13 @@ internal sealed class RegisterAsUserHandler
         }
 
         // Getting mail content and sending.
-        var accountConfirmedCode = WebEncoders.Base64UrlEncode(
+        var mainAccountConfirmedCode = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(
+                s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
+            )
+        );
+
+        var alternateAccountConfirmedCode = WebEncoders.Base64UrlEncode(
             input: Encoding.UTF8.GetBytes(
                 s: await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)
             )
@@ -118,25 +126,22 @@ internal sealed class RegisterAsUserHandler
             await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
                 to: command.Email,
                 subject: "Xác nhận tài khoản",
-                mainVerifyLink: accountConfirmedCode,
+                mainLink: mainAccountConfirmedCode,
+                alternateLink: alternateAccountConfirmedCode,
                 cancellationToken: ct
             );
 
-        var mailSendingResult = await _sendingMailHandler.Value.SendAsync(
-            mailContent: mainContent,
-            cancellationToken: ct
-        );
-
-        if (!mailSendingResult)
+        // Try to send mail.
+        var sendingAnyEmailCommand = new SendingUserConfirmationCommand
         {
-            // Delete user if sending mail fail.
-            await _unitOfWork.Value.RegisterAsUserRepository.RemoveUserCommandAsync(
-                newUser: newUser,
-                userManager: _userManager.Value
-            );
+            MailContent = mainContent
+        };
 
-            return new() { StatusCode = RegisterAsUserResponseStatusCode.OPERATION_FAIL };
-        }
+        await sendingAnyEmailCommand.QueueJobAsync(
+            executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
+            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+            ct: ct
+        );
 
         return new() { StatusCode = RegisterAsUserResponseStatusCode.OPERATION_SUCCESS };
     }
@@ -194,7 +199,7 @@ internal sealed class RegisterAsUserHandler
             UserId = newUser.Id,
             FirstName = string.Empty,
             LastName = string.Empty,
-            AvatarUrl = string.Empty,
+            AvatarUrl = CommonConstant.App.DefaultAvatarUrl,
             Gender = true,
             IsTemporarilyRemoved = false,
             AccountStatusId = newAccountStatus

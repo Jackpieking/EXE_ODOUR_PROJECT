@@ -9,7 +9,7 @@ namespace ODour.PostgresRelationalDb.Main;
 internal sealed class MainUnitOfWork : IMainUnitOfWork
 {
     private IRegisterAsUserRepository _registerAsUserRepository;
-    private Lazy<DbContext> _context;
+    private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
     {

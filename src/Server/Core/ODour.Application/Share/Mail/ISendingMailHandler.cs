@@ -17,7 +17,10 @@ public interface ISendingMailHandler
     /// <param name="subject">
     ///     Mail subject
     /// </param>
-    /// <param name="mainVerifyLink">
+    /// <param name="mainLink">
+    ///     Main mail verification link.
+    /// </param>
+    /// <param name="alternateLink">
     ///     Main mail verification link.
     /// </param>
     /// <param name="cancellationToken">
@@ -31,7 +34,8 @@ public interface ISendingMailHandler
     Task<AppMailContent> GetUserAccountConfirmationMailContentAsync(
         string to,
         string subject,
-        string mainVerifyLink,
+        string mainLink,
+        string alternateLink,
         CancellationToken cancellationToken
     );
 

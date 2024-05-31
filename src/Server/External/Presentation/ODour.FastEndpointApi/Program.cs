@@ -81,6 +81,12 @@ app.UseAppExceptionHandler()
     .UseAuthorization()
     .UseResponseCaching()
     .UseFastEndpoints()
+    .UseJobQueues(options: option =>
+    {
+        option.ExecutionTimeLimit = TimeSpan.FromSeconds(value: 12);
+        option.MaxConcurrency = 1;
+        option.StorageProbeDelay = TimeSpan.FromSeconds(value: 3);
+    })
     .UseSwaggerGen()
     .UseSwaggerUi(configure: options =>
     {

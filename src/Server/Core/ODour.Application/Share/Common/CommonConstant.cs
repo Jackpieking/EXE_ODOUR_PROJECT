@@ -14,6 +14,9 @@ public static class CommonConstant
             input: "7b513726-d8a9-4849-b797-4e31a34c378f"
         );
 
+        public const string DefaultAvatarUrl =
+            "https://t4.ftcdn.net/jpg/05/49/98/39/360_F_549983970_bRCkYfk0P6PP5fKbMhZMIb07mCJ6esXL.jpg";
+
         public static readonly JsonSerializerOptions DefaultJsonSerializerOptions =
             new()
             {

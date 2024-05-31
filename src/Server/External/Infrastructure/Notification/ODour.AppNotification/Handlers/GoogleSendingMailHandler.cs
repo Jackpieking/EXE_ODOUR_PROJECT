@@ -29,22 +29,24 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
     public async Task<AppMailContent> GetUserAccountConfirmationMailContentAsync(
         string to,
         string subject,
-        string verifyLink,
+        string mainLink,
+        string alternateLink,
         CancellationToken cancellationToken
     )
     {
         if (
             string.IsNullOrWhiteSpace(value: to)
             || string.IsNullOrWhiteSpace(value: subject)
-            || string.IsNullOrWhiteSpace(value: verifyLink)
+            || string.IsNullOrWhiteSpace(value: mainLink)
+            || string.IsNullOrWhiteSpace(value: alternateLink)
         )
         {
             return default;
         }
 
         var mailTemplatePath = Path.Combine(
-            path1: "CreateUserAccount",
-            path2: "ConfirmUserAccountByEmail.html"
+            path1: "ODOUR_USER_CONFIRMATION",
+            path2: "ODOUR_USER_CONFIRMATION_EMAIL_TEMPLATE.html"
         );
 
         var htmlTemplate = await ReadTemplateAsync(
@@ -54,9 +56,14 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
 
         var mailBody = new StringBuilder(value: htmlTemplate)
             .Replace(
-                oldValue: "{verify-link}",
-                newValue: _googleGmailSendingOption.Value.WebUrl + verifyLink
+                oldValue: "{main_link}",
+                newValue: _googleGmailSendingOption.Value.WebUrl + mainLink
             )
+            .Replace(
+                oldValue: "{alternate_link}",
+                newValue: _googleGmailSendingOption.Value.WebUrl + alternateLink
+            )
+            .Replace(oldValue: "{app_email}", newValue: to)
             .ToString();
 
         return new()
