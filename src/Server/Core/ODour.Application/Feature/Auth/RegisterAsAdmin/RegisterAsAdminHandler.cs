@@ -160,6 +160,8 @@ internal sealed class RegisterAsAdminHandler
     {
         Dictionary<string, SystemAccountTokenEntity> emailConfirmedTokens = new(capacity: 2);
 
+        var tokenId = Guid.NewGuid();
+
         // Add new token for email confirmed.
         emailConfirmedTokens.Add(
             key: "MainToken",
@@ -167,17 +169,15 @@ internal sealed class RegisterAsAdminHandler
             {
                 SystemAccountId = adminId,
                 Name = "EmailConfirmedToken",
-                Value = WebEncoders.Base64UrlEncode(
-                    input: Encoding.UTF8.GetBytes(
-                        s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{adminId}"
-                        )
-                    )
+                Value = _dataProtectionHandler.Value.Protect(
+                    plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{tokenId}"
                 ),
                 ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = Guid.NewGuid().ToString()
+                LoginProvider = tokenId.ToString()
             }
         );
+
+        tokenId = Guid.NewGuid();
 
         emailConfirmedTokens.Add(
             key: "AlternateToken",
@@ -185,15 +185,11 @@ internal sealed class RegisterAsAdminHandler
             {
                 SystemAccountId = adminId,
                 Name = "EmailConfirmedToken",
-                Value = WebEncoders.Base64UrlEncode(
-                    input: Encoding.UTF8.GetBytes(
-                        s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{adminId}"
-                        )
-                    )
+                Value = _dataProtectionHandler.Value.Protect(
+                    plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{tokenId}"
                 ),
                 ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = Guid.NewGuid().ToString()
+                LoginProvider = tokenId.ToString()
             }
         );
 
@@ -221,15 +217,22 @@ internal sealed class RegisterAsAdminHandler
         CancellationToken ct
     )
     {
+        var mainToken = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["MainToken"].Value)
+        );
+
+        var alternateToken = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["AlternateToken"].Value)
+        );
+
         var mainContent =
             await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
                 to: command.Email,
                 subject: "Xác nhận tài khoản",
-                mainLink: emailConfirmedTokens["MainToken"].Value,
-                alternateLink: emailConfirmedTokens["AlternateToken"].Value,
+                mainLink: $"auth/confirmEmail?token={mainToken}",
+                alternateLink: $"auth/confirmEmail?token={alternateToken}",
                 cancellationToken: ct
             );
-
         // Try to send mail.
         var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
@@ -237,7 +240,6 @@ internal sealed class RegisterAsAdminHandler
         };
 
         await sendingAnyEmailCommand.QueueJobAsync(
-            executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
             expireOn: DateTime.UtcNow.AddMinutes(value: 5),
             ct: ct
         );

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +19,7 @@ internal sealed class ResendUserConfirmationEmailHandler
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
+
     private readonly Lazy<IDataProtectionHandler> _dataProtectionHandler;
 
     public ResendUserConfirmationEmailHandler(
@@ -134,6 +134,8 @@ internal sealed class ResendUserConfirmationEmailHandler
     {
         Dictionary<string, UserTokenEntity> emailConfirmedTokens = new(capacity: 2);
 
+        var tokenId = Guid.NewGuid();
+
         // Add new token for email confirmed.
         emailConfirmedTokens.Add(
             key: "MainToken",
@@ -141,17 +143,15 @@ internal sealed class ResendUserConfirmationEmailHandler
             {
                 UserId = userId,
                 Name = "EmailConfirmedToken",
-                Value = WebEncoders.Base64UrlEncode(
-                    input: Encoding.UTF8.GetBytes(
-                        s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{userId}"
-                        )
-                    )
+                Value = _dataProtectionHandler.Value.Protect(
+                    plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{tokenId}"
                 ),
                 ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = Guid.NewGuid().ToString()
+                LoginProvider = tokenId.ToString()
             }
         );
+
+        tokenId = Guid.NewGuid();
 
         emailConfirmedTokens.Add(
             key: "AlternateToken",
@@ -159,15 +159,11 @@ internal sealed class ResendUserConfirmationEmailHandler
             {
                 UserId = userId,
                 Name = "EmailConfirmedToken",
-                Value = WebEncoders.Base64UrlEncode(
-                    input: Encoding.UTF8.GetBytes(
-                        s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{userId}"
-                        )
-                    )
+                Value = _dataProtectionHandler.Value.Protect(
+                    plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{tokenId}"
                 ),
                 ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = Guid.NewGuid().ToString()
+                LoginProvider = tokenId.ToString()
             }
         );
 
@@ -195,23 +191,30 @@ internal sealed class ResendUserConfirmationEmailHandler
         CancellationToken ct
     )
     {
+        var mainToken = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["MainToken"].Value)
+        );
+
+        var alternateToken = WebEncoders.Base64UrlEncode(
+            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["AlternateToken"].Value)
+        );
+
         var mainContent =
             await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
                 to: command.Email,
                 subject: "Xác nhận tài khoản",
-                mainLink: emailConfirmedTokens["MainToken"].Value,
-                alternateLink: emailConfirmedTokens["AlternateToken"].Value,
+                mainLink: $"auth/confirmEmail?token={mainToken}",
+                alternateLink: $"auth/confirmEmail?token={alternateToken}",
                 cancellationToken: ct
             );
 
-        // Try to send mail.
+        //Try to send mail.
         var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
             MailContent = mainContent
         };
 
         await sendingAnyEmailCommand.QueueJobAsync(
-            executeAfter: DateTime.UtcNow.AddSeconds(value: 5),
             expireOn: DateTime.UtcNow.AddMinutes(value: 5),
             ct: ct
         );

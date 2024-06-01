@@ -84,8 +84,8 @@ app.UseAppExceptionHandler()
     .UseJobQueues(options: option =>
     {
         option.ExecutionTimeLimit = TimeSpan.FromSeconds(value: 12);
-        option.MaxConcurrency = 1;
-        option.StorageProbeDelay = TimeSpan.FromSeconds(value: 3);
+        option.MaxConcurrency = 2;
+        option.StorageProbeDelay = TimeSpan.FromSeconds(value: 2);
     })
     .UseSwaggerGen()
     .UseSwaggerUi(configure: options =>

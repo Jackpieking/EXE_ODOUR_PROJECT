@@ -9,4 +9,6 @@ public interface IMainUnitOfWork
     IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
 
     IResendUserConfirmationEmailRepository ResendUserConfirmationEmailRepository { get; }
+
+    IConfirmUserEmailRepository ConfirmUserEmailRepository { get; }
 }

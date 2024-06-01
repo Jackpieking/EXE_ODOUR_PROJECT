@@ -2,47 +2,42 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.RegisterAsAdmin;
-using ODour.FastEndpointApi.Feature.Auth.RegisterAsAdmin.HttpResponse;
-using ODour.FastEndpointApi.Feature.Auth.RegisterAsAdmin.Middleware;
+using ODour.Application.Feature.Auth.ConfirmUserEmail;
+using ODour.FastEndpointApi.Feature.Auth.ConfirmUserEmail.HttpResponse;
+using ODour.FastEndpointApi.Feature.Auth.ConfirmUserEmail.Middlewares;
 
-namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsAdmin;
+namespace ODour.FastEndpointApi.Feature.Auth.ConfirmUserEmail;
 
-internal sealed class RegisterAsAdminEndpoint
-    : Endpoint<RegisterAsAdminRequest, RegisterAsAdminHttpResponse>
+internal sealed class ConfirmUserEmailEndpoint
+    : Endpoint<ConfirmUserEmailRequest, ConfirmUserEmailHttpResponse>
 {
     public override void Configure()
     {
-        Post(routePatterns: "admin/auth/register");
+        Post(routePatterns: "auth/confirmEmail");
         AllowAnonymous();
         DontThrowIfValidationFails();
-        PreProcessor<RegisterAsAdminValidationPreProcessor>();
+        PreProcessor<ConfirmUserEmailValidationPreProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
         });
         Summary(endpointSummary: summary =>
         {
-            summary.Summary = "Endpoint for admin register/signup feature";
-            summary.Description = "This endpoint is used for admin register/signup purpose.";
-            summary.ExampleRequest = new()
-            {
-                Email = "string",
-                Password = "string",
-                AdminConfirmedKey = "string"
-            };
-            summary.Response<RegisterAsAdminHttpResponse>(
+            summary.Summary = "Endpoint for confirm user email feature";
+            summary.Description = "This endpoint is used for confirm user email purpose.";
+            summary.ExampleRequest = new() { Token = "string" };
+            summary.Response<ConfirmUserEmailHttpResponse>(
                 description: "Represent successful operation response.",
                 example: new()
                 {
-                    AppCode = RegisterAsAdminResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
+                    AppCode = ConfirmUserEmailResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
                 }
             );
         });
     }
 
-    public override async Task<RegisterAsAdminHttpResponse> ExecuteAsync(
-        RegisterAsAdminRequest req,
+    public override async Task<ConfirmUserEmailHttpResponse> ExecuteAsync(
+        ConfirmUserEmailRequest req,
         CancellationToken ct
     )
     {
@@ -50,7 +45,7 @@ internal sealed class RegisterAsAdminEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyRegisterAsAdminHttpResponseManager
+        var httpResponse = LazyConfirmUserEmailHttpResponseManager
             .Get()
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);

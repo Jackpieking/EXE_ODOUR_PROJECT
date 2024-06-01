@@ -10,11 +10,11 @@ internal sealed class AppDataProtectionHandler : IDataProtectionHandler
     private readonly IDataProtector _protector;
 
     public AppDataProtectionHandler(
-        Lazy<IDataProtectionProvider> dataProtectionProvider,
+        IDataProtectionProvider dataProtectionProvider,
         Lazy<AppBaseProtectionSecurityKeyOption> options
     )
     {
-        _protector = dataProtectionProvider.Value.CreateProtector(purpose: options.Value.Value);
+        _protector = dataProtectionProvider.CreateProtector(purpose: options.Value.Value);
     }
 
     public string Protect(string plaintext)
@@ -34,6 +34,13 @@ internal sealed class AppDataProtectionHandler : IDataProtectionHandler
             return default;
         }
 
-        return _protector.Unprotect(protectedData: ciphertext);
+        try
+        {
+            return _protector.Unprotect(protectedData: ciphertext);
+        }
+        catch
+        {
+            return default;
+        }
     }
 }

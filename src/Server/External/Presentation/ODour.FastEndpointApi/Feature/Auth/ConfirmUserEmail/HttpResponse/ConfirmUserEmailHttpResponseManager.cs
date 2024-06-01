@@ -1,27 +1,23 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.ResendUserConfirmationEmail;
+using ODour.Application.Feature.Auth.ConfirmUserEmail;
 
-namespace ODour.FastEndpointApi.Feature.Auth.ResendUserConfirmationEmail.HttpResponse;
+namespace ODour.FastEndpointApi.Feature.Auth.ConfirmUserEmail.HttpResponse;
 
-internal sealed class ResendUserConfirmationEmailHttpResponseManager
+internal sealed class ConfirmUserEmailHttpResponseManager
 {
     private readonly Dictionary<
-        ResendUserConfirmationEmailResponseStatusCode,
-        Func<
-            ResendUserConfirmationEmailRequest,
-            ResendUserConfirmationEmailResponse,
-            ResendUserConfirmationEmailHttpResponse
-        >
+        ConfirmUserEmailResponseStatusCode,
+        Func<ConfirmUserEmailRequest, ConfirmUserEmailResponse, ConfirmUserEmailHttpResponse>
     > _dictionary;
 
-    public ResendUserConfirmationEmailHttpResponseManager()
+    public ConfirmUserEmailHttpResponseManager()
     {
         _dictionary = new();
 
         _dictionary.TryAdd(
-            key: ResendUserConfirmationEmailResponseStatusCode.INPUT_VALIDATION_FAIL,
+            key: ConfirmUserEmailResponseStatusCode.INPUT_VALIDATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -31,7 +27,7 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ResendUserConfirmationEmailResponseStatusCode.OPERATION_FAIL,
+            key: ConfirmUserEmailResponseStatusCode.OPERATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -41,17 +37,27 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ResendUserConfirmationEmailResponseStatusCode.OPERATION_SUCCESS,
+            key: ConfirmUserEmailResponseStatusCode.OPERATION_SUCCESS,
             value: (_, response) =>
                 new()
                 {
                     HttpCode = StatusCodes.Status200OK,
-                    AppCode = response.StatusCode.ToAppCode()
+                    AppCode = response.StatusCode.ToAppCode(),
                 }
         );
 
         _dictionary.TryAdd(
-            key: ResendUserConfirmationEmailResponseStatusCode.USER_IS_NOT_FOUND,
+            key: ConfirmUserEmailResponseStatusCode.INVALID_TOKEN,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status400BadRequest,
+                    AppCode = response.StatusCode.ToAppCode(),
+                }
+        );
+
+        _dictionary.TryAdd(
+            key: ConfirmUserEmailResponseStatusCode.USER_IS_NOT_FOUND,
             value: (_, response) =>
                 new()
                 {
@@ -61,7 +67,7 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ResendUserConfirmationEmailResponseStatusCode.USER_HAS_CONFIRMED_EMAIL,
+            key: ConfirmUserEmailResponseStatusCode.USER_HAS_CONFIRMED_EMAIL,
             value: (_, response) =>
                 new()
                 {
@@ -71,7 +77,7 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ResendUserConfirmationEmailResponseStatusCode.USER_IS_TEMPORARILY_REMOVED,
+            key: ConfirmUserEmailResponseStatusCode.USER_IS_TEMPORARILY_REMOVED,
             value: (_, response) =>
                 new()
                 {
@@ -82,10 +88,10 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
     }
 
     internal Func<
-        ResendUserConfirmationEmailRequest,
-        ResendUserConfirmationEmailResponse,
-        ResendUserConfirmationEmailHttpResponse
-    > Resolve(ResendUserConfirmationEmailResponseStatusCode statusCode)
+        ConfirmUserEmailRequest,
+        ConfirmUserEmailResponse,
+        ConfirmUserEmailHttpResponse
+    > Resolve(ConfirmUserEmailResponseStatusCode statusCode)
     {
         return _dictionary[statusCode];
     }
