@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -123,7 +122,6 @@ internal sealed class RegisterAsUserHandler
 
         // Sending user confirmation mail.
         await SendingUserConfirmationMailAsync(
-            newUser: newUser,
             emailConfirmedTokens: userEmailConfirmedTokens,
             command: command,
             ct: ct
@@ -179,7 +177,7 @@ internal sealed class RegisterAsUserHandler
                 Value = WebEncoders.Base64UrlEncode(
                     input: Encoding.UTF8.GetBytes(
                         s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"main{CommonConstant.App.DefaultStringSeparator}{userId}"
+                            plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{userId}"
                         )
                     )
                 ),
@@ -197,7 +195,7 @@ internal sealed class RegisterAsUserHandler
                 Value = WebEncoders.Base64UrlEncode(
                     input: Encoding.UTF8.GetBytes(
                         s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"alternate{CommonConstant.App.DefaultStringSeparator}{userId}"
+                            plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{userId}"
                         )
                     )
                 ),
@@ -265,7 +263,6 @@ internal sealed class RegisterAsUserHandler
     /// </returns>
     private async Task SendingUserConfirmationMailAsync(
         RegisterAsUserRequest command,
-        UserEntity newUser,
         Dictionary<string, UserTokenEntity> emailConfirmedTokens,
         CancellationToken ct
     )

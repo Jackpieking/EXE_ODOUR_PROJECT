@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.RegisterAsUser;
 
@@ -7,12 +7,12 @@ namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.HttpResponse;
 
 internal sealed class RegisterAsUserHttpResponseManager
 {
-    private readonly ConcurrentDictionary<
+    private readonly Dictionary<
         RegisterAsUserResponseStatusCode,
         Func<RegisterAsUserRequest, RegisterAsUserResponse, RegisterAsUserHttpResponse>
     > _dictionary;
 
-    internal RegisterAsUserHttpResponseManager()
+    public RegisterAsUserHttpResponseManager()
     {
         _dictionary = new();
 

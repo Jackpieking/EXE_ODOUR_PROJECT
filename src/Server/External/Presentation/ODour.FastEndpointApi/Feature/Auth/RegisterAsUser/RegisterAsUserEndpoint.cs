@@ -30,7 +30,6 @@ internal sealed class RegisterAsUserEndpoint
                 description: "Represent successful operation response.",
                 example: new()
                 {
-                    HttpCode = StatusCodes.Status200OK,
                     AppCode = RegisterAsUserResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
                 }
             );
@@ -46,7 +45,7 @@ internal sealed class RegisterAsUserEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyRegisterAsUserHttResponseMapper
+        var httpResponse = LazyRegisterAsUserHttpResponseMapper
             .Get()
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);

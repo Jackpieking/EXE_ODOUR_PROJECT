@@ -18,7 +18,7 @@ internal sealed class RegisterAsUserValidationPreProcessor
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyRegisterAsUserHttResponseMapper
+            var httpResponse = LazyRegisterAsUserHttpResponseMapper
                 .Get()
                 .Resolve(statusCode: RegisterAsUserResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(

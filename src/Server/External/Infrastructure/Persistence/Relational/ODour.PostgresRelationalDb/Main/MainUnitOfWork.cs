@@ -10,6 +10,7 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
 {
     private IRegisterAsUserRepository _registerAsUserRepository;
     private IRegisterAsAdminRepository _registerAsAdminRepository;
+    private IResendUserConfirmationEmailRepository _resendUserConfirmationEmailRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -30,6 +31,15 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _registerAsAdminRepository ??= new RegisterAsAdminRepository(context: _context);
+        }
+    }
+
+    public IResendUserConfirmationEmailRepository ResendUserConfirmationEmailRepository
+    {
+        get
+        {
+            return _resendUserConfirmationEmailRepository ??=
+                new ResendUserConfirmationEmailRepository(context: _context);
         }
     }
 }

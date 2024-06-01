@@ -143,6 +143,7 @@ internal sealed class RegisterAsAdminHandler
             NormalizedUserName = upperCaseEmail,
             Email = command.Email,
             NormalizedEmail = upperCaseEmail,
+            EmailConfirmed = false,
             PasswordHash = _dataProtectionHandler.Value.Protect(
                 plaintext: $"{upperCaseEmail}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
             ),
@@ -169,7 +170,7 @@ internal sealed class RegisterAsAdminHandler
                 Value = WebEncoders.Base64UrlEncode(
                     input: Encoding.UTF8.GetBytes(
                         s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"main{CommonConstant.App.DefaultStringSeparator}{adminId}"
+                            plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{adminId}"
                         )
                     )
                 ),
@@ -187,7 +188,7 @@ internal sealed class RegisterAsAdminHandler
                 Value = WebEncoders.Base64UrlEncode(
                     input: Encoding.UTF8.GetBytes(
                         s: _dataProtectionHandler.Value.Protect(
-                            plaintext: $"alternate{CommonConstant.App.DefaultStringSeparator}{adminId}"
+                            plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{adminId}"
                         )
                     )
                 ),
