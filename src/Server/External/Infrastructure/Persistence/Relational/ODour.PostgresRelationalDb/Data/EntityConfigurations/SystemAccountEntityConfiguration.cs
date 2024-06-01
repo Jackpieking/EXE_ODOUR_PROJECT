@@ -52,6 +52,10 @@ internal sealed class SystemAccountEntityConfiguration
             .IsRequired(required: true);
 
         builder
+            .Property(propertyExpression: builder => builder.EmailConfirmed)
+            .IsRequired(required: true);
+
+        builder
             .Property(propertyExpression: builder => builder.LockoutEnd)
             .IsRequired(required: true);
 

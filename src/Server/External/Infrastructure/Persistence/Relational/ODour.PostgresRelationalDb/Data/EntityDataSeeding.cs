@@ -934,6 +934,8 @@ public static class EntityDataSeeding
             NormalizedEmail = "JAYKHOALE@GMAIL.COM",
             PasswordHash = protector.Protect(plaintext: "Admin123@"),
             AccessFailedCount = default,
+            EmailConfirmed = true,
+            IsTemporarilyRemoved = false,
             LockoutEnd = App.MinTimeInUTC,
             AccountStatusId = Guid.Parse(input: "0c7bed0c-2478-43fd-9a6d-cd084980f749"),
             SystemAccountRoles = new List<SystemAccountRoleEntity>

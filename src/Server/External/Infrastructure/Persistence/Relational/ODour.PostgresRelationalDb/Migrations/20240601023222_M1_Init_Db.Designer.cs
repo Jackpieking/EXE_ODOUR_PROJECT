@@ -10,7 +10,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240531170626_M1_Init_Db")]
+    [Migration("20240601023222_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
@@ -596,6 +596,9 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsTemporarilyRemoved")
                         .HasColumnType("boolean");

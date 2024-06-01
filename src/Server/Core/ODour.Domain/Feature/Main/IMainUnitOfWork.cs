@@ -1,11 +1,10 @@
 using ODour.Domain.Feature.Main.Repository.Auth;
 
-namespace ODour.Domain.Feature.Main
-{
-    public interface IMainUnitOfWork
-    {
-        IRegisterAsUserRepository RegisterAsUserRepository { get; }
+namespace ODour.Domain.Feature.Main;
 
-        IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
-    }
+public interface IMainUnitOfWork
+{
+    IRegisterAsUserRepository RegisterAsUserRepository { get; }
+
+    IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
 }

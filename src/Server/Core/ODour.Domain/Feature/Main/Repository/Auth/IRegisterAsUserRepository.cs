@@ -1,28 +1,28 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using ODour.Domain.Share.AccountStatus.Entities;
 using ODour.Domain.Share.User.Entities;
 
-namespace ODour.Domain.Feature.Main.Repository.Auth
+namespace ODour.Domain.Feature.Main.Repository.Auth;
+
+public interface IRegisterAsUserRepository
 {
-    public interface IRegisterAsUserRepository
-    {
-        #region Query
-        Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
+    #region Query
+    Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
-        Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct);
-        #endregion
+    Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct);
+    #endregion
 
-        #region Command
-        Task<bool> CreateAndAddUserToRoleCommandAsync(
-            UserEntity newUser,
-            string password,
-            UserManager<UserEntity> userManager,
-            CancellationToken ct
-        );
+    #region Command
+    Task<bool> CreateAndAddUserToRoleCommandAsync(
+        UserEntity newUser,
+        IEnumerable<UserTokenEntity> emailConfirmTokens,
+        UserManager<UserEntity> userManager,
+        CancellationToken ct
+    );
 
-        Task RemoveUserCommandAsync(UserEntity newUser, UserManager<UserEntity> userManager);
-        #endregion
-    }
+    Task RemoveUserCommandAsync(UserEntity newUser, UserManager<UserEntity> userManager);
+    #endregion
 }

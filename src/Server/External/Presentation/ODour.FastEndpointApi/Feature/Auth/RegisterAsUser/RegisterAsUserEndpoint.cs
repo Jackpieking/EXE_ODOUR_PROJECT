@@ -23,8 +23,8 @@ internal sealed class RegisterAsUserEndpoint
         });
         Summary(endpointSummary: summary =>
         {
-            summary.Summary = "Endpoint for register/signup feature";
-            summary.Description = "This endpoint is used for register/signup purpose.";
+            summary.Summary = "Endpoint for user register/signup feature";
+            summary.Description = "This endpoint is used for user register/signup purpose.";
             summary.ExampleRequest = new() { Email = "string", Password = "string" };
             summary.Response<RegisterAsUserHttpResponse>(
                 description: "Represent successful operation response.",

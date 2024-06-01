@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
 
     public async Task<bool> CreateAndAddUserToRoleCommandAsync(
         UserEntity newUser,
-        string password,
+        IEnumerable<UserTokenEntity> emailConfirmTokens,
         UserManager<UserEntity> userManager,
         CancellationToken ct
     )
@@ -38,7 +39,7 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
 
                 try
                 {
-                    var result = await userManager.CreateAsync(user: newUser, password: password);
+                    var result = await userManager.CreateAsync(user: newUser);
 
                     if (!result.Succeeded)
                     {
@@ -51,6 +52,12 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
                     {
                         throw new DbUpdateConcurrencyException();
                     }
+
+                    await _context
+                        .Value.Set<UserTokenEntity>()
+                        .AddRangeAsync(entities: emailConfirmTokens, cancellationToken: ct);
+
+                    await _context.Value.SaveChangesAsync(cancellationToken: ct);
 
                     await dbTransaction.CommitAsync(cancellationToken: ct);
 

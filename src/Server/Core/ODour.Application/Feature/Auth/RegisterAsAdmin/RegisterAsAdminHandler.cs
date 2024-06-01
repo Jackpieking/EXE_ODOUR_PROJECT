@@ -148,6 +148,7 @@ internal sealed class RegisterAsAdminHandler
             ),
             AccessFailedCount = default,
             LockoutEnd = CommonConstant.App.MinTimeInUTC,
+            IsTemporarilyRemoved = false,
             AccountStatusId = newUserAccountStatusId
         };
     }
@@ -164,7 +165,7 @@ internal sealed class RegisterAsAdminHandler
             value: new()
             {
                 SystemAccountId = adminId,
-                Name = "AdminEmailConfirmedToken",
+                Name = "EmailConfirmedToken",
                 Value = WebEncoders.Base64UrlEncode(
                     input: Encoding.UTF8.GetBytes(
                         s: _dataProtectionHandler.Value.Protect(
@@ -182,7 +183,7 @@ internal sealed class RegisterAsAdminHandler
             value: new()
             {
                 SystemAccountId = adminId,
-                Name = "AdminEmailConfirmedToken",
+                Name = "EmailConfirmedToken",
                 Value = WebEncoders.Base64UrlEncode(
                     input: Encoding.UTF8.GetBytes(
                         s: _dataProtectionHandler.Value.Protect(

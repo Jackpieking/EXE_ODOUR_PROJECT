@@ -9,7 +9,7 @@ namespace ODour.Domain.Feature.Main.Repository.Auth;
 
 public interface IRegisterAsAdminRepository
 {
-    #region Quey
+    #region Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
     Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct);

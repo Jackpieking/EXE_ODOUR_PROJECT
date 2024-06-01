@@ -331,6 +331,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                     ),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "integer", nullable: false),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
                     LockoutEnd = table.Column<DateTime>(
                         type: "timestamp with time zone",
                         nullable: false
