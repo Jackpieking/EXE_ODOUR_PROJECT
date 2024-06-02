@@ -1,23 +1,23 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.ConfirmUserEmail;
+using ODour.Application.Feature.Auth.ResetPassword;
 
-namespace ODour.FastEndpointApi.Feature.Auth.ConfirmUserEmail.HttpResponse;
+namespace ODour.FastEndpointApi.Feature.Auth.ResetPassword.HttpResponse;
 
-internal sealed class ConfirmUserEmailHttpResponseManager
+internal sealed class ResetPasswordHttpResponseManager
 {
     private readonly Dictionary<
-        ConfirmUserEmailResponseStatusCode,
-        Func<ConfirmUserEmailRequest, ConfirmUserEmailResponse, ConfirmUserEmailHttpResponse>
+        ResetPasswordResponseStatusCode,
+        Func<ResetPasswordRequest, ResetPasswordResponse, ResetPasswordHttpResponse>
     > _dictionary;
 
-    public ConfirmUserEmailHttpResponseManager()
+    public ResetPasswordHttpResponseManager()
     {
         _dictionary = new();
 
         _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.INPUT_VALIDATION_FAIL,
+            key: ResetPasswordResponseStatusCode.INPUT_VALIDATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -27,7 +27,7 @@ internal sealed class ConfirmUserEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.OPERATION_FAIL,
+            key: ResetPasswordResponseStatusCode.OPERATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -37,7 +37,7 @@ internal sealed class ConfirmUserEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.OPERATION_SUCCESS,
+            key: ResetPasswordResponseStatusCode.OPERATION_SUCCESS,
             value: (_, response) =>
                 new()
                 {
@@ -47,7 +47,7 @@ internal sealed class ConfirmUserEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.USER_IS_NOT_FOUND,
+            key: ResetPasswordResponseStatusCode.USER_IS_NOT_FOUND,
             value: (_, response) =>
                 new()
                 {
@@ -57,17 +57,7 @@ internal sealed class ConfirmUserEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.USER_HAS_CONFIRMED_EMAIL,
-            value: (_, response) =>
-                new()
-                {
-                    HttpCode = StatusCodes.Status409Conflict,
-                    AppCode = response.StatusCode.ToAppCode(),
-                }
-        );
-
-        _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.USER_IS_TEMPORARILY_REMOVED,
+            key: ResetPasswordResponseStatusCode.USER_IS_TEMPORARILY_REMOVED,
             value: (_, response) =>
                 new()
                 {
@@ -77,11 +67,9 @@ internal sealed class ConfirmUserEmailHttpResponseManager
         );
     }
 
-    internal Func<
-        ConfirmUserEmailRequest,
-        ConfirmUserEmailResponse,
-        ConfirmUserEmailHttpResponse
-    > Resolve(ConfirmUserEmailResponseStatusCode statusCode)
+    internal Func<ResetPasswordRequest, ResetPasswordResponse, ResetPasswordHttpResponse> Resolve(
+        ResetPasswordResponseStatusCode statusCode
+    )
     {
         return _dictionary[statusCode];
     }

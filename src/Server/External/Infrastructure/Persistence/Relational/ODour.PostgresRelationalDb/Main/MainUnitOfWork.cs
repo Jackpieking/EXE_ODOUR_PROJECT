@@ -13,6 +13,7 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     private IResendUserConfirmationEmailRepository _resendUserConfirmationEmailRepository;
     private IConfirmUserEmailRepository _confirmUserEmailRepository;
     private IForgotPasswordRepository _forgotPasswordRepository;
+    private IResetPasswordRepository _resetPasswordRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -61,5 +62,10 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
         {
             return _forgotPasswordRepository ??= new ForgotPasswordRepository(context: _context);
         }
+    }
+
+    public IResetPasswordRepository ResetPasswordRepository
+    {
+        get { return _resetPasswordRepository ??= new ResetPasswordRepository(context: _context); }
     }
 }

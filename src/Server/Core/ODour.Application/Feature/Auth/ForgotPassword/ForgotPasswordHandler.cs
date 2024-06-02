@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.Features;
-using ODour.Application.Share.Mail;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
 
@@ -17,19 +14,16 @@ namespace ODour.Application.Feature.Auth.ForgotPassword;
 internal sealed class ForgotPasswordHandler
     : IFeatureHandler<ForgotPasswordRequest, ForgotPasswordResponse>
 {
-    private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
 
     public ForgotPasswordHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<UserManager<UserEntity>> userManager,
-        Lazy<ISendingMailHandler> sendingMailHandler
+        Lazy<UserManager<UserEntity>> userManager
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
-        _sendingMailHandler = sendingMailHandler;
     }
 
     public async Task<ForgotPasswordResponse> ExecuteAsync(
@@ -70,7 +64,7 @@ internal sealed class ForgotPasswordHandler
         var user = await _userManager.Value.FindByEmailAsync(email: command.Email);
 
         // Generate password changing token.
-        var passwordChangingTokens = await GenerateUserEmailConfirmedTokenAsync(user: user);
+        var passwordChangingTokens = await GenerateUserPasswordChangingTokenAsync(user: user);
 
         // Add token to the database.
         var dbResult =
@@ -90,7 +84,7 @@ internal sealed class ForgotPasswordHandler
 
         // Send email.
         await SendingUserPasswordChangingMailAsync(
-            emailConfirmedTokens: passwordChangingTokens,
+            passwordChangingTokens: passwordChangingTokens,
             command: command,
             ct: ct
         );
@@ -98,7 +92,7 @@ internal sealed class ForgotPasswordHandler
         return new() { StatusCode = ForgotPasswordResponseStatusCode.OPERATION_SUCCESS };
     }
 
-    private async Task<Dictionary<string, UserTokenEntity>> GenerateUserEmailConfirmedTokenAsync(
+    private async Task<Dictionary<string, UserTokenEntity>> GenerateUserPasswordChangingTokenAsync(
         UserEntity user
     )
     {
@@ -115,7 +109,7 @@ internal sealed class ForgotPasswordHandler
                 Name = "PasswordChanghingToken",
                 Value =
                     $"{await _userManager.Value.GeneratePasswordResetTokenAsync(user: user)}{CommonConstant.App.DefaultStringSeparator}{tokenId}",
-                ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
+                ExpiredAt = DateTime.UtcNow.AddMinutes(value: 1),
                 LoginProvider = tokenId.ToString()
             }
         );
@@ -138,27 +132,17 @@ internal sealed class ForgotPasswordHandler
     /// <returns>
     ///     Nothing
     /// </returns>
-    private async Task SendingUserPasswordChangingMailAsync(
+    private static async Task SendingUserPasswordChangingMailAsync(
         ForgotPasswordRequest command,
-        Dictionary<string, UserTokenEntity> emailConfirmedTokens,
+        Dictionary<string, UserTokenEntity> passwordChangingTokens,
         CancellationToken ct
     )
     {
-        var mainToken = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["MainToken"].Value)
-        );
-
-        var mainContent = await _sendingMailHandler.Value.GetUserResetPasswordMailContentAsync(
-            to: command.Email,
-            subject: "Đổi mật khẩu",
-            resetPasswordLink: $"auth/passwordChanging?token={mainToken}",
-            cancellationToken: ct
-        );
-
         //Try to send mail.
         var sendingAnyEmailCommand = new BackgroundJob.SendingUserPasswordChangingEmailCommand
         {
-            MailContent = mainContent
+            MainTokenValue = passwordChangingTokens["MainToken"].Value,
+            Email = command.Email
         };
 
         await sendingAnyEmailCommand.QueueJobAsync(

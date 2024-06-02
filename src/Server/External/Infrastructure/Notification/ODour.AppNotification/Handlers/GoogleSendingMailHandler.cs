@@ -88,6 +88,96 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
         }
     }
 
+    public async Task<AppMailContent> GetUserConfirmSuccessfullyMailContentAsync(
+        string to,
+        string subject,
+        CancellationToken cancellationToken
+    )
+    {
+        if (string.IsNullOrWhiteSpace(value: to) || string.IsNullOrWhiteSpace(value: subject))
+        {
+            return default;
+        }
+
+        var mailTemplatePath = Path.Combine(
+            path1: "ODOUR_USER_CONFIRMATION",
+            path2: "ODOUR_SUCCESSFULLY_USER_CONFIRMATION_EMAIL_TEMPLATE.html"
+        );
+
+        var htmlTemplate = await ReadTemplateAsync(
+            templatePath: mailTemplatePath,
+            cancellationToken: cancellationToken
+        );
+
+        return new()
+        {
+            To = to,
+            Subject = subject,
+            Body = htmlTemplate
+        };
+
+        async Task<string> ReadTemplateAsync(
+            string templatePath,
+            CancellationToken cancellationToken
+        )
+        {
+            var templateFilePath = Path.Combine(
+                path1: _webHostEnvironment.WebRootPath,
+                path2: templatePath
+            );
+
+            return await File.ReadAllTextAsync(
+                path: templateFilePath,
+                cancellationToken: cancellationToken
+            );
+        }
+    }
+
+    public async Task<AppMailContent> GetUserPasswordChangedSuccessfullyMailContentAsync(
+        string to,
+        string subject,
+        CancellationToken cancellationToken
+    )
+    {
+        if (string.IsNullOrWhiteSpace(value: to) || string.IsNullOrWhiteSpace(value: subject))
+        {
+            return default;
+        }
+
+        var mailTemplatePath = Path.Combine(
+            path1: "ODOUR_USER_CONFIRMATION",
+            path2: "ODOUR_SUCCESSFULLY_USER_RESET_PASSWORD_EMAIL_TEMPLATE.html"
+        );
+
+        var htmlTemplate = await ReadTemplateAsync(
+            templatePath: mailTemplatePath,
+            cancellationToken: cancellationToken
+        );
+
+        return new()
+        {
+            To = to,
+            Subject = subject,
+            Body = htmlTemplate
+        };
+
+        async Task<string> ReadTemplateAsync(
+            string templatePath,
+            CancellationToken cancellationToken
+        )
+        {
+            var templateFilePath = Path.Combine(
+                path1: _webHostEnvironment.WebRootPath,
+                path2: templatePath
+            );
+
+            return await File.ReadAllTextAsync(
+                path: templateFilePath,
+                cancellationToken: cancellationToken
+            );
+        }
+    }
+
     public async Task<AppMailContent> GetUserResetPasswordMailContentAsync(
         string to,
         string subject,

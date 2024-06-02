@@ -62,6 +62,18 @@ public interface ISendingMailHandler
         CancellationToken cancellationToken
     );
 
+    Task<AppMailContent> GetUserConfirmSuccessfullyMailContentAsync(
+        string to,
+        string subject,
+        CancellationToken cancellationToken
+    );
+
+    Task<AppMailContent> GetUserPasswordChangedSuccessfullyMailContentAsync(
+        string to,
+        string subject,
+        CancellationToken cancellationToken
+    );
+
     /// <summary>
     ///     Sending an email to the specified user.
     /// </summary>

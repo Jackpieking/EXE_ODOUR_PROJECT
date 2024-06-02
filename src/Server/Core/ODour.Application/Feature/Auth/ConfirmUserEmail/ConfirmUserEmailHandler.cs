@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using ODour.Application.Share.Common;
@@ -32,13 +34,15 @@ internal sealed class ConfirmUserEmailHandler
     )
     {
         // Validate input token.
-        var (userId, tokenName) = await ValidateTokenAsync(token: command.Token, ct: ct);
+        #region InputValidation
+        var (userId, tokenId, tokenValue) = await ValidateTokenAsync(token: command.Token, ct: ct);
 
         // Invalid token.
         if (userId == Guid.Empty)
         {
-            return new() { StatusCode = ConfirmUserEmailResponseStatusCode.INVALID_TOKEN };
+            return new() { StatusCode = ConfirmUserEmailResponseStatusCode.INPUT_VALIDATION_FAIL };
         }
+        #endregion
 
         // Does user exist by user id.
         var isUserFound =
@@ -47,20 +51,20 @@ internal sealed class ConfirmUserEmailHandler
                 ct: ct
             );
 
-        // User with email is not found.
+        // User with id is not found.
         if (!isUserFound)
         {
             return new() { StatusCode = ConfirmUserEmailResponseStatusCode.USER_IS_NOT_FOUND };
         }
 
-        // Has user confirmed email.
+        // Has user confirmed id.
         var hasUserConfirmedEmail =
             await _unitOfWork.Value.ConfirmUserEmailRepository.HasUserConfirmedEmailQueryAsync(
                 userId: userId,
                 ct: ct
             );
 
-        // User has confirmed email.
+        // User has confirmed id.
         if (hasUserConfirmedEmail)
         {
             return new()
@@ -69,14 +73,14 @@ internal sealed class ConfirmUserEmailHandler
             };
         }
 
-        // Is user temporarily removed by email.
+        // Is user temporarily removed by id.
         var IsUserTemporarilyRemoved =
             await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserTemporarilyRemovedQueryAsync(
                 userId: userId,
                 ct: ct
             );
 
-        // User with email is temporarily removed.
+        // User with id is temporarily removed.
         if (IsUserTemporarilyRemoved)
         {
             return new()
@@ -91,11 +95,15 @@ internal sealed class ConfirmUserEmailHandler
                 ct: ct
             );
 
+        // Get full user info.
+        var foundUser = await _userManager.Value.FindByIdAsync(userId: userId.ToString());
+
         // Confirm user email.
         var dbResult =
             await _unitOfWork.Value.ConfirmUserEmailRepository.ConfirmUserEmailCommandAsync(
-                userId: userId,
-                tokenName: tokenName,
+                user: foundUser,
+                tokenId: tokenId,
+                tokenValue: tokenValue,
                 accountStatusId: accountStatus.Id,
                 userManager: _userManager.Value,
                 ct: ct
@@ -107,31 +115,55 @@ internal sealed class ConfirmUserEmailHandler
             return new() { StatusCode = ConfirmUserEmailResponseStatusCode.OPERATION_FAIL };
         }
 
+        await SendingUserConfirmationSuccessfullyMailAsync(email: foundUser.Email, ct: ct);
+
         return new() { StatusCode = ConfirmUserEmailResponseStatusCode.OPERATION_SUCCESS };
     }
 
-    private async Task<(Guid, string)> ValidateTokenAsync(string token, CancellationToken ct)
+    private async Task<(Guid, Guid, string)> ValidateTokenAsync(string token, CancellationToken ct)
     {
-        var tokens = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token));
+        token = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token));
 
-        if (string.IsNullOrWhiteSpace(value: tokens))
+        if (string.IsNullOrWhiteSpace(value: token))
         {
-            return (Guid.Empty, default);
+            return (Guid.Empty, Guid.Empty, string.Empty);
         }
 
-        var tokenId = tokens.Split(separator: CommonConstant.App.DefaultStringSeparator)[1];
+        var tokens = token.Split(separator: CommonConstant.App.DefaultStringSeparator);
+
+        if (!tokens.Any())
+        {
+            return (Guid.Empty, Guid.Empty, string.Empty);
+        }
 
         var foundUserToken =
-            await _unitOfWork.Value.ConfirmUserEmailRepository.GetUserTokenByTokenIdQueryAsync(
-                tokenId: tokenId,
+            await _unitOfWork.Value.ConfirmUserEmailRepository.GetUserConfirmedEmailTokenByTokenIdQueryAsync(
+                tokenId: tokens[1],
                 ct: ct
             );
 
         if (Equals(objA: foundUserToken, objB: default))
         {
-            return (Guid.Empty, default);
+            return (Guid.Empty, Guid.Empty, string.Empty);
         }
 
-        return (foundUserToken.UserId, foundUserToken.Name);
+        return (foundUserToken.UserId, Guid.Parse(input: tokens[1]), tokens[0]);
+    }
+
+    private static async Task SendingUserConfirmationSuccessfullyMailAsync(
+        string email,
+        CancellationToken ct
+    )
+    {
+        // Try to send mail.
+        var sendingAnyEmailCommand = new BackgroundJob.SendUserConfirmSuccessfullyEmailCommand
+        {
+            Email = email
+        };
+
+        await sendingAnyEmailCommand.QueueJobAsync(
+            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+            ct: ct
+        );
     }
 }

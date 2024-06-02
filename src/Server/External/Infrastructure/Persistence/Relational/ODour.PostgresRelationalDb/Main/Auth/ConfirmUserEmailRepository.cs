@@ -20,8 +20,9 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
     }
 
     public async Task<bool> ConfirmUserEmailCommandAsync(
-        Guid userId,
-        string tokenName,
+        UserEntity user,
+        Guid tokenId,
+        string tokenValue,
         Guid accountStatusId,
         UserManager<UserEntity> userManager,
         CancellationToken ct
@@ -39,19 +40,8 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
 
                 try
                 {
-                    // Get full user information.
-                    var foundUser = await userManager.FindByIdAsync(userId: userId.ToString());
-
-                    // Generate email confirm token.
-                    var emailConfirmedToken = await userManager.GenerateEmailConfirmationTokenAsync(
-                        user: foundUser
-                    );
-
                     // Confirm user email.
-                    var result = await userManager.ConfirmEmailAsync(
-                        user: foundUser,
-                        token: emailConfirmedToken
-                    );
+                    var result = await userManager.ConfirmEmailAsync(user: user, token: tokenValue);
 
                     if (!result.Succeeded)
                     {
@@ -61,12 +51,12 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
                     // Remove all email confirmed token of given user.
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .Where(token => token.UserId == userId && token.Name.Equals(tokenName))
+                        .Where(token => token.LoginProvider == tokenId.ToString())
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
                     await _context
                         .Value.Set<UserDetailEntity>()
-                        .Where(predicate: user => user.UserId == userId)
+                        .Where(predicate: user => user.UserId == user.UserId)
                         .ExecuteUpdateAsync(
                             setPropertyCalls: builder =>
                                 builder.SetProperty(user => user.AccountStatusId, accountStatusId),
@@ -98,7 +88,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public Task<UserTokenEntity> GetUserTokenByTokenIdQueryAsync(
+    public Task<UserTokenEntity> GetUserConfirmedEmailTokenByTokenIdQueryAsync(
         string tokenId,
         CancellationToken ct
     )
@@ -109,11 +99,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
             .Where(predicate: token =>
                 token.LoginProvider == tokenId && token.ExpiredAt > DateTime.UtcNow
             )
-            .Select(selector: token => new UserTokenEntity
-            {
-                UserId = token.UserId,
-                Name = token.Name
-            })
+            .Select(selector: token => new UserTokenEntity { UserId = token.UserId })
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
 

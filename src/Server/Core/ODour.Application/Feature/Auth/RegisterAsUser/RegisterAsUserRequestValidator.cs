@@ -16,5 +16,10 @@ public sealed class RegisterAsUserRequestValidator : Validator<RegisterAsUserReq
             .EmailAddress()
             .MaximumLength(maximumLength: UserEntity.MetaData.Email.MaxLength)
             .MinimumLength(minimumLength: UserEntity.MetaData.Email.MinLength);
+
+        RuleFor(expression: request => request.Password)
+            .NotEmpty()
+            .MaximumLength(maximumLength: UserEntity.MetaData.Password.MaxLength)
+            .MinimumLength(minimumLength: UserEntity.MetaData.Password.MinLength);
     }
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace ODour.FastEndpointApi.Feature.Auth.ResendUserConfirmationEmail.HttpResponse;
 
-internal sealed class LazyResendUserConfirmationEmailHttpResponseManager
+internal static class LazyResendUserConfirmationEmailHttpResponseManager
 {
     private static readonly Lazy<ResendUserConfirmationEmailHttpResponseManager> _resendUserConfirmationEmailHttpResponseManager =
         new();

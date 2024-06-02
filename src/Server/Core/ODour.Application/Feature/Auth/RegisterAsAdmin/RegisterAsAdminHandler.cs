@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
-using Microsoft.AspNetCore.WebUtilities;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.DataProtection;
 using ODour.Application.Share.Features;
-using ODour.Application.Share.Mail;
 using ODour.Application.Share.Tokens;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.System.Entities;
@@ -19,19 +16,16 @@ internal sealed class RegisterAsAdminHandler
     : IFeatureHandler<RegisterAsAdminRequest, RegisterAsAdminResponse>
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
-    private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
     private readonly Lazy<IDataProtectionHandler> _dataProtectionHandler;
     private readonly Lazy<IAdminAccessKeyHandler> _adminAccessKeyHandler;
 
     public RegisterAsAdminHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<ISendingMailHandler> sendingMailHandler,
         Lazy<IDataProtectionHandler> dataProtectionHandler,
         Lazy<IAdminAccessKeyHandler> adminAccessKeyHandler
     )
     {
         _unitOfWork = unitOfWork;
-        _sendingMailHandler = sendingMailHandler;
         _dataProtectionHandler = dataProtectionHandler;
         _adminAccessKeyHandler = adminAccessKeyHandler;
     }
@@ -196,21 +190,11 @@ internal sealed class RegisterAsAdminHandler
         CancellationToken ct
     )
     {
-        var mainToken = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["MainToken"].Value)
-        );
-
-        var mainContent =
-            await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
-                to: command.Email,
-                subject: "Xác nhận tài khoản",
-                mainLink: $"auth/confirmEmail?token={mainToken}",
-                cancellationToken: ct
-            );
         // Try to send mail.
         var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
-            MailContent = mainContent
+            MainTokenValue = emailConfirmedTokens["MainToken"].Value,
+            Email = command.Email
         };
 
         await sendingAnyEmailCommand.QueueJobAsync(

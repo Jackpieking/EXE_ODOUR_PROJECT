@@ -54,16 +54,18 @@ public sealed class UserEntity : IdentityUser<Guid>, IEntity
             public const int MinLength = 1;
         }
 
-        public static class PasswordHash
-        {
-            public const int MinLength = 1;
-        }
-
         public static class AccessFailedCount
         {
             public const int MinValue = default;
 
             public const int MaxValue = int.MaxValue;
+        }
+
+        public static class Password
+        {
+            public const int MaxLength = 100;
+
+            public const int MinLength = 1;
         }
     }
     #endregion

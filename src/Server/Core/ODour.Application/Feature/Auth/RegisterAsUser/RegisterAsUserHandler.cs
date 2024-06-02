@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.DataProtection;
 using ODour.Application.Share.Features;
-using ODour.Application.Share.Mail;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
 
@@ -21,19 +18,16 @@ internal sealed class RegisterAsUserHandler
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
     private readonly Lazy<IDataProtectionHandler> _dataProtectionHandler;
-    private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
     public RegisterAsUserHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
         Lazy<UserManager<UserEntity>> userManager,
-        Lazy<IDataProtectionHandler> dataProtectionHandler,
-        Lazy<ISendingMailHandler> sendingMailHandler
+        Lazy<IDataProtectionHandler> dataProtectionHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _dataProtectionHandler = dataProtectionHandler;
-        _sendingMailHandler = sendingMailHandler;
     }
 
     /// <summary>
@@ -214,6 +208,13 @@ internal sealed class RegisterAsUserHandler
         newUser.PasswordHash = _dataProtectionHandler.Value.Protect(
             plaintext: $"{newUser.Email.ToUpper()}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
         );
+        newUser.SecurityStamp = string.Concat(
+            values: Array.ConvertAll(
+                array: Guid.NewGuid().ToByteArray(),
+                converter: myByte => myByte.ToString(format: "X2")
+            )
+        );
+
         newUser.UserDetail = new()
         {
             UserId = newUser.Id,
@@ -222,7 +223,7 @@ internal sealed class RegisterAsUserHandler
             AvatarUrl = CommonConstant.App.DefaultAvatarUrl,
             Gender = true,
             IsTemporarilyRemoved = false,
-            AccountStatusId = newAccountStatus
+            AccountStatusId = newAccountStatus,
         };
     }
 
@@ -241,27 +242,17 @@ internal sealed class RegisterAsUserHandler
     /// <returns>
     ///     Nothing
     /// </returns>
-    private async Task SendingUserConfirmationMailAsync(
+    private static async Task SendingUserConfirmationMailAsync(
         RegisterAsUserRequest command,
         Dictionary<string, UserTokenEntity> emailConfirmedTokens,
         CancellationToken ct
     )
     {
-        var mainToken = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["MainToken"].Value)
-        );
-
-        var mainContent =
-            await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
-                to: command.Email,
-                subject: "Xác nhận tài khoản",
-                mainLink: $"auth/confirmEmail?token={mainToken}",
-                cancellationToken: ct
-            );
         // Try to send mail.
         var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
-            MailContent = mainContent
+            MainTokenValue = emailConfirmedTokens["MainToken"].Value,
+            Email = command.Email
         };
 
         await sendingAnyEmailCommand.QueueJobAsync(

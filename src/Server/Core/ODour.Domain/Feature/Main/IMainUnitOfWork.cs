@@ -13,4 +13,6 @@ public interface IMainUnitOfWork
     IConfirmUserEmailRepository ConfirmUserEmailRepository { get; }
 
     IForgotPasswordRepository ForgotPasswordRepository { get; }
+
+    IResetPasswordRepository ResetPasswordRepository { get; }
 }

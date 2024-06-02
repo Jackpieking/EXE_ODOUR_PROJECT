@@ -2,42 +2,46 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.ForgotPassword;
-using ODour.FastEndpointApi.Feature.Auth.ForgotPassword.HttpResponse;
-using ODour.FastEndpointApi.Feature.Auth.ForgotPassword.Middlewares;
+using ODour.Application.Feature.Auth.ResetPassword;
+using ODour.FastEndpointApi.Feature.Auth.ResetPassword.HttpResponse;
+using ODour.FastEndpointApi.Feature.Auth.ResetPassword.Middlewares;
 
-namespace ODour.FastEndpointApi.Feature.Auth.ForgotPassword;
+namespace ODour.FastEndpointApi.Feature.Auth.ResetPassword;
 
-internal sealed class ForgotPasswordEndpoint
-    : Endpoint<ForgotPasswordRequest, ForgotPasswordHttpResponse>
+internal sealed class ResetPasswordEndpoint
+    : Endpoint<ResetPasswordRequest, ResetPasswordHttpResponse>
 {
     public override void Configure()
     {
-        Post(routePatterns: "auth/forgotPassword");
+        Post(routePatterns: "auth/resetPassword");
         AllowAnonymous();
         DontThrowIfValidationFails();
-        PreProcessor<ForgotPasswordValidationPreProcessor>();
+        PreProcessor<ResetPasswordValidationPreProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
         });
         Summary(endpointSummary: summary =>
         {
-            summary.Summary = "Endpoint for user forgot password feature";
-            summary.Description = "This endpoint is used for user forgot password purpose.";
-            summary.ExampleRequest = new() { Email = "string" };
-            summary.Response<ForgotPasswordHttpResponse>(
+            summary.Summary = "Endpoint for reset password feature";
+            summary.Description = "This endpoint is used for reset password purpose.";
+            summary.ExampleRequest = new()
+            {
+                NewPassword = "string",
+                ResetPasswordToken = "string"
+            };
+            summary.Response<ResetPasswordHttpResponse>(
                 description: "Represent successful operation response.",
                 example: new()
                 {
-                    AppCode = ForgotPasswordResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
+                    AppCode = ResetPasswordResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
                 }
             );
         });
     }
 
-    public override async Task<ForgotPasswordHttpResponse> ExecuteAsync(
-        ForgotPasswordRequest req,
+    public override async Task<ResetPasswordHttpResponse> ExecuteAsync(
+        ResetPasswordRequest req,
         CancellationToken ct
     )
     {
@@ -45,7 +49,7 @@ internal sealed class ForgotPasswordEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyForgotPasswordHttpResponseManager
+        var httpResponse = LazyResetPasswordHttpResponseManager
             .Get()
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
