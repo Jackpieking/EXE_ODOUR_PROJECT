@@ -2,42 +2,34 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main.Repository.Auth;
 using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.Auth;
 
-internal sealed class ResetPasswordRepository : IResetPasswordRepository
+internal sealed class LogoutRepository : ILogoutRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    internal ResetPasswordRepository(Lazy<DbContext> context)
+    internal LogoutRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
 
-    public Task<UserTokenEntity> GetResetPasswordTokenByTokenIdQueryAsync(
-        string tokenId,
+    public Task<bool> IsRefreshTokenFoundQueryAsync(
+        string refreshToken,
+        string refreshTokenId,
         CancellationToken ct
     )
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AsNoTracking()
-            .Where(predicate: token =>
-                token.LoginProvider == tokenId && token.ExpiredAt > DateTime.UtcNow
-            )
-            .Select(selector: token => new UserTokenEntity { UserId = token.UserId })
-            .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserFoundByUserIdQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
-            .AnyAsync(predicate: user => user.UserId == userId, cancellationToken: ct);
+            .AnyAsync(
+                predicate: token =>
+                    token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken),
+                cancellationToken: ct
+            );
     }
 
     public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)
@@ -50,12 +42,8 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
             );
     }
 
-    public async Task<bool> ResetPasswordCommandAsync(
-        UserEntity user,
-        Guid tokenId,
-        string tokenValue,
-        string newPassword,
-        UserManager<UserEntity> userManager,
+    public async Task<bool> RemoveRefreshTokenByItsValueCommandAsync(
+        string refreshToken,
         CancellationToken ct
     )
     {
@@ -71,22 +59,11 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
 
                 try
                 {
-                    // Confirm user email.
-                    var result = await userManager.ResetPasswordAsync(
-                        user: user,
-                        token: tokenValue,
-                        newPassword: newPassword
-                    );
-
-                    if (!result.Succeeded)
-                    {
-                        throw new DbUpdateConcurrencyException();
-                    }
-
-                    // Remove all email confirmed token of given user.
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .Where(predicate: token => token.LoginProvider.Equals(tokenId.ToString()))
+                        .Where(predicate: token =>
+                            token.Value.Equals(refreshToken) && token.Name.Equals("RefreshToken")
+                        )
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
                     await dbTransaction.CommitAsync(cancellationToken: ct);
