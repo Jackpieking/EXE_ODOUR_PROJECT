@@ -1,0 +1,20 @@
+using ODour.Domain.Feature.Main.Repository.Auth;
+
+namespace ODour.Domain.Feature.Main;
+
+public interface IMainUnitOfWork
+{
+    IRegisterAsUserRepository RegisterAsUserRepository { get; }
+
+    IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
+
+    IResendUserConfirmationEmailRepository ResendUserConfirmationEmailRepository { get; }
+
+    IConfirmUserEmailRepository ConfirmUserEmailRepository { get; }
+
+    IForgotPasswordRepository ForgotPasswordRepository { get; }
+
+    IResetPasswordRepository ResetPasswordRepository { get; }
+
+    ILoginRepository LoginRepository { get; }
+}

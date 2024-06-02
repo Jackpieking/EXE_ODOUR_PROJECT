@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Infrastructure\Persistence\Relational\ODour.PostgresRelationalDb\ODour.PostgresRelationalDb.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Persistence\Cache\ODour.RedisCacheDb\ODour.RedisCacheDb.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\IdentityService\ODour.AppIdentityService\ODour.AppIdentityService.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Notification\ODour.AppNotification\ODour.AppNotification.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\BackgroundJob\ODour.AppBackgroundJob\ODour.AppBackgroundJob.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FastEndpoints.Swagger" Version="5.25.0" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

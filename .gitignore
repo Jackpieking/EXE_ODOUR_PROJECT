@@ -396,3 +396,14 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+.config/*
+
+# Setting files
+appsettings.json
+appsettings.Development.json
+src/Server/.vscode/launch.json
+src/Server/.vscode/tasks.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/settings.json
