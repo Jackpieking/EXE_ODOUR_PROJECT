@@ -67,7 +67,7 @@ internal sealed class ConfirmUserEmailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ConfirmUserEmailResponseStatusCode.USER_IS_TEMPORARILY_REMOVED,
+            key: ConfirmUserEmailResponseStatusCode.USER_IS_TEMPORARILY_BANNED,
             value: (_, response) =>
                 new()
                 {

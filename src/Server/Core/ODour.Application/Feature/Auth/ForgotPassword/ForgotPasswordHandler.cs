@@ -56,7 +56,7 @@ internal sealed class ForgotPasswordHandler
         {
             return new()
             {
-                StatusCode = ForgotPasswordResponseStatusCode.USER_IS_TEMPORARILY_REMOVED
+                StatusCode = ForgotPasswordResponseStatusCode.USER_IS_TEMPORARILY_BANNED
             };
         }
 

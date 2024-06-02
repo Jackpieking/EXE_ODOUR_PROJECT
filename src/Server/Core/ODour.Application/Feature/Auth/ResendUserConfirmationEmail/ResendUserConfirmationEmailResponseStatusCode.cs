@@ -7,5 +7,5 @@ public enum ResendUserConfirmationEmailResponseStatusCode
     INPUT_VALIDATION_FAIL,
     OPERATION_SUCCESS,
     OPERATION_FAIL,
-    USER_IS_TEMPORARILY_REMOVED
+    USER_IS_TEMPORARILY_BANNED
 }

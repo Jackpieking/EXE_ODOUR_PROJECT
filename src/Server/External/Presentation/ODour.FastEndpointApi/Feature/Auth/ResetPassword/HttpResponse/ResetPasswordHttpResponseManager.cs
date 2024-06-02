@@ -57,7 +57,7 @@ internal sealed class ResetPasswordHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ResetPasswordResponseStatusCode.USER_IS_TEMPORARILY_REMOVED,
+            key: ResetPasswordResponseStatusCode.USER_IS_TEMPORARILY_BANNED,
             value: (_, response) =>
                 new()
                 {

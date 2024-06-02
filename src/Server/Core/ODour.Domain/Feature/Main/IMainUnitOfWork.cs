@@ -15,4 +15,6 @@ public interface IMainUnitOfWork
     IForgotPasswordRepository ForgotPasswordRepository { get; }
 
     IResetPasswordRepository ResetPasswordRepository { get; }
+
+    ILoginRepository LoginRepository { get; }
 }

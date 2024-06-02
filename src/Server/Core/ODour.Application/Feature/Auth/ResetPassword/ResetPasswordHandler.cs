@@ -84,7 +84,7 @@ public sealed class ResetPasswordHandler
         {
             return new()
             {
-                StatusCode = ResetPasswordResponseStatusCode.USER_IS_TEMPORARILY_REMOVED
+                StatusCode = ResetPasswordResponseStatusCode.USER_IS_TEMPORARILY_BANNED
             };
         }
 

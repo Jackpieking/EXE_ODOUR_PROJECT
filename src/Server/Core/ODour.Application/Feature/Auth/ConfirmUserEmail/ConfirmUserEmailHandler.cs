@@ -85,7 +85,7 @@ internal sealed class ConfirmUserEmailHandler
         {
             return new()
             {
-                StatusCode = ConfirmUserEmailResponseStatusCode.USER_IS_TEMPORARILY_REMOVED
+                StatusCode = ConfirmUserEmailResponseStatusCode.USER_IS_TEMPORARILY_BANNED
             };
         }
 

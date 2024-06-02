@@ -1,23 +1,23 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.ForgotPassword;
+using ODour.Application.Feature.Auth.Login;
 
-namespace ODour.FastEndpointApi.Feature.Auth.ForgotPassword.HttpResponse;
+namespace ODour.FastEndpointApi.Feature.Auth.Login.HttpResponse;
 
-internal sealed class ForgotPasswordHttpResponseManager
+internal sealed class LoginHttpResponseManager
 {
     private readonly Dictionary<
-        ForgotPasswordResponseStatusCode,
-        Func<ForgotPasswordRequest, ForgotPasswordResponse, ForgotPasswordHttpResponse>
+        LoginResponseStatusCode,
+        Func<LoginRequest, LoginResponse, LoginHttpResponse>
     > _dictionary;
 
-    public ForgotPasswordHttpResponseManager()
+    public LoginHttpResponseManager()
     {
         _dictionary = new();
 
         _dictionary.TryAdd(
-            key: ForgotPasswordResponseStatusCode.INPUT_VALIDATION_FAIL,
+            key: LoginResponseStatusCode.INPUT_VALIDATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -27,7 +27,7 @@ internal sealed class ForgotPasswordHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ForgotPasswordResponseStatusCode.OPERATION_FAIL,
+            key: LoginResponseStatusCode.OPERATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -37,17 +37,18 @@ internal sealed class ForgotPasswordHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ForgotPasswordResponseStatusCode.OPERATION_SUCCESS,
+            key: LoginResponseStatusCode.OPERATION_SUCCESS,
             value: (_, response) =>
                 new()
                 {
                     HttpCode = StatusCodes.Status200OK,
                     AppCode = response.StatusCode.ToAppCode(),
+                    Body = response.Body
                 }
         );
 
         _dictionary.TryAdd(
-            key: ForgotPasswordResponseStatusCode.USER_IS_NOT_FOUND,
+            key: LoginResponseStatusCode.USER_IS_NOT_FOUND,
             value: (_, response) =>
                 new()
                 {
@@ -57,7 +58,17 @@ internal sealed class ForgotPasswordHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: ForgotPasswordResponseStatusCode.USER_IS_TEMPORARILY_BANNED,
+            key: LoginResponseStatusCode.USER_IS_TEMPORARILY_LOCKED_OUT,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status429TooManyRequests,
+                    AppCode = response.StatusCode.ToAppCode(),
+                }
+        );
+
+        _dictionary.TryAdd(
+            key: LoginResponseStatusCode.USER_IS_TEMPORARILY_BANNED,
             value: (_, response) =>
                 new()
                 {
@@ -67,11 +78,9 @@ internal sealed class ForgotPasswordHttpResponseManager
         );
     }
 
-    internal Func<
-        ForgotPasswordRequest,
-        ForgotPasswordResponse,
-        ForgotPasswordHttpResponse
-    > Resolve(ForgotPasswordResponseStatusCode statusCode)
+    internal Func<LoginRequest, LoginResponse, LoginHttpResponse> Resolve(
+        LoginResponseStatusCode statusCode
+    )
     {
         return _dictionary[statusCode];
     }

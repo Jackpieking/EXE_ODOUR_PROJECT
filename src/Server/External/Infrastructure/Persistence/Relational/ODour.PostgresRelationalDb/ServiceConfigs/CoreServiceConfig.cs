@@ -25,5 +25,8 @@ internal static class CoreServiceConfig
 
         // ====
         services.MakeScopedLazy<RoleManager<RoleEntity>>();
+
+        // ====
+        services.MakeScopedLazy<SignInManager<UserEntity>>();
     }
 }

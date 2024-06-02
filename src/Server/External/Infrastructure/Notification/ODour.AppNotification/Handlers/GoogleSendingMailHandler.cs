@@ -133,6 +133,56 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
         }
     }
 
+    public async Task<AppMailContent> GetNotifyUserAboutLoginActionMailContentAsync(
+        string to,
+        string subject,
+        DateTime currentTimeInLocal,
+        CancellationToken cancellationToken
+    )
+    {
+        if (string.IsNullOrWhiteSpace(value: to) || string.IsNullOrWhiteSpace(value: subject))
+        {
+            return default;
+        }
+
+        var mailTemplatePath = Path.Combine(
+            path1: "ODOUR_USER_CONFIRMATION",
+            path2: "NOTIFY_USER_ABOUT_LOGIN_ACTION_EMAIL_TEMPLATE.html"
+        );
+
+        var htmlTemplate = await ReadTemplateAsync(
+            templatePath: mailTemplatePath,
+            cancellationToken: cancellationToken
+        );
+
+        var mailBody = new StringBuilder(value: htmlTemplate)
+            .Replace(oldValue: "{current-time}", newValue: currentTimeInLocal.ToString())
+            .ToString();
+
+        return new()
+        {
+            To = to,
+            Subject = subject,
+            Body = mailBody
+        };
+
+        async Task<string> ReadTemplateAsync(
+            string templatePath,
+            CancellationToken cancellationToken
+        )
+        {
+            var templateFilePath = Path.Combine(
+                path1: _webHostEnvironment.WebRootPath,
+                path2: templatePath
+            );
+
+            return await File.ReadAllTextAsync(
+                path: templateFilePath,
+                cancellationToken: cancellationToken
+            );
+        }
+    }
+
     public async Task<AppMailContent> GetUserPasswordChangedSuccessfullyMailContentAsync(
         string to,
         string subject,

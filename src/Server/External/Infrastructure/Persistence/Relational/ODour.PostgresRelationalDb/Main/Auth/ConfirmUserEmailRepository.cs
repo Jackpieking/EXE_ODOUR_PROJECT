@@ -116,16 +116,16 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
     public Task<bool> IsUserFoundByUserIdQueryAsync(Guid userId, CancellationToken ct)
     {
         return _context
-            .Value.Set<UserEntity>()
-            .AnyAsync(predicate: user => user.Id == userId, cancellationToken: ct);
+            .Value.Set<UserDetailEntity>()
+            .AnyAsync(predicate: user => user.UserId == userId, cancellationToken: ct);
     }
 
     public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)
     {
         return _context
-            .Value.Set<UserEntity>()
+            .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user => user.Id == userId && user.UserDetail.IsTemporarilyRemoved,
+                predicate: user => user.UserId == userId && user.IsTemporarilyRemoved,
                 cancellationToken: ct
             );
     }

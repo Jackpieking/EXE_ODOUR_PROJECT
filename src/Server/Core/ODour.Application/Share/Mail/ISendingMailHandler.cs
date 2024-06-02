@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ODour.Application.Share.Mail;
@@ -65,6 +66,13 @@ public interface ISendingMailHandler
     Task<AppMailContent> GetUserConfirmSuccessfullyMailContentAsync(
         string to,
         string subject,
+        CancellationToken cancellationToken
+    );
+
+    Task<AppMailContent> GetNotifyUserAboutLoginActionMailContentAsync(
+        string to,
+        string subject,
+        DateTime currentTimeInLocal,
         CancellationToken cancellationToken
     );
 
