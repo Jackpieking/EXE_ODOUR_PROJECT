@@ -30,7 +30,6 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
         string to,
         string subject,
         string mainLink,
-        string alternateLink,
         CancellationToken cancellationToken
     )
     {
@@ -38,7 +37,6 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
             string.IsNullOrWhiteSpace(value: to)
             || string.IsNullOrWhiteSpace(value: subject)
             || string.IsNullOrWhiteSpace(value: mainLink)
-            || string.IsNullOrWhiteSpace(value: alternateLink)
         )
         {
             return default;
@@ -61,7 +59,7 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
             )
             .Replace(
                 oldValue: "{alternate_link}",
-                newValue: _googleGmailSendingOption.Value.WebUrl + alternateLink
+                newValue: _googleGmailSendingOption.Value.WebUrl + mainLink
             )
             .Replace(oldValue: "{app_email}", newValue: to)
             .ToString();
@@ -93,22 +91,22 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
     public async Task<AppMailContent> GetUserResetPasswordMailContentAsync(
         string to,
         string subject,
-        string resetPasswordToken,
+        string resetPasswordLink,
         CancellationToken cancellationToken
     )
     {
         if (
             string.IsNullOrWhiteSpace(value: to)
             || string.IsNullOrWhiteSpace(value: subject)
-            || string.IsNullOrWhiteSpace(value: resetPasswordToken)
+            || string.IsNullOrWhiteSpace(value: resetPasswordLink)
         )
         {
             return default;
         }
 
         var mailTemplatePath = Path.Combine(
-            path1: "CreateUserAccount",
-            path2: "UserResetPasswordHtmlTemplate.html"
+            path1: "ODOUR_USER_CONFIRMATION",
+            path2: "ODOUR_USER_PASSWORD_CHANGING_EMAIL_TEMPLATE.html"
         );
 
         var htmlTemplate = await ReadTemplateAsync(
@@ -117,7 +115,15 @@ internal sealed class GoogleSendingMailHandler : ISendingMailHandler
         );
 
         var mailBody = new StringBuilder(value: htmlTemplate)
-            .Replace(oldValue: "{passcode}", newValue: resetPasswordToken)
+            .Replace(
+                oldValue: "{main_link}",
+                newValue: _googleGmailSendingOption.Value.WebUrl + resetPasswordLink
+            )
+            .Replace(
+                oldValue: "{alternate_link}",
+                newValue: _googleGmailSendingOption.Value.WebUrl + resetPasswordLink
+            )
+            .Replace(oldValue: "{app_email}", newValue: to)
             .ToString();
 
         return new()

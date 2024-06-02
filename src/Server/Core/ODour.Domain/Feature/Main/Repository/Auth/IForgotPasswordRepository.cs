@@ -5,14 +5,14 @@ using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Feature.Main.Repository.Auth;
 
-public interface IResendUserConfirmationEmailRepository
+public interface IForgotPasswordRepository
 {
-    #region  Query
+    #region Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
     Task<bool> IsUserTemporarilyRemovedQueryAsync(string email, CancellationToken ct);
 
-    Task<bool> HasUserConfirmedEmailQueryAsync(string email, CancellationToken ct);
+    Task<UserEntity> GetUserByEmailQueryAsync(string email, CancellationToken ct);
     #endregion
 
     #region Command

@@ -61,7 +61,9 @@ internal sealed class RegisterAsAdminRepository : IRegisterAsAdminRepository
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct)
+    public Task<AccountStatusEntity> GetPendingConfirmedAccountStatusQueryAsync(
+        CancellationToken ct
+    )
     {
         return _context
             .Value.Set<AccountStatusEntity>()

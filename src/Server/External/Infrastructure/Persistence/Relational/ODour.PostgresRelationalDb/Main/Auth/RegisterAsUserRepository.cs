@@ -72,7 +72,9 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
         return executedTransactionResult;
     }
 
-    public Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct)
+    public Task<AccountStatusEntity> GetPendingConfirmedAccountStatusQueryAsync(
+        CancellationToken ct
+    )
     {
         return _context
             .Value.Set<AccountStatusEntity>()

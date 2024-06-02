@@ -12,7 +12,7 @@ public interface IRegisterAsUserRepository
     #region Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
-    Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct);
+    Task<AccountStatusEntity> GetPendingConfirmedAccountStatusQueryAsync(CancellationToken ct);
     #endregion
 
     #region Command

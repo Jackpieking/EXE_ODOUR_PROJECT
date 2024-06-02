@@ -11,4 +11,6 @@ public interface IMainUnitOfWork
     IResendUserConfirmationEmailRepository ResendUserConfirmationEmailRepository { get; }
 
     IConfirmUserEmailRepository ConfirmUserEmailRepository { get; }
+
+    IForgotPasswordRepository ForgotPasswordRepository { get; }
 }

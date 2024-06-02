@@ -12,7 +12,7 @@ public interface IRegisterAsAdminRepository
     #region Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
-    Task<AccountStatusEntity> GetPendingConfirmedStatusQueryAsync(CancellationToken ct);
+    Task<AccountStatusEntity> GetPendingConfirmedAccountStatusQueryAsync(CancellationToken ct);
 
     Task<RoleEntity> GetAdminRoleQueryAsync(CancellationToken ct);
     #endregion

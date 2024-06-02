@@ -10,11 +10,11 @@ internal sealed class AppDataProtectionHandler : IDataProtectionHandler
     private readonly IDataProtector _protector;
 
     public AppDataProtectionHandler(
-        IDataProtectionProvider dataProtectionProvider,
+        Lazy<IDataProtectionProvider> dataProtectionProvider,
         Lazy<AppBaseProtectionSecurityKeyOption> options
     )
     {
-        _protector = dataProtectionProvider.CreateProtector(purpose: options.Value.Value);
+        _protector = dataProtectionProvider.Value.CreateProtector(purpose: options.Value.Value);
     }
 
     public string Protect(string plaintext)

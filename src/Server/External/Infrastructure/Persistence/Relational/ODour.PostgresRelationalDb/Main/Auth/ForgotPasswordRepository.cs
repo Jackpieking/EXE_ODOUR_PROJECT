@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -8,11 +9,11 @@ using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.Auth;
 
-internal sealed class ResendUserConfirmationEmailRepository : IResendUserConfirmationEmailRepository
+internal sealed class ForgotPasswordRepository : IForgotPasswordRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    internal ResendUserConfirmationEmailRepository(Lazy<DbContext> context)
+    internal ForgotPasswordRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
@@ -22,32 +23,34 @@ internal sealed class ResendUserConfirmationEmailRepository : IResendUserConfirm
         CancellationToken ct
     )
     {
-        try
         {
-            await _context
-                .Value.Set<UserTokenEntity>()
-                .AddRangeAsync(entities: userTokenEntities, cancellationToken: ct);
+            try
+            {
+                await _context
+                    .Value.Set<UserTokenEntity>()
+                    .AddRangeAsync(entities: userTokenEntities, cancellationToken: ct);
 
-            await _context.Value.SaveChangesAsync(cancellationToken: ct);
-        }
-        catch
-        {
-            return false;
-        }
+                await _context.Value.SaveChangesAsync(cancellationToken: ct);
+            }
+            catch
+            {
+                return false;
+            }
 
-        return true;
+            return true;
+        }
     }
 
-    public Task<bool> HasUserConfirmedEmailQueryAsync(string email, CancellationToken ct)
+    public Task<UserEntity> GetUserByEmailQueryAsync(string email, CancellationToken ct)
     {
         email = email.ToUpper();
 
         return _context
             .Value.Set<UserEntity>()
-            .AnyAsync(
-                predicate: user => user.NormalizedEmail.Equals(email) && user.EmailConfirmed,
-                cancellationToken: ct
-            );
+            .AsNoTracking()
+            .Where(predicate: user => user.NormalizedEmail.Equals(email))
+            .Select(selector: user => new UserEntity { Id = user.Id })
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
     public Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct)

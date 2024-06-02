@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using ODour.Application.Share.Common;
-using ODour.Application.Share.DataProtection;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
@@ -16,17 +15,14 @@ internal sealed class ConfirmUserEmailHandler
     : IFeatureHandler<ConfirmUserEmailRequest, ConfirmUserEmailResponse>
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
-    private readonly Lazy<IDataProtectionHandler> _dataProtectionHandler;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
 
     public ConfirmUserEmailHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<IDataProtectionHandler> dataProtectionHandler,
         Lazy<UserManager<UserEntity>> userManager
     )
     {
         _unitOfWork = unitOfWork;
-        _dataProtectionHandler = dataProtectionHandler;
         _userManager = userManager;
     }
 
@@ -89,11 +85,18 @@ internal sealed class ConfirmUserEmailHandler
             };
         }
 
+        // Getting successfully confirmed account status.
+        var accountStatus =
+            await _unitOfWork.Value.ConfirmUserEmailRepository.GetSuccesfullyConfirmedAccountStatusQueryAsync(
+                ct: ct
+            );
+
         // Confirm user email.
         var dbResult =
             await _unitOfWork.Value.ConfirmUserEmailRepository.ConfirmUserEmailCommandAsync(
                 userId: userId,
                 tokenName: tokenName,
+                accountStatusId: accountStatus.Id,
                 userManager: _userManager.Value,
                 ct: ct
             );
@@ -109,9 +112,7 @@ internal sealed class ConfirmUserEmailHandler
 
     private async Task<(Guid, string)> ValidateTokenAsync(string token, CancellationToken ct)
     {
-        var tokens = _dataProtectionHandler.Value.Unprotect(
-            ciphertext: Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token))
-        );
+        var tokens = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token));
 
         if (string.IsNullOrWhiteSpace(value: tokens))
         {

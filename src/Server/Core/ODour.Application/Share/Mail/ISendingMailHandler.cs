@@ -20,9 +20,6 @@ public interface ISendingMailHandler
     /// <param name="mainLink">
     ///     Main mail verification link.
     /// </param>
-    /// <param name="alternateLink">
-    ///     Main mail verification link.
-    /// </param>
     /// <param name="cancellationToken">
     ///     A token that is used for notifying system
     ///     to cancel the current operation when user stop
@@ -35,7 +32,6 @@ public interface ISendingMailHandler
         string to,
         string subject,
         string mainLink,
-        string alternateLink,
         CancellationToken cancellationToken
     );
 
@@ -48,7 +44,7 @@ public interface ISendingMailHandler
     /// <param name="subject">
     ///     Mail subject
     /// </param>
-    /// <param name="resetPasswordToken">
+    /// <param name="resetPasswordLink">
     ///     Mail reset password token.
     /// </param>
     /// <param name="cancellationToken">
@@ -62,7 +58,7 @@ public interface ISendingMailHandler
     Task<AppMailContent> GetUserResetPasswordMailContentAsync(
         string to,
         string subject,
-        string resetPasswordToken,
+        string resetPasswordLink,
         CancellationToken cancellationToken
     );
 

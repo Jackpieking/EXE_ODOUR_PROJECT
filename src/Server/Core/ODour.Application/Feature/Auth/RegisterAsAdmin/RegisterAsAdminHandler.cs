@@ -78,7 +78,7 @@ internal sealed class RegisterAsAdminHandler
 
         // Get account status for new user.
         var newAccountStatus =
-            await _unitOfWork.Value.RegisterAsAdminRepository.GetPendingConfirmedStatusQueryAsync(
+            await _unitOfWork.Value.RegisterAsAdminRepository.GetPendingConfirmedAccountStatusQueryAsync(
                 ct: ct
             );
 
@@ -106,8 +106,7 @@ internal sealed class RegisterAsAdminHandler
             },
             adminTokens: new List<SystemAccountTokenEntity>
             {
-                adminEmailConfirmedTokens["MainToken"],
-                adminEmailConfirmedTokens["AlternateToken"]
+                adminEmailConfirmedTokens["MainToken"]
             },
             ct: ct
         );
@@ -144,9 +143,7 @@ internal sealed class RegisterAsAdminHandler
             Email = command.Email,
             NormalizedEmail = upperCaseEmail,
             EmailConfirmed = false,
-            PasswordHash = _dataProtectionHandler.Value.Protect(
-                plaintext: $"{upperCaseEmail}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
-            ),
+            PasswordHash = _dataProtectionHandler.Value.Protect(plaintext: command.Password),
             AccessFailedCount = default,
             LockoutEnd = CommonConstant.App.MinTimeInUTC,
             IsTemporarilyRemoved = false,
@@ -169,25 +166,7 @@ internal sealed class RegisterAsAdminHandler
             {
                 SystemAccountId = adminId,
                 Name = "EmailConfirmedToken",
-                Value = _dataProtectionHandler.Value.Protect(
-                    plaintext: $"main_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{tokenId}"
-                ),
-                ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = tokenId.ToString()
-            }
-        );
-
-        tokenId = Guid.NewGuid();
-
-        emailConfirmedTokens.Add(
-            key: "AlternateToken",
-            value: new()
-            {
-                SystemAccountId = adminId,
-                Name = "EmailConfirmedToken",
-                Value = _dataProtectionHandler.Value.Protect(
-                    plaintext: $"alternate_confirmation_email_token{CommonConstant.App.DefaultStringSeparator}{tokenId}"
-                ),
+                Value = _dataProtectionHandler.Value.Protect(plaintext: tokenId.ToString()),
                 ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
                 LoginProvider = tokenId.ToString()
             }
@@ -221,16 +200,11 @@ internal sealed class RegisterAsAdminHandler
             input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["MainToken"].Value)
         );
 
-        var alternateToken = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(s: emailConfirmedTokens["AlternateToken"].Value)
-        );
-
         var mainContent =
             await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
                 to: command.Email,
                 subject: "Xác nhận tài khoản",
                 mainLink: $"auth/confirmEmail?token={mainToken}",
-                alternateLink: $"auth/confirmEmail?token={alternateToken}",
                 cancellationToken: ct
             );
         // Try to send mail.

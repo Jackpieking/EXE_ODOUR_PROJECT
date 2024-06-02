@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Share.AccountStatus.Entities;
 using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.Auth;
@@ -21,6 +22,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
     public async Task<bool> ConfirmUserEmailCommandAsync(
         Guid userId,
         string tokenName,
+        Guid accountStatusId,
         UserManager<UserEntity> userManager,
         CancellationToken ct
     )
@@ -62,6 +64,15 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
                         .Where(token => token.UserId == userId && token.Name.Equals(tokenName))
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
+                    await _context
+                        .Value.Set<UserDetailEntity>()
+                        .Where(predicate: user => user.UserId == userId)
+                        .ExecuteUpdateAsync(
+                            setPropertyCalls: builder =>
+                                builder.SetProperty(user => user.AccountStatusId, accountStatusId),
+                            cancellationToken: ct
+                        );
+
                     await dbTransaction.CommitAsync(cancellationToken: ct);
 
                     executedTransactionResult = true;
@@ -73,6 +84,18 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
             });
 
         return executedTransactionResult;
+    }
+
+    public Task<AccountStatusEntity> GetSuccesfullyConfirmedAccountStatusQueryAsync(
+        CancellationToken ct
+    )
+    {
+        return _context
+            .Value.Set<AccountStatusEntity>()
+            .AsNoTracking()
+            .Where(predicate: entity => entity.Name.Equals("Đã xác nhận đăng ký"))
+            .Select(selector: entity => new AccountStatusEntity { Id = entity.Id, })
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
     public Task<UserTokenEntity> GetUserTokenByTokenIdQueryAsync(
