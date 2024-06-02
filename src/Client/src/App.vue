@@ -7,7 +7,7 @@
     <!-- Header -->
     <v-container-fluid class="border">
       <!-- Top header -->
-      <v-toolbar color="blue-grey-darken-4" height="40">
+      <!-- <v-toolbar color="blue-grey-darken-4" height="40">
         <v-container>
           <v-row
             class="d-flex justify-space-between"
@@ -18,7 +18,7 @@
             <v-col>123</v-col>
           </v-row>
         </v-container>
-      </v-toolbar>
+      </v-toolbar> -->
 
       <!-- Bottom header -->
       <v-toolbar height="100" class="bg-white">
@@ -52,10 +52,10 @@
             class="col-3 d-flex justify-space-between"
           >
             <p></p>
-            <a href="https://www.fb.com"
+            <a href=""
               ><i class="fas fa-shopping-cart"></i
             ></a>
-            <a href="https://www.fb.com"><i class="fas fa-user"></i></a>
+            <a href=""><i class="fas fa-user"></i></a>
           </v-col>
         </v-row>
       </v-toolbar>
@@ -66,7 +66,10 @@
       <Shop v-if="ShopSelected" @load-product="loadProduct"></Shop>
       <About v-if="AboutSelected"></About>
       <Contact v-if="ContactSelected"></Contact>
-      <Product v-if="componentName == 'Product'" :item="componentParam"></Product>
+      <Product
+        v-if="componentName == 'Product'"
+        :item="componentParam"
+      ></Product>
       <!-- <Product></Product> -->
     </v-main>
     <Footer></Footer>
@@ -80,7 +83,7 @@ export default {
   name: "app",
   components: {
     Shop,
-    Product
+    Product,
   },
   data: () => ({
     HomeSelected: true,
@@ -88,7 +91,7 @@ export default {
     AboutSelected: false,
     ContactSelected: false,
     componentName: null,
-    componentParam: null
+    componentParam: null,
   }),
   methods: {
     handleProductLoad(productName, productData) {
@@ -106,27 +109,32 @@ export default {
         this.ShopSelected = false;
         this.AboutSelected = false;
         this.ContactSelected = false;
+        this.componentName = null;
       } else if (tab == "Shop") {
         this.ShopSelected = true;
         this.HomeSelected = false;
         this.AboutSelected = false;
         this.ContactSelected = false;
+        this.componentName = null;
       } else if (tab == "About") {
         this.AboutSelected = true;
         this.HomeSelected = false;
         this.ShopSelected = false;
         this.ContactSelected = false;
+        this.componentName = null;
       } else if (tab == "Contact") {
         this.ContactSelected = true;
         this.HomeSelected = false;
         this.ShopSelected = false;
         this.AboutSelected = false;
+        this.componentName = null;
       }
     },
 
     loadProduct(item) {
-      this.componentName = 'Product';
+      this.componentName = "Product";
       this.componentParam = item;
+      this.ShopSelected = false;
     },
   },
   mounted() {
