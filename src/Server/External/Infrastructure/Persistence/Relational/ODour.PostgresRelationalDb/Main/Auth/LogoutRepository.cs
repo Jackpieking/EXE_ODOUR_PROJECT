@@ -27,7 +27,9 @@ internal sealed class LogoutRepository : ILogoutRepository
             .Value.Set<UserTokenEntity>()
             .AnyAsync(
                 predicate: token =>
-                    token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken),
+                    token.LoginProvider.Equals(refreshTokenId)
+                    && token.Value.Equals(refreshToken)
+                    && token.ExpiredAt > DateTime.UtcNow,
                 cancellationToken: ct
             );
     }

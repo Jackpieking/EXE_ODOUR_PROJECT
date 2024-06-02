@@ -7,20 +7,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using ODour.Application.Feature.Auth.Logout;
+using ODour.Application.Feature.Auth.RefreshAccessToken;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
-using ODour.FastEndpointApi.Feature.Auth.Logout.Common;
-using ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
+using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.Common;
+using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.HttpResponse;
 
-namespace ODour.FastEndpointApi.Feature.Auth.Logout.Middlewares;
+namespace ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.Middlewares;
 
-internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutRequest, LogoutStateBag>
+internal sealed class RefreshAccessTokenAuthorizationPreProcessor
+    : PreProcessor<RefreshAccessTokenRequest, RefreshAccessTokenStateBag>
 {
     private readonly Lazy<IServiceScopeFactory> _serviceScopeFactory;
     private readonly Lazy<TokenValidationParameters> _tokenValidationParameters;
 
-    public LogoutAuthorizationPreProcessor(
+    public RefreshAccessTokenAuthorizationPreProcessor(
         Lazy<IServiceScopeFactory> serviceScopeFactory,
         Lazy<TokenValidationParameters> tokenValidationParameters
     )
@@ -30,8 +31,8 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
     }
 
     public override async Task PreProcessAsync(
-        IPreProcessorContext<LogoutRequest> context,
-        LogoutStateBag state,
+        IPreProcessorContext<RefreshAccessTokenRequest> context,
+        RefreshAccessTokenStateBag state,
         CancellationToken ct
     )
     {
@@ -49,7 +50,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
         if (!validateTokenResult.IsValid)
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                 context: context,
                 ct: ct
             );
@@ -65,7 +66,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             #region Part1
             // Does refresh token exist by access token id.
             var isRefreshTokenFound =
-                await unitOfWork.Value.LogoutRepository.IsRefreshTokenFoundQueryAsync(
+                await unitOfWork.Value.RefreshAccessTokenRepository.IsRefreshTokenFoundQueryAsync(
                     refreshToken: context.Request.RefreshToken,
                     refreshTokenId: Guid.Parse(
                             input: context.HttpContext.User.FindFirstValue(
@@ -80,7 +81,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (!isRefreshTokenFound)
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                     context: context,
                     ct: ct
                 );
@@ -104,7 +105,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (Equals(objA: foundUser, objB: default))
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                     context: context,
                     ct: ct
                 );
@@ -116,7 +117,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             #region Part3
             // Is user temporarily removed.
             var isUserTemporarilyRemoved =
-                await unitOfWork.Value.LogoutRepository.IsUserTemporarilyRemovedQueryAsync(
+                await unitOfWork.Value.RefreshAccessTokenRepository.IsUserTemporarilyRemovedQueryAsync(
                     userId: foundUser.Id,
                     ct: ct
                 );
@@ -125,7 +126,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (isUserTemporarilyRemoved)
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                     context: context,
                     ct: ct
                 );
@@ -145,7 +146,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (!isUserInRole)
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                     context: context,
                     ct: ct
                 );
@@ -157,7 +158,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
         catch (FormatException)
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                 context: context,
                 ct: ct
             );
@@ -165,12 +166,12 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
     }
 
     private static Task SendResponseAsync(
-        LogoutResponseStatusCode statusCode,
-        IPreProcessorContext<LogoutRequest> context,
+        RefreshAccessTokenResponseStatusCode statusCode,
+        IPreProcessorContext<RefreshAccessTokenRequest> context,
         CancellationToken ct
     )
     {
-        var httpResponse = LazyLogoutHttpResponseManager
+        var httpResponse = LazyRefreshAccessTokenHttpResponseManager
             .Get()
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: context.Request, arg2: new() { StatusCode = statusCode });

@@ -19,4 +19,6 @@ public interface IMainUnitOfWork
     ILoginRepository LoginRepository { get; }
 
     ILogoutRepository LogoutRepository { get; }
+
+    IRefreshAccessTokenRepository RefreshAccessTokenRepository { get; }
 }

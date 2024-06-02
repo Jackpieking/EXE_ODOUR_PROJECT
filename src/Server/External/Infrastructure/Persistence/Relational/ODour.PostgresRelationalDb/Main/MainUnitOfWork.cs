@@ -16,6 +16,7 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     private IResetPasswordRepository _resetPasswordRepository;
     private ILoginRepository _loginRepository;
     private ILogoutRepository _logoutRepository;
+    private IRefreshAccessTokenRepository _refreshAccessTokenRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -79,5 +80,15 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     public ILogoutRepository LogoutRepository
     {
         get { return _logoutRepository ??= new LogoutRepository(context: _context); }
+    }
+
+    public IRefreshAccessTokenRepository RefreshAccessTokenRepository
+    {
+        get
+        {
+            return _refreshAccessTokenRepository ??= new RefreshAccessTokenRepository(
+                context: _context
+            );
+        }
     }
 }
