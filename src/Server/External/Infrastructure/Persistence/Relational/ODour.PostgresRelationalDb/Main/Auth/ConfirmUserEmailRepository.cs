@@ -51,7 +51,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
                     // Remove all email confirmed token of given user.
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .Where(token => token.LoginProvider == tokenId.ToString())
+                        .Where(predicate: token => token.LoginProvider.Equals(tokenId.ToString()))
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
                     await _context

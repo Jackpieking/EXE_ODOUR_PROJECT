@@ -4,6 +4,7 @@ using FastEndpoints.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using ODour.Application.Share.Common;
 using ODour.Configuration.Presentation.WebApi.Authentication;
 
 namespace ODour.FastEndpointApi.ServiceConfigs;
@@ -37,19 +38,16 @@ internal static class AuthenticationServiceConfig
                 )
             };
 
-        services
-            .AddSingleton(implementationInstance: option)
-            .AddSingleton(implementationInstance: tokenValidationParameters)
-            .AddAuthenticationJwtBearer(
-                signingOptions: jwtSigningOption =>
-                {
-                    jwtSigningOption.SigningKey = option.Jwt.IssuerSigningKey;
-                },
-                bearerOptions: jwtBearerOption =>
-                {
-                    jwtBearerOption.TokenValidationParameters = tokenValidationParameters;
-                    jwtBearerOption.Validate();
-                }
-            );
+        services.AddAuthenticationJwtBearer(
+            signingOptions: jwtSigningOption =>
+            {
+                jwtSigningOption.SigningKey = option.Jwt.IssuerSigningKey;
+            },
+            bearerOptions: jwtBearerOption =>
+            {
+                jwtBearerOption.TokenValidationParameters = tokenValidationParameters;
+                jwtBearerOption.Validate();
+            }
+        );
     }
 }
