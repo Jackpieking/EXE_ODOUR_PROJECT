@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using ODour.Application.Share.Common;
 using ODour.Configuration.Infrastructure.Mail.GoogleGmail;
 using ODour.Configuration.Presentation.WebApi.Authentication;
@@ -15,19 +18,12 @@ internal static class CoreServiceConfig
 {
     internal static void Config(IServiceCollection services, IConfiguration configuration)
     {
-        var a = configuration
-            .GetRequiredSection(key: "SecurityKey")
-            .GetRequiredSection(key: "AppBaseProtection")
-            .Get<AppBaseProtectionSecurityKeyOption>();
+        var option = configuration
+            .GetRequiredSection(key: "Authentication")
+            .Get<JwtAuthenticationOption>();
 
         // Add config from json.
         services
-            .AddSingleton(
-                implementationInstance: configuration
-                    .GetRequiredSection(key: "Authentication")
-                    .Get<JwtAuthenticationOption>()
-            )
-            .MakeSingletonLazy<JwtAuthenticationOption>()
             // ====
             .AddSingleton(
                 implementationInstance: configuration
@@ -51,9 +47,32 @@ internal static class CoreServiceConfig
                     .GetRequiredSection(key: "AdminAccess")
                     .Get<AdminAccessSecurityKeyOption>()
             )
-            .MakeSingletonLazy<AdminAccessSecurityKeyOption>();
+            .MakeSingletonLazy<AdminAccessSecurityKeyOption>()
+            .AddSingleton(
+                new TokenValidationParameters
+                {
+                    ValidateIssuer = option.Jwt.ValidateIssuer,
+                    ValidateAudience = option.Jwt.ValidateAudience,
+                    ValidateLifetime = option.Jwt.ValidateLifetime,
+                    ValidateIssuerSigningKey = option.Jwt.ValidateIssuerSigningKey,
+                    RequireExpirationTime = option.Jwt.RequireExpirationTime,
+                    ValidTypes = option.Jwt.ValidTypes,
+                    ValidIssuer = option.Jwt.ValidIssuer,
+                    ValidAudience = option.Jwt.ValidAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        key: new HMACSHA256(
+                            key: Encoding.UTF8.GetBytes(s: option.Jwt.IssuerSigningKey)
+                        ).Key
+                    )
+                }
+            )
+            .MakeSingletonLazy<TokenValidationParameters>()
+            .AddSingleton(implementationInstance: option)
+            .MakeSingletonLazy<JwtAuthenticationOption>();
 
         // Config other services.
-        services.MakeSingletonLazy<IDataProtectionProvider>();
+        services
+            .MakeSingletonLazy<IDataProtectionProvider>()
+            .MakeSingletonLazy<IServiceScopeFactory>();
     }
 }

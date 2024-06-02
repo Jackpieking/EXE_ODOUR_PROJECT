@@ -12,7 +12,7 @@ internal sealed class LoginRepository : ILoginRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    public LoginRepository(Lazy<DbContext> context)
+    internal LoginRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
