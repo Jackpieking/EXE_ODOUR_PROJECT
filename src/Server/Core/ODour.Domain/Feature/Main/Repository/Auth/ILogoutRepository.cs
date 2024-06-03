@@ -1,13 +1,14 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Feature.Main.Repository.Auth;
 
 public interface ILogoutRepository
 {
     #region Quries
-    Task<bool> IsRefreshTokenFoundQueryAsync(
+    Task<UserTokenEntity> GetRefreshTokenQueryAsync(
         string refreshToken,
         string refreshTokenId,
         CancellationToken ct

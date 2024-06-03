@@ -40,6 +40,8 @@ internal sealed class ConfirmUserEmailValidationPreProcessor
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }

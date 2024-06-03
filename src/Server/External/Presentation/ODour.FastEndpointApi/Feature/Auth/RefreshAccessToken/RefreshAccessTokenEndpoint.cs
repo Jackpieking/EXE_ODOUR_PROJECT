@@ -4,6 +4,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.RefreshAccessToken;
+using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.Common;
 using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.HttpResponse;
 using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.Middlewares;
 
@@ -44,6 +45,10 @@ internal sealed class RefreshAccessTokenEndpoint
         CancellationToken ct
     )
     {
+        var stateBag = ProcessorState<RefreshAccessTokenStateBag>();
+
+        req.SetUserId(userId: stateBag.FoundUserId);
+
         // Get app feature response.
         var appResponse = await req.ExecuteAsync(ct: ct);
 

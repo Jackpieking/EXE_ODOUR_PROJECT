@@ -110,7 +110,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         // Generate access token.
         var newAccessToken = _accessTokenHandler.Value.GenerateSigningToken(
             claims: userClaims,
-            additionalMinutesFromNow: 15
+            additionalSecondsFromNow: 600
         );
 
         foundUser.UserDetail =

@@ -14,12 +14,12 @@ public interface IAccessTokenHandler
     /// <param name="claims">
     ///     List of user claims.
     /// </param>
-    /// <param name="additionalMinutesFromNow">
-    ///     Additional minutes from now.
+    /// <param name="additionalSecondsFromNow">
+    ///     Additional seconds from now.
     /// </param>
     /// <returns>
     ///     A string having format of jwt
     ///     or empty string if validate fail.
     /// </returns>
-    string GenerateSigningToken(IEnumerable<Claim> claims, int additionalMinutesFromNow);
+    string GenerateSigningToken(IEnumerable<Claim> claims, int additionalSecondsFromNow);
 }

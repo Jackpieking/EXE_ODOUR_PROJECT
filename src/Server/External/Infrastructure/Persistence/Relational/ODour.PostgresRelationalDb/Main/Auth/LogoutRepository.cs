@@ -17,7 +17,7 @@ internal sealed class LogoutRepository : ILogoutRepository
         _context = context;
     }
 
-    public Task<bool> IsRefreshTokenFoundQueryAsync(
+    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
         string refreshToken,
         string refreshTokenId,
         CancellationToken ct
@@ -25,13 +25,12 @@ internal sealed class LogoutRepository : ILogoutRepository
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AnyAsync(
-                predicate: token =>
-                    token.LoginProvider.Equals(refreshTokenId)
-                    && token.Value.Equals(refreshToken)
-                    && token.ExpiredAt > DateTime.UtcNow,
-                cancellationToken: ct
-            );
+            .AsNoTracking()
+            .Where(predicate: token =>
+                token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken)
+            )
+            .Select(token => new UserTokenEntity { ExpiredAt = token.ExpiredAt })
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
     public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)

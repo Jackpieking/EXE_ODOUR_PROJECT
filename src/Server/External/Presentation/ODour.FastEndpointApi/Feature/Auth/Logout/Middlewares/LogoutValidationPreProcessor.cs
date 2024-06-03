@@ -36,6 +36,8 @@ internal sealed class LogoutValidationPreProcessor : PreProcessor<LogoutRequest,
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }
