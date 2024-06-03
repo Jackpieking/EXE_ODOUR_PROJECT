@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ internal sealed class RefreshAccessTokenRepository : IRefreshAccessTokenReposito
         _context = context;
     }
 
-    public Task<bool> IsRefreshTokenFoundQueryAsync(
+    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
         string refreshToken,
         string refreshTokenId,
         CancellationToken ct
@@ -24,19 +25,22 @@ internal sealed class RefreshAccessTokenRepository : IRefreshAccessTokenReposito
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AnyAsync(
-                predicate: token =>
-                    token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken),
-                cancellationToken: ct
-            );
+            .AsNoTracking()
+            .Where(predicate: token =>
+                token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken)
+            )
+            .Select(token => new UserTokenEntity { ExpiredAt = token.ExpiredAt })
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)
+    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user => user.UserId == userId && user.IsTemporarilyRemoved,
+                predicate: user =>
+                    user.UserId == userId
+                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
                 cancellationToken: ct
             );
     }

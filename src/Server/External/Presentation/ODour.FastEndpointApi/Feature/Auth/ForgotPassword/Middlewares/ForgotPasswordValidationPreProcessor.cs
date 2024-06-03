@@ -40,6 +40,8 @@ internal sealed class ForgotPasswordValidationPreProcessor
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }

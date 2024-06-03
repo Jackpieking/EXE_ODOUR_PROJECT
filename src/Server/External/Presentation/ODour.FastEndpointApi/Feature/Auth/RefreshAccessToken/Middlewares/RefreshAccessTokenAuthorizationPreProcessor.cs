@@ -46,14 +46,34 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
             validationParameters: _tokenValidationParameters.Value
         );
 
-        // Token is not valid.
+        // Validate access token expiration.
         if (!validateTokenResult.IsValid)
+        {
+            await SendResponseAsync(
+                statusCode: RefreshAccessTokenResponseStatusCode.UN_AUTHORIZED,
+                context: context,
+                ct: ct
+            );
+
+            return;
+        }
+
+        // Token is not expired.
+        if (
+            CheckAccessTokenIsValid(
+                expClaim: context.HttpContext.User.FindFirstValue(
+                    claimType: JwtRegisteredClaimNames.Exp
+                )
+            )
+        )
         {
             await SendResponseAsync(
                 statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                 context: context,
                 ct: ct
             );
+
+            return;
         }
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
@@ -64,9 +84,9 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         try
         {
             #region Part1
-            // Does refresh token exist by access token id.
-            var isRefreshTokenFound =
-                await unitOfWork.Value.RefreshAccessTokenRepository.IsRefreshTokenFoundQueryAsync(
+            // Get refresh token.
+            var refreshToken =
+                await unitOfWork.Value.RefreshAccessTokenRepository.GetRefreshTokenQueryAsync(
                     refreshToken: context.Request.RefreshToken,
                     refreshTokenId: Guid.Parse(
                             input: context.HttpContext.User.FindFirstValue(
@@ -77,11 +97,23 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
                     ct: ct
                 );
 
-            // Refresh token is not found by access token id.
-            if (!isRefreshTokenFound)
+            // Refresh token is not found.
+            if (Equals(objA: refreshToken, objB: default))
             {
                 await SendResponseAsync(
                     statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
+                    context: context,
+                    ct: ct
+                );
+
+                return;
+            }
+
+            // Refresh token is expired.
+            if (refreshToken.ExpiredAt < DateTime.UtcNow)
+            {
+                await SendResponseAsync(
+                    statusCode: RefreshAccessTokenResponseStatusCode.UN_AUTHORIZED,
                     context: context,
                     ct: ct
                 );
@@ -117,7 +149,7 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
             #region Part3
             // Is user temporarily removed.
             var isUserTemporarilyRemoved =
-                await unitOfWork.Value.RefreshAccessTokenRepository.IsUserTemporarilyRemovedQueryAsync(
+                await unitOfWork.Value.RefreshAccessTokenRepository.IsUserBannedQueryAsync(
                     userId: foundUser.Id,
                     ct: ct
                 );
@@ -154,6 +186,9 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
                 return;
             }
             #endregion
+
+            // State some changes.
+            state.FoundUserId = foundUser.Id;
         }
         catch (FormatException)
         {
@@ -178,10 +213,23 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
 
         context.HttpContext.MarkResponseStart();
 
+        /*
+        * Store the real http code of http response into a temporary variable.
+        * Set the http code of http response to default for not serializing.
+        */
+        var httpResponseStatusCode = httpResponse.HttpCode;
+        httpResponse.HttpCode = default;
+
         return context.HttpContext.Response.SendAsync(
             response: httpResponse,
-            statusCode: httpResponse.HttpCode,
+            statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+    }
+
+    private static bool CheckAccessTokenIsValid(string expClaim)
+    {
+        return DateTimeOffset.FromUnixTimeSeconds(seconds: long.Parse(s: expClaim)).UtcDateTime
+            >= DateTime.UtcNow;
     }
 }

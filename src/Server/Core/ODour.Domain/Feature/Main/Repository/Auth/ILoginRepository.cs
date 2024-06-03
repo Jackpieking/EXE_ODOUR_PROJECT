@@ -10,7 +10,7 @@ public interface ILoginRepository
     #region Query
     Task<UserDetailEntity> GetUserInfoWithAvatarOnlyQueryAsync(Guid userId, CancellationToken ct);
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
     #endregion
 
     #region Command

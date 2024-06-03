@@ -40,12 +40,14 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
             .AnyAsync(predicate: user => user.UserId == userId, cancellationToken: ct);
     }
 
-    public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)
+    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user => user.UserId == userId && user.IsTemporarilyRemoved,
+                predicate: user =>
+                    user.UserId == userId
+                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
                 cancellationToken: ct
             );
     }
@@ -71,7 +73,7 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
 
                 try
                 {
-                    // Confirm user email.
+                    // Reset user password.
                     var result = await userManager.ResetPasswordAsync(
                         user: user,
                         token: tokenValue,
@@ -83,10 +85,10 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
                         throw new DbUpdateConcurrencyException();
                     }
 
-                    // Remove all email confirmed token of given user.
+                    // Remove all token of given user.
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .Where(predicate: token => token.LoginProvider.Equals(tokenId.ToString()))
+                        .Where(predicate: token => token.UserId == user.Id)
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
                     await dbTransaction.CommitAsync(cancellationToken: ct);

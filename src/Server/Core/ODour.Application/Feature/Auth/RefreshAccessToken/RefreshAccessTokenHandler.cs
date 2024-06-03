@@ -30,7 +30,9 @@ internal sealed class RefreshAccessTokenHandler
         CancellationToken ct
     )
     {
-        var foundUser = await _userManager.Value.FindByIdAsync(userId: command.RefreshToken);
+        var foundUser = await _userManager.Value.FindByIdAsync(
+            userId: command.GetUserId().ToString()
+        );
 
         var foundUserRoles = await _userManager.Value.GetRolesAsync(user: foundUser);
 
@@ -45,7 +47,7 @@ internal sealed class RefreshAccessTokenHandler
         // Generate access token.
         var newAccessToken = _accessTokenHandler.Value.GenerateSigningToken(
             claims: userClaims,
-            additionalMinutesFromNow: 15
+            additionalSecondsFromNow: 600
         );
 
         return new()

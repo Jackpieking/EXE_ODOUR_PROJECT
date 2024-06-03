@@ -40,6 +40,8 @@ internal sealed class RegisterAsAdminValidationPreProcessor
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }

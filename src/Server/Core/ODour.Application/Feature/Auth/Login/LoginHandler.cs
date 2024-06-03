@@ -67,7 +67,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
 
         // Is user temporarily banned by id.
         var IsUserTemporarilyRemoved =
-            await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserTemporarilyRemovedQueryAsync(
+            await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserBannedQueryAsync(
                 userId: foundUser.Id,
                 ct: ct
             );
@@ -110,7 +110,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         // Generate access token.
         var newAccessToken = _accessTokenHandler.Value.GenerateSigningToken(
             claims: userClaims,
-            additionalMinutesFromNow: 15
+            additionalSecondsFromNow: 600
         );
 
         foundUser.UserDetail =

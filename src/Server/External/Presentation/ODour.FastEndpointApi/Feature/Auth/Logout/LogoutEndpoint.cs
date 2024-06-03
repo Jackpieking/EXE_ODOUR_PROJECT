@@ -4,6 +4,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.Logout;
+using ODour.FastEndpointApi.Feature.Auth.Logout.Common;
 using ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
 using ODour.FastEndpointApi.Feature.Auth.Logout.Middlewares;
 
@@ -26,7 +27,7 @@ internal sealed class LogoutEndpoint : Endpoint<LogoutRequest, LogoutHttpRespons
         {
             summary.Summary = "Endpoint for user logout feature";
             summary.Description = "This endpoint is used for user logout purpose.";
-            summary.ExampleRequest = new() { RefreshToken = "string" };
+            summary.ExampleRequest = new();
             summary.Response<LogoutHttpResponse>(
                 description: "Represent successful operation response.",
                 example: new() { AppCode = LogoutResponseStatusCode.OPERATION_SUCCESS.ToAppCode() }
@@ -39,6 +40,10 @@ internal sealed class LogoutEndpoint : Endpoint<LogoutRequest, LogoutHttpRespons
         CancellationToken ct
     )
     {
+        var stateBag = ProcessorState<LogoutStateBag>();
+
+        req.SetRefreshToken(refreshToken: stateBag.FoundRefreshTokenValue);
+
         // Get app feature response.
         var appResponse = await req.ExecuteAsync(ct: ct);
 

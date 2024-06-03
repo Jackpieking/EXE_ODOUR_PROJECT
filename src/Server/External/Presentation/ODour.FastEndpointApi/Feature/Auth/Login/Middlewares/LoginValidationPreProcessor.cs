@@ -36,6 +36,8 @@ internal sealed class LoginValidationPreProcessor : PreProcessor<LoginRequest, L
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }

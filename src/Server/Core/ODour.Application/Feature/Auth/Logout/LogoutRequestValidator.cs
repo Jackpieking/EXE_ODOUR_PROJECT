@@ -9,7 +9,5 @@ public sealed class LogoutRequestValidator : Validator<LogoutRequest>
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
         RuleLevelCascadeMode = CascadeMode.Stop;
-
-        RuleFor(expression: request => request.RefreshToken).NotEmpty();
     }
 }

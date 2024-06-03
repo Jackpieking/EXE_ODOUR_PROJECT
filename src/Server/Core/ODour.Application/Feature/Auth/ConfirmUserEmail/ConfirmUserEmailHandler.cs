@@ -75,7 +75,7 @@ internal sealed class ConfirmUserEmailHandler
 
         // Is user temporarily removed by id.
         var IsUserTemporarilyRemoved =
-            await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserTemporarilyRemovedQueryAsync(
+            await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserBannedQueryAsync(
                 userId: userId,
                 ct: ct
             );

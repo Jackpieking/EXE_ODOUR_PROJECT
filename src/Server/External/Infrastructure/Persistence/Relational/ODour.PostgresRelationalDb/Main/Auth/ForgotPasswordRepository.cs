@@ -62,7 +62,7 @@ internal sealed class ForgotPasswordRepository : IForgotPasswordRepository
             .AnyAsync(predicate: user => user.NormalizedEmail.Equals(email), cancellationToken: ct);
     }
 
-    public Task<bool> IsUserTemporarilyRemovedQueryAsync(string email, CancellationToken ct)
+    public Task<bool> IsUserBannedQueryAsync(string email, CancellationToken ct)
     {
         email = email.ToUpper();
 
@@ -70,7 +70,8 @@ internal sealed class ForgotPasswordRepository : IForgotPasswordRepository
             .Value.Set<UserEntity>()
             .AnyAsync(
                 predicate: user =>
-                    user.NormalizedEmail.Equals(email) && user.UserDetail.IsTemporarilyRemoved,
+                    user.NormalizedEmail.Equals(email)
+                    && user.UserDetail.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
                 cancellationToken: ct
             );
     }

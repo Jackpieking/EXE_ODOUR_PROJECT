@@ -22,13 +22,13 @@ internal sealed class AppAccessTokenHandler : IAccessTokenHandler
         _jwtAuthenticationOption = jwtAuthenticationOption;
     }
 
-    public string GenerateSigningToken(IEnumerable<Claim> claims, int additionalMinutesFromNow)
+    public string GenerateSigningToken(IEnumerable<Claim> claims, int additionalSecondsFromNow)
     {
         // Validate set of user claims.
         if (
             claims.Equals(obj: Enumerable.Empty<Claim>())
             || Equals(objA: claims, objB: default)
-            || additionalMinutesFromNow <= default(int)
+            || additionalSecondsFromNow <= default(int)
         )
         {
             return string.Empty;
@@ -37,7 +37,7 @@ internal sealed class AppAccessTokenHandler : IAccessTokenHandler
         return JwtBearer.CreateToken(options: option =>
         {
             option.SigningKey = _jwtAuthenticationOption.Value.Jwt.IssuerSigningKey;
-            option.ExpireAt = DateTime.UtcNow.AddMinutes(value: additionalMinutesFromNow);
+            option.ExpireAt = DateTime.UtcNow.AddSeconds(value: additionalSecondsFromNow);
             option.User.Claims.AddRange(collection: claims);
             option.Audience = _jwtAuthenticationOption.Value.Jwt.ValidAudience;
             option.Issuer = _jwtAuthenticationOption.Value.Jwt.ValidIssuer;

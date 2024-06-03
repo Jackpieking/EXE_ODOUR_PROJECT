@@ -65,7 +65,7 @@ internal sealed class ResendUserConfirmationEmailHandler
 
         // Is user temporarily removed by email.
         var IsUserTemporarilyRemoved =
-            await _unitOfWork.Value.ResendUserConfirmationEmailRepository.IsUserTemporarilyRemovedQueryAsync(
+            await _unitOfWork.Value.ResendUserConfirmationEmailRepository.IsUserBannedQueryAsync(
                 email: command.Email,
                 ct: ct
             );

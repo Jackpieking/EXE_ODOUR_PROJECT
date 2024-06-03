@@ -20,7 +20,7 @@ internal sealed class LogoutHandler : IFeatureHandler<LogoutRequest, LogoutRespo
         // Attempt to remove refresh token by its value.
         var dbResult =
             await _unitOfWork.Value.LogoutRepository.RemoveRefreshTokenByItsValueCommandAsync(
-                refreshToken: command.RefreshToken,
+                refreshToken: command.GetRefreshToken(),
                 ct: ct
             );
 

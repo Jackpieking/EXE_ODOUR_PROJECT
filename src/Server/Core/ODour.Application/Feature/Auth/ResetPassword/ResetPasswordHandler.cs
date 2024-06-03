@@ -74,7 +74,7 @@ public sealed class ResetPasswordHandler
 
         // Is user temporarily removed by id.
         var IsUserTemporarilyRemoved =
-            await _unitOfWork.Value.ResetPasswordRepository.IsUserTemporarilyRemovedQueryAsync(
+            await _unitOfWork.Value.ResetPasswordRepository.IsUserBannedQueryAsync(
                 userId: userId,
                 ct: ct
             );

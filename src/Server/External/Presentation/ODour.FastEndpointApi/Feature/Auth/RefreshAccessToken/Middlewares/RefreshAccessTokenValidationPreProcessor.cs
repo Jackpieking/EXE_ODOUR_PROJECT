@@ -40,6 +40,8 @@ internal sealed class RefreshAccessTokenValidationPreProcessor
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }

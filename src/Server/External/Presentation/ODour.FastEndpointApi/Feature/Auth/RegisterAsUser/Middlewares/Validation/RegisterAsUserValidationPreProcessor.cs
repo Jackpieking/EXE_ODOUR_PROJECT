@@ -40,6 +40,8 @@ internal sealed class RegisterAsUserValidationPreProcessor
             );
 
             context.HttpContext.MarkResponseStart();
+
+            return;
         }
     }
 }
