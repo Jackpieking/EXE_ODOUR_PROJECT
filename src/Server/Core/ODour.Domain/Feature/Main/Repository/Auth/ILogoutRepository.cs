@@ -8,13 +8,9 @@ namespace ODour.Domain.Feature.Main.Repository.Auth;
 public interface ILogoutRepository
 {
     #region Quries
-    Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshToken,
-        string refreshTokenId,
-        CancellationToken ct
-    );
+    Task<UserTokenEntity> GetRefreshTokenQueryAsync(string refreshTokenId, CancellationToken ct);
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
     #endregion
 
     #region Commands

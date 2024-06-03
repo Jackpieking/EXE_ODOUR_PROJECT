@@ -51,12 +51,14 @@ internal sealed class LoginRepository : ILoginRepository
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)
+    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user => user.UserId == userId && user.IsTemporarilyRemoved,
+                predicate: user =>
+                    user.UserId == userId
+                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
                 cancellationToken: ct
             );
     }

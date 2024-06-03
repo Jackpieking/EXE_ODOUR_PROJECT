@@ -14,6 +14,6 @@ public interface IRefreshAccessTokenRepository
         CancellationToken ct
     );
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
     #endregion
 }

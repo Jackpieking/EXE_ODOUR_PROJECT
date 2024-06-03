@@ -67,7 +67,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
 
         // Is user temporarily banned by id.
         var IsUserTemporarilyRemoved =
-            await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserTemporarilyRemovedQueryAsync(
+            await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserBannedQueryAsync(
                 userId: foundUser.Id,
                 ct: ct
             );

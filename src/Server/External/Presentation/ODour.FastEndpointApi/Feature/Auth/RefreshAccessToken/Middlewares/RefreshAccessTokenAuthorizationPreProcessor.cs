@@ -149,7 +149,7 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
             #region Part3
             // Is user temporarily removed.
             var isUserTemporarilyRemoved =
-                await unitOfWork.Value.RefreshAccessTokenRepository.IsUserTemporarilyRemovedQueryAsync(
+                await unitOfWork.Value.RefreshAccessTokenRepository.IsUserBannedQueryAsync(
                     userId: foundUser.Id,
                     ct: ct
                 );
@@ -213,9 +213,16 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
 
         context.HttpContext.MarkResponseStart();
 
+        /*
+        * Store the real http code of http response into a temporary variable.
+        * Set the http code of http response to default for not serializing.
+        */
+        var httpResponseStatusCode = httpResponse.HttpCode;
+        httpResponse.HttpCode = default;
+
         return context.HttpContext.Response.SendAsync(
             response: httpResponse,
-            statusCode: httpResponse.HttpCode,
+            statusCode: httpResponseStatusCode,
             cancellation: ct
         );
     }

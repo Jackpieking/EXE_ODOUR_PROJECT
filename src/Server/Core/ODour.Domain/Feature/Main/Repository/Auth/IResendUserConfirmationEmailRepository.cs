@@ -10,7 +10,7 @@ public interface IResendUserConfirmationEmailRepository
     #region  Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(string email, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(string email, CancellationToken ct);
 
     Task<bool> HasUserConfirmedEmailQueryAsync(string email, CancellationToken ct);
     #endregion

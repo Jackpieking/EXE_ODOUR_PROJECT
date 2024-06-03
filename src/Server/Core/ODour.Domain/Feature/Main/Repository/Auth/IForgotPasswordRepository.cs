@@ -10,7 +10,7 @@ public interface IForgotPasswordRepository
     #region Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(string email, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(string email, CancellationToken ct);
 
     Task<UserEntity> GetUserByEmailQueryAsync(string email, CancellationToken ct);
     #endregion

@@ -18,7 +18,6 @@ internal sealed class LogoutRepository : ILogoutRepository
     }
 
     public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshToken,
         string refreshTokenId,
         CancellationToken ct
     )
@@ -26,19 +25,23 @@ internal sealed class LogoutRepository : ILogoutRepository
         return _context
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
-            .Where(predicate: token =>
-                token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken)
-            )
-            .Select(token => new UserTokenEntity { ExpiredAt = token.ExpiredAt })
+            .Where(predicate: token => token.LoginProvider.Equals(refreshTokenId))
+            .Select(token => new UserTokenEntity
+            {
+                Value = token.Value,
+                ExpiredAt = token.ExpiredAt
+            })
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct)
+    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user => user.UserId == userId && user.IsTemporarilyRemoved,
+                predicate: user =>
+                    user.UserId == userId
+                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
                 cancellationToken: ct
             );
     }

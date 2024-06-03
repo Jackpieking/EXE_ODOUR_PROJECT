@@ -12,7 +12,7 @@ public interface IConfirmUserEmailRepository
     #region Query
     Task<bool> IsUserFoundByUserIdQueryAsync(Guid userId, CancellationToken ct);
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
 
     Task<bool> HasUserConfirmedEmailQueryAsync(Guid userId, CancellationToken ct);
 

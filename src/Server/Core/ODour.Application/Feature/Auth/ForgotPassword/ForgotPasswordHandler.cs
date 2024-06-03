@@ -46,7 +46,7 @@ internal sealed class ForgotPasswordHandler
 
         // Is user temporarily removed by email.
         var IsUserTemporarilyRemoved =
-            await _unitOfWork.Value.ForgotPasswordRepository.IsUserTemporarilyRemovedQueryAsync(
+            await _unitOfWork.Value.ForgotPasswordRepository.IsUserBannedQueryAsync(
                 email: command.Email,
                 ct: ct
             );

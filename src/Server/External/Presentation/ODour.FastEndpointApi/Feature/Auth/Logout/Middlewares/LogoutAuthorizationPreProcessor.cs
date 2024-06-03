@@ -74,7 +74,6 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             #region Part1
             // Get refresh token.
             var refreshToken = await unitOfWork.Value.LogoutRepository.GetRefreshTokenQueryAsync(
-                refreshToken: context.Request.RefreshToken,
                 refreshTokenId: Guid.Parse(
                         input: context.HttpContext.User.FindFirstValue(
                             claimType: JwtRegisteredClaimNames.Jti
@@ -136,7 +135,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             #region Part3
             // Is user temporarily removed.
             var isUserTemporarilyRemoved =
-                await unitOfWork.Value.LogoutRepository.IsUserTemporarilyRemovedQueryAsync(
+                await unitOfWork.Value.LogoutRepository.IsUserBannedQueryAsync(
                     userId: foundUser.Id,
                     ct: ct
                 );
@@ -173,6 +172,8 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
                 return;
             }
             #endregion
+
+            state.FoundRefreshTokenValue = refreshToken.Value;
         }
         catch (FormatException)
         {
@@ -197,9 +198,16 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
 
         context.HttpContext.MarkResponseStart();
 
+        /*
+        * Store the real http code of http response into a temporary variable.
+        * Set the http code of http response to default for not serializing.
+        */
+        var httpResponseStatusCode = httpResponse.HttpCode;
+        httpResponse.HttpCode = default;
+
         return context.HttpContext.Response.SendAsync(
             response: httpResponse,
-            statusCode: httpResponse.HttpCode,
+            statusCode: httpResponseStatusCode,
             cancellation: ct
         );
     }

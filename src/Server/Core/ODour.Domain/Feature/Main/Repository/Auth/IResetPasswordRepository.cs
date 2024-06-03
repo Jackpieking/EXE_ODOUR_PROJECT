@@ -11,7 +11,7 @@ public interface IResetPasswordRepository
     #region Query
     Task<bool> IsUserFoundByUserIdQueryAsync(Guid userId, CancellationToken ct);
 
-    Task<bool> IsUserTemporarilyRemovedQueryAsync(Guid userId, CancellationToken ct);
+    Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
 
     Task<UserTokenEntity> GetResetPasswordTokenByTokenIdQueryAsync(
         string tokenId,
