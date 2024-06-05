@@ -46,8 +46,7 @@ internal sealed class LoginEndpoint : Endpoint<LoginRequest, LoginHttpResponse>
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyLoginHttpResponseManager
-            .Get()
+        var httpResponse = LoginHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using ODour.AppBackgroundJob;
 using ODour.AppIdentityService;
 using ODour.Application;
+using ODour.Application.Share.DataProtection;
 using ODour.AppNotification;
 using ODour.Configuration.Presentation.WebApi.SecurityKey;
 using ODour.Domain.Share.Role.Entities;
@@ -62,8 +63,7 @@ await using (var scope = app.Services.CreateAsyncScope())
         context: context,
         userManager: scope.TryResolve<Lazy<UserManager<UserEntity>>>(),
         roleManager: scope.TryResolve<Lazy<RoleManager<RoleEntity>>>(),
-        dataProtectionProvider: scope.TryResolve<Lazy<IDataProtectionProvider>>(),
-        protectionSecurityKeyOption: scope.TryResolve<Lazy<AppBaseProtectionSecurityKeyOption>>(),
+        dataProtectionHandler: scope.TryResolve<Lazy<IDataProtectionHandler>>(),
         cancellationToken: CancellationToken.None
     );
 

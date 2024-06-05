@@ -47,8 +47,7 @@ internal sealed class ResendUserConfirmationEmailEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyResendUserConfirmationEmailHttpResponseManager
-            .Get()
+        var httpResponse = ResendUserConfirmationEmailHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

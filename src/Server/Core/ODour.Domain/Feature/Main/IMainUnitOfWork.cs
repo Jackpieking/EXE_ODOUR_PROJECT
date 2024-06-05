@@ -1,9 +1,11 @@
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.User.Product;
 
 namespace ODour.Domain.Feature.Main;
 
 public interface IMainUnitOfWork
 {
+    #region Auth
     IRegisterAsUserRepository RegisterAsUserRepository { get; }
 
     IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
@@ -21,4 +23,9 @@ public interface IMainUnitOfWork
     ILogoutRepository LogoutRepository { get; }
 
     IRefreshAccessTokenRepository RefreshAccessTokenRepository { get; }
+    #endregion
+
+    #region User.Product
+    IGetAllProductsRepository GetAllProductsRepository { get; }
+    #endregion
 }

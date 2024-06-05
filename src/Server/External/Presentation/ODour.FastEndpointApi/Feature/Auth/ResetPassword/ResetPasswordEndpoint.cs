@@ -49,8 +49,7 @@ internal sealed class ResetPasswordEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyResetPasswordHttpResponseManager
-            .Get()
+        var httpResponse = ResetPasswordHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

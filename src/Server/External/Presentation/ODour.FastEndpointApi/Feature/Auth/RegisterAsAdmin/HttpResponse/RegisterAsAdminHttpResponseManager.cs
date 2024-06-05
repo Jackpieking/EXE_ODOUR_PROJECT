@@ -1,18 +1,18 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.RegisterAsAdmin;
 
 namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsAdmin.HttpResponse;
 
-internal sealed class RegisterAsAdminHttpResponseManager
+internal static class RegisterAsAdminHttpResponseManager
 {
-    private readonly Dictionary<
+    private static ConcurrentDictionary<
         RegisterAsAdminResponseStatusCode,
         Func<RegisterAsAdminRequest, RegisterAsAdminResponse, RegisterAsAdminHttpResponse>
     > _dictionary;
 
-    public RegisterAsAdminHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -67,12 +67,17 @@ internal sealed class RegisterAsAdminHttpResponseManager
         );
     }
 
-    internal Func<
+    internal static Func<
         RegisterAsAdminRequest,
         RegisterAsAdminResponse,
         RegisterAsAdminHttpResponse
     > Resolve(RegisterAsAdminResponseStatusCode statusCode)
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

@@ -18,8 +18,7 @@ internal sealed class ResetPasswordValidationPreProcessor
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyResetPasswordHttpResponseManager
-                .Get()
+            var httpResponse = ResetPasswordHttpResponseManager
                 .Resolve(statusCode: ResetPasswordResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(
                     arg1: context.Request,

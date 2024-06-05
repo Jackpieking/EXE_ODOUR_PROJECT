@@ -10,7 +10,7 @@ using ODour.FastEndpointApi.Feature.Auth.Logout.Middlewares;
 
 namespace ODour.FastEndpointApi.Feature.Auth.Logout;
 
-internal sealed class LogoutEndpoint : Endpoint<LogoutRequest, LogoutHttpResponse>
+internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse>
 {
     public override void Configure()
     {
@@ -36,22 +36,21 @@ internal sealed class LogoutEndpoint : Endpoint<LogoutRequest, LogoutHttpRespons
     }
 
     public override async Task<LogoutHttpResponse> ExecuteAsync(
-        LogoutRequest req,
+        EmptyRequest req,
         CancellationToken ct
     )
     {
         var stateBag = ProcessorState<LogoutStateBag>();
 
-        req.SetRefreshToken(refreshToken: stateBag.FoundRefreshTokenValue);
+        stateBag.AppRequest.SetRefreshToken(refreshToken: stateBag.FoundRefreshTokenValue);
 
         // Get app feature response.
-        var appResponse = await req.ExecuteAsync(ct: ct);
+        var appResponse = await stateBag.AppRequest.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyLogoutHttpResponseManager
-            .Get()
+        var httpResponse = LogoutHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
-            .Invoke(arg1: req, arg2: appResponse);
+            .Invoke(arg1: stateBag.AppRequest, arg2: appResponse);
 
         /*
          * Store the real http code of http response into a temporary variable.

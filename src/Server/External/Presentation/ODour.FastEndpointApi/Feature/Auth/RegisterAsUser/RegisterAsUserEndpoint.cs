@@ -45,8 +45,7 @@ internal sealed class RegisterAsUserEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyRegisterAsUserHttpResponseMapper
-            .Get()
+        var httpResponse = RegisterAsUserHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

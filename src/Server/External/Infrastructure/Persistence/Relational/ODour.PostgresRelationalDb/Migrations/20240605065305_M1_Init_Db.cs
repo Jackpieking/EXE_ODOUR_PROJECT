@@ -556,6 +556,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AppPasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     FirstName = table.Column<string>(
                         type: "character varying(20)",
                         maxLength: 20,

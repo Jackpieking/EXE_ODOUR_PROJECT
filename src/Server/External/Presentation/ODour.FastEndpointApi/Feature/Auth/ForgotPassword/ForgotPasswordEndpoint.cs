@@ -45,8 +45,7 @@ internal sealed class ForgotPasswordEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyForgotPasswordHttpResponseManager
-            .Get()
+        var httpResponse = ForgotPasswordHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

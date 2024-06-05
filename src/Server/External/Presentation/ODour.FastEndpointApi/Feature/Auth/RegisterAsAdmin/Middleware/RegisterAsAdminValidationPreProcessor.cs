@@ -18,8 +18,7 @@ internal sealed class RegisterAsAdminValidationPreProcessor
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyRegisterAsAdminHttpResponseManager
-                .Get()
+            var httpResponse = RegisterAsAdminHttpResponseManager
                 .Resolve(statusCode: RegisterAsAdminResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(
                     arg1: context.Request,

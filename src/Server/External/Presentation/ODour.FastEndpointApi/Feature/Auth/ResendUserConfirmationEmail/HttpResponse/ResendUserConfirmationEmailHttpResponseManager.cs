@@ -1,13 +1,13 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.ResendUserConfirmationEmail;
 
 namespace ODour.FastEndpointApi.Feature.Auth.ResendUserConfirmationEmail.HttpResponse;
 
-internal sealed class ResendUserConfirmationEmailHttpResponseManager
+internal static class ResendUserConfirmationEmailHttpResponseManager
 {
-    private readonly Dictionary<
+    private static ConcurrentDictionary<
         ResendUserConfirmationEmailResponseStatusCode,
         Func<
             ResendUserConfirmationEmailRequest,
@@ -16,7 +16,7 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
         >
     > _dictionary;
 
-    public ResendUserConfirmationEmailHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -81,12 +81,17 @@ internal sealed class ResendUserConfirmationEmailHttpResponseManager
         );
     }
 
-    internal Func<
+    internal static Func<
         ResendUserConfirmationEmailRequest,
         ResendUserConfirmationEmailResponse,
         ResendUserConfirmationEmailHttpResponse
     > Resolve(ResendUserConfirmationEmailResponseStatusCode statusCode)
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

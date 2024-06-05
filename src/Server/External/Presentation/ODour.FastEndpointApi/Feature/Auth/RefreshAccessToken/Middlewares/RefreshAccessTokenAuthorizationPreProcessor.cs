@@ -206,8 +206,7 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         CancellationToken ct
     )
     {
-        var httpResponse = LazyRefreshAccessTokenHttpResponseManager
-            .Get()
+        var httpResponse = RefreshAccessTokenHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: context.Request, arg2: new() { StatusCode = statusCode });
 

@@ -1,18 +1,18 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.Logout;
 
 namespace ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
 
-internal sealed class LogoutHttpResponseManager
+internal static class LogoutHttpResponseManager
 {
-    private readonly Dictionary<
+    private static ConcurrentDictionary<
         LogoutResponseStatusCode,
         Func<LogoutRequest, LogoutResponse, LogoutHttpResponse>
     > _dictionary;
 
-    public LogoutHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -67,10 +67,15 @@ internal sealed class LogoutHttpResponseManager
         );
     }
 
-    internal Func<LogoutRequest, LogoutResponse, LogoutHttpResponse> Resolve(
+    internal static Func<LogoutRequest, LogoutResponse, LogoutHttpResponse> Resolve(
         LogoutResponseStatusCode statusCode
     )
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

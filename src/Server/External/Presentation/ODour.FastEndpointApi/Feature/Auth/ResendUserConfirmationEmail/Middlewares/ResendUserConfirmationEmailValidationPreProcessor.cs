@@ -18,8 +18,7 @@ internal sealed class ResendUserConfirmationEmailValidationPreProcessor
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyResendUserConfirmationEmailHttpResponseManager
-                .Get()
+            var httpResponse = ResendUserConfirmationEmailHttpResponseManager
                 .Resolve(
                     statusCode: ResendUserConfirmationEmailResponseStatusCode.INPUT_VALIDATION_FAIL
                 )

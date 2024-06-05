@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.RefreshAccessToken;
 
@@ -7,12 +7,12 @@ namespace ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.HttpResponse;
 
 internal sealed class RefreshAccessTokenHttpResponseManager
 {
-    private readonly Dictionary<
+    private static ConcurrentDictionary<
         RefreshAccessTokenResponseStatusCode,
         Func<RefreshAccessTokenRequest, RefreshAccessTokenResponse, RefreshAccessTokenHttpResponse>
     > _dictionary;
 
-    public RefreshAccessTokenHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -58,12 +58,17 @@ internal sealed class RefreshAccessTokenHttpResponseManager
         );
     }
 
-    internal Func<
+    internal static Func<
         RefreshAccessTokenRequest,
         RefreshAccessTokenResponse,
         RefreshAccessTokenHttpResponse
     > Resolve(RefreshAccessTokenResponseStatusCode statusCode)
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

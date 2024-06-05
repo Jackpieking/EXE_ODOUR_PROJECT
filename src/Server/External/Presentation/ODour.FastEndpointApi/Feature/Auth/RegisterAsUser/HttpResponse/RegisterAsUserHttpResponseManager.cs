@@ -5,14 +5,14 @@ using ODour.Application.Feature.Auth.RegisterAsUser;
 
 namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.HttpResponse;
 
-internal sealed class RegisterAsUserHttpResponseManager
+internal static class RegisterAsUserHttpResponseManager
 {
-    private readonly Dictionary<
+    private static Dictionary<
         RegisterAsUserResponseStatusCode,
         Func<RegisterAsUserRequest, RegisterAsUserResponse, RegisterAsUserHttpResponse>
     > _dictionary;
 
-    public RegisterAsUserHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -57,12 +57,17 @@ internal sealed class RegisterAsUserHttpResponseManager
         );
     }
 
-    internal Func<
+    internal static Func<
         RegisterAsUserRequest,
         RegisterAsUserResponse,
         RegisterAsUserHttpResponse
     > Resolve(RegisterAsUserResponseStatusCode statusCode)
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

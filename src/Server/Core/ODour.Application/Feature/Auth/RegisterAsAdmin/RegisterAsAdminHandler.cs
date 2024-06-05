@@ -137,7 +137,9 @@ internal sealed class RegisterAsAdminHandler
             Email = command.Email,
             NormalizedEmail = upperCaseEmail,
             EmailConfirmed = false,
-            PasswordHash = _dataProtectionHandler.Value.Protect(plaintext: command.Password),
+            PasswordHash = _dataProtectionHandler.Value.Protect(
+                plaintext: $"{upperCaseEmail}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
+            ),
             AccessFailedCount = default,
             LockoutEnd = CommonConstant.App.MinTimeInUTC,
             IsTemporarilyRemoved = false,

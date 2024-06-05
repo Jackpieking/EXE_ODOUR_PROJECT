@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -15,7 +16,7 @@ using ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
 
 namespace ODour.FastEndpointApi.Feature.Auth.Logout.Middlewares;
 
-internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutRequest, LogoutStateBag>
+internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyRequest, LogoutStateBag>
 {
     private readonly Lazy<IServiceScopeFactory> _serviceScopeFactory;
     private readonly Lazy<TokenValidationParameters> _tokenValidationParameters;
@@ -30,11 +31,14 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
     }
 
     public override async Task PreProcessAsync(
-        IPreProcessorContext<LogoutRequest> context,
+        IPreProcessorContext<EmptyRequest> context,
         LogoutStateBag state,
         CancellationToken ct
     )
     {
+        // Set new app request.
+        state.AppRequest = new();
+
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -57,7 +61,8 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
         {
             await SendResponseAsync(
                 statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
-                context: context,
+                appRequest: state.AppRequest,
+                context: context.HttpContext,
                 ct: ct
             );
 
@@ -87,8 +92,9 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (Equals(objA: refreshToken, objB: default))
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                    context: context,
+                    statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                    appRequest: state.AppRequest,
+                    context: context.HttpContext,
                     ct: ct
                 );
 
@@ -100,7 +106,8 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             {
                 await SendResponseAsync(
                     statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
-                    context: context,
+                    appRequest: state.AppRequest,
+                    context: context.HttpContext,
                     ct: ct
                 );
 
@@ -123,8 +130,9 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (Equals(objA: foundUser, objB: default))
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                    context: context,
+                    statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                    appRequest: state.AppRequest,
+                    context: context.HttpContext,
                     ct: ct
                 );
 
@@ -144,8 +152,9 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (isUserTemporarilyRemoved)
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                    context: context,
+                    statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                    appRequest: state.AppRequest,
+                    context: context.HttpContext,
                     ct: ct
                 );
 
@@ -164,8 +173,9 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             if (!isUserInRole)
             {
                 await SendResponseAsync(
-                    statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                    context: context,
+                    statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                    appRequest: state.AppRequest,
+                    context: context.HttpContext,
                     ct: ct
                 );
 
@@ -173,13 +183,15 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
             }
             #endregion
 
+            // Set new found refresh token value.
             state.FoundRefreshTokenValue = refreshToken.Value;
         }
         catch (FormatException)
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                context: context,
+                statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                appRequest: state.AppRequest,
+                context: context.HttpContext,
                 ct: ct
             );
         }
@@ -187,16 +199,16 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
 
     private static Task SendResponseAsync(
         LogoutResponseStatusCode statusCode,
-        IPreProcessorContext<LogoutRequest> context,
+        LogoutRequest appRequest,
+        HttpContext context,
         CancellationToken ct
     )
     {
-        var httpResponse = LazyLogoutHttpResponseManager
-            .Get()
+        var httpResponse = LogoutHttpResponseManager
             .Resolve(statusCode: statusCode)
-            .Invoke(arg1: context.Request, arg2: new() { StatusCode = statusCode });
+            .Invoke(arg1: appRequest, arg2: new() { StatusCode = statusCode });
 
-        context.HttpContext.MarkResponseStart();
+        context.MarkResponseStart();
 
         /*
         * Store the real http code of http response into a temporary variable.
@@ -205,7 +217,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<LogoutReque
         var httpResponseStatusCode = httpResponse.HttpCode;
         httpResponse.HttpCode = default;
 
-        return context.HttpContext.Response.SendAsync(
+        return context.Response.SendAsync(
             response: httpResponse,
             statusCode: httpResponseStatusCode,
             cancellation: ct

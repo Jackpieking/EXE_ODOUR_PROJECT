@@ -36,7 +36,7 @@ public sealed class ProductEntity : IEntity, ITemporarilyRemovedEntity
     #endregion
 
     #region NavigationCollections
-    public IEnumerable<ProductMediaEntity> ProductImages { get; set; }
+    public IEnumerable<ProductMediaEntity> ProductMedias { get; set; }
 
     public IEnumerable<OrderItemEntity> OrderItems { get; set; }
 

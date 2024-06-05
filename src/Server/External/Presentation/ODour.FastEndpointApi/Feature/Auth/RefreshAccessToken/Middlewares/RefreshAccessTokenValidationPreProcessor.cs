@@ -18,8 +18,7 @@ internal sealed class RefreshAccessTokenValidationPreProcessor
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyRefreshAccessTokenHttpResponseManager
-                .Get()
+            var httpResponse = RefreshAccessTokenHttpResponseManager
                 .Resolve(statusCode: RefreshAccessTokenResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(
                     arg1: context.Request,
