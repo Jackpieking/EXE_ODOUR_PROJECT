@@ -48,8 +48,7 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
         var appResponse = await stateBag.AppRequest.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyLogoutHttpResponseManager
-            .Get()
+        var httpResponse = LogoutHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: stateBag.AppRequest, arg2: appResponse);
 

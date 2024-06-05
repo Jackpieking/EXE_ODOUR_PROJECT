@@ -1,18 +1,18 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.ResetPassword;
 
 namespace ODour.FastEndpointApi.Feature.Auth.ResetPassword.HttpResponse;
 
-internal sealed class ResetPasswordHttpResponseManager
+internal static class ResetPasswordHttpResponseManager
 {
-    private readonly Dictionary<
+    private static ConcurrentDictionary<
         ResetPasswordResponseStatusCode,
         Func<ResetPasswordRequest, ResetPasswordResponse, ResetPasswordHttpResponse>
     > _dictionary;
 
-    public ResetPasswordHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -67,10 +67,17 @@ internal sealed class ResetPasswordHttpResponseManager
         );
     }
 
-    internal Func<ResetPasswordRequest, ResetPasswordResponse, ResetPasswordHttpResponse> Resolve(
-        ResetPasswordResponseStatusCode statusCode
-    )
+    internal static Func<
+        ResetPasswordRequest,
+        ResetPasswordResponse,
+        ResetPasswordHttpResponse
+    > Resolve(ResetPasswordResponseStatusCode statusCode)
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

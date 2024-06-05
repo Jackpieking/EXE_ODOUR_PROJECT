@@ -1,18 +1,18 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.ForgotPassword;
 
 namespace ODour.FastEndpointApi.Feature.Auth.ForgotPassword.HttpResponse;
 
-internal sealed class ForgotPasswordHttpResponseManager
+internal static class ForgotPasswordHttpResponseManager
 {
-    private readonly Dictionary<
+    private static ConcurrentDictionary<
         ForgotPasswordResponseStatusCode,
         Func<ForgotPasswordRequest, ForgotPasswordResponse, ForgotPasswordHttpResponse>
     > _dictionary;
 
-    public ForgotPasswordHttpResponseManager()
+    private static void Init()
     {
         _dictionary = new();
 
@@ -67,12 +67,17 @@ internal sealed class ForgotPasswordHttpResponseManager
         );
     }
 
-    internal Func<
+    internal static Func<
         ForgotPasswordRequest,
         ForgotPasswordResponse,
         ForgotPasswordHttpResponse
     > Resolve(ForgotPasswordResponseStatusCode statusCode)
     {
+        if (Equals(objA: _dictionary, objB: default))
+        {
+            Init();
+        }
+
         return _dictionary[statusCode];
     }
 }

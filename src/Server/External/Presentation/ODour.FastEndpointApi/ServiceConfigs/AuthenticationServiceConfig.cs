@@ -4,7 +4,6 @@ using FastEndpoints.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using ODour.Application.Share.Common;
 using ODour.Configuration.Presentation.WebApi.Authentication;
 
 namespace ODour.FastEndpointApi.ServiceConfigs;

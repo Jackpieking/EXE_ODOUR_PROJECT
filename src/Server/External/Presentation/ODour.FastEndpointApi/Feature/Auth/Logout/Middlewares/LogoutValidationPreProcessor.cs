@@ -17,8 +17,7 @@ internal sealed class LogoutValidationPreProcessor : PreProcessor<EmptyRequest, 
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyLogoutHttpResponseManager
-                .Get()
+            var httpResponse = LogoutHttpResponseManager
                 .Resolve(statusCode: LogoutResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(
                     arg1: state.AppRequest,

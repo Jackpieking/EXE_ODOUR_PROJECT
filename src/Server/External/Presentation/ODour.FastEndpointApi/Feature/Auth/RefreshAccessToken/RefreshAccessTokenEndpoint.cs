@@ -53,8 +53,7 @@ internal sealed class RefreshAccessTokenEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LazyRefreshAccessTokenHttpResponseManager
-            .Get()
+        var httpResponse = RefreshAccessTokenHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

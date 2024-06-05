@@ -2,7 +2,9 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.User.Product;
 using ODour.PostgresRelationalDb.Main.Auth;
+using ODour.PostgresRelationalDb.Main.User.Product;
 
 namespace ODour.PostgresRelationalDb.Main;
 
@@ -17,6 +19,7 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     private ILoginRepository _loginRepository;
     private ILogoutRepository _logoutRepository;
     private IRefreshAccessTokenRepository _refreshAccessTokenRepository;
+    private IGetAllProductsRepository _getAllProductsRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -89,6 +92,14 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
             return _refreshAccessTokenRepository ??= new RefreshAccessTokenRepository(
                 context: _context
             );
+        }
+    }
+
+    public IGetAllProductsRepository GetAllProductsRepository
+    {
+        get
+        {
+            return _getAllProductsRepository ??= new GetAllProductsRepository(context: _context);
         }
     }
 }

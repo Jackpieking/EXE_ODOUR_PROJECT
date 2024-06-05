@@ -2,42 +2,42 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.RegisterAsUser;
-using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.HttpResponse;
-using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.Middlewares.Validation;
+using ODour.Application.Feature.User.Product.GetAllProducts;
+using ODour.FastEndpointApi.Feature.User.Product.GetAllProducts.HttpResponse;
+using ODour.FastEndpointApi.Feature.User.Product.GetAllProducts.Middlewares;
 
-namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsUser;
+namespace ODour.FastEndpointApi.Feature.User.Product.GetAllProducts;
 
-internal sealed class RegisterAsUserEndpoint
-    : Endpoint<RegisterAsUserRequest, RegisterAsUserHttpResponse>
+internal sealed class GetAllProductsEndpoint
+    : Endpoint<GetAllProductsRequest, GetAllProductsHttpResponse>
 {
     public override void Configure()
     {
-        Post(routePatterns: "auth/register");
+        Get(routePatterns: "product");
         AllowAnonymous();
         DontThrowIfValidationFails();
-        PreProcessor<RegisterAsUserValidationPreProcessor>();
+        PreProcessor<GetAllProductsValidationPreProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
         });
         Summary(endpointSummary: summary =>
         {
-            summary.Summary = "Endpoint for user register/signup feature";
-            summary.Description = "This endpoint is used for user register/signup purpose.";
-            summary.ExampleRequest = new() { Email = "string", Password = "string" };
-            summary.Response<RegisterAsUserHttpResponse>(
+            summary.Summary = "Endpoint for get all products feature";
+            summary.Description = "This endpoint is used for get all products purpose.";
+            summary.ExampleRequest = new() { CurrentPage = 0 };
+            summary.Response<GetAllProductsHttpResponse>(
                 description: "Represent successful operation response.",
                 example: new()
                 {
-                    AppCode = RegisterAsUserResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
+                    AppCode = GetAllProductsResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
                 }
             );
         });
     }
 
-    public override async Task<RegisterAsUserHttpResponse> ExecuteAsync(
-        RegisterAsUserRequest req,
+    public override async Task<GetAllProductsHttpResponse> ExecuteAsync(
+        GetAllProductsRequest req,
         CancellationToken ct
     )
     {
@@ -45,7 +45,7 @@ internal sealed class RegisterAsUserEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = RegisterAsUserHttpResponseManager
+        var httpResponse = GetAllProductsHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

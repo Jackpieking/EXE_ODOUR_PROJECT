@@ -17,8 +17,7 @@ internal sealed class LoginValidationPreProcessor : PreProcessor<LoginRequest, L
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyLoginHttpResponseManager
-                .Get()
+            var httpResponse = LoginHttpResponseManager
                 .Resolve(statusCode: LoginResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(
                     arg1: context.Request,

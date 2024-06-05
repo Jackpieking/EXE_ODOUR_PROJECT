@@ -18,8 +18,7 @@ internal sealed class ForgotPasswordValidationPreProcessor
     {
         if (context.HasValidationFailures)
         {
-            var httpResponse = LazyForgotPasswordHttpResponseManager
-                .Get()
+            var httpResponse = ForgotPasswordHttpResponseManager
                 .Resolve(statusCode: ForgotPasswordResponseStatusCode.INPUT_VALIDATION_FAIL)
                 .Invoke(
                     arg1: context.Request,

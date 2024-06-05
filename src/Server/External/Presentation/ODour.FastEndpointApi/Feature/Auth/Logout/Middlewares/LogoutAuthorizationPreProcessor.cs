@@ -204,8 +204,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         CancellationToken ct
     )
     {
-        var httpResponse = LazyLogoutHttpResponseManager
-            .Get()
+        var httpResponse = LogoutHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: appRequest, arg2: new() { StatusCode = statusCode });
 
