@@ -36,7 +36,13 @@ internal sealed class GetAllProductsRepository : IGetAllProductsRepository
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
                 QuantityInStock = product.QuantityInStock,
-                ProductStatus = new() { Name = product.ProductStatus.Name }
+                ProductStatus = new() { Name = product.ProductStatus.Name },
+                ProductMedias = product.ProductMedias.Select(image => new ProductMediaEntity
+                {
+                    UploadOrder = image.UploadOrder,
+                    StorageUrl = image.StorageUrl
+                }),
+                Category = new() { Id = product.Category.Id, Name = product.Category.Name }
             })
             .Skip(count: offset)
             .Take(count: pageSize)

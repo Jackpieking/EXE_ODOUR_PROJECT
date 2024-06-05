@@ -34,8 +34,8 @@ internal sealed class ProductMediaEntityConfiguration : IEntityTypeConfiguration
         #region Relationships
         builder
             .HasOne(navigationExpression: productImage => productImage.Product)
-            .WithMany(navigationExpression: product => product.ProductImages)
-            .HasForeignKey(foreignKeyExpression: productImage => productImage.ProductId)
+            .WithMany(navigationExpression: product => product.ProductMedias)
+            .HasForeignKey(foreignKeyExpression: productMedia => productMedia.ProductId)
             .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
         #endregion
     }

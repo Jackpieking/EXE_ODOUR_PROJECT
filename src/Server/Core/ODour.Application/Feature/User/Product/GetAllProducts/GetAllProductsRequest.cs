@@ -6,5 +6,5 @@ public sealed class GetAllProductsRequest : IFeatureRequest<GetAllProductsRespon
 {
     internal int PageSize { get; } = 9;
 
-    public int CurrentPage { get; init; }
+    public int CurrentPage { get; set; }
 }

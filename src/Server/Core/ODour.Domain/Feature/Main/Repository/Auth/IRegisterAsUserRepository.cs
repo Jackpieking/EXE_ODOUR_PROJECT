@@ -18,6 +18,7 @@ public interface IRegisterAsUserRepository
     #region Command
     Task<bool> CreateAndAddUserToRoleCommandAsync(
         UserEntity newUser,
+        string password,
         IEnumerable<UserTokenEntity> emailConfirmTokens,
         UserManager<UserEntity> userManager,
         CancellationToken ct

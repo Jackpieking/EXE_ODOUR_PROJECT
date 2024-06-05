@@ -18,6 +18,11 @@ internal sealed class UserDetailEntityConfiguration : IEntityTypeConfiguration<U
         builder.HasKey(keyExpression: builder => builder.UserId);
 
         builder
+            .Property(propertyExpression: builder => builder.AppPasswordHash)
+            .HasColumnType(typeName: DatabaseNativeType.TEXT)
+            .IsRequired(required: true);
+
+        builder
             .Property(propertyExpression: builder => builder.AccountStatusId)
             .IsRequired(required: true);
 

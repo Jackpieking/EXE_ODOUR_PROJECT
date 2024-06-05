@@ -9,8 +9,5 @@ public sealed class GetAllProductsRequestValidator : Validator<GetAllProductsReq
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
         ClassLevelCascadeMode = CascadeMode.Stop;
-
-        RuleFor(expression: request => request.CurrentPage)
-            .Must(predicate: currentPage => currentPage > default(int));
     }
 }

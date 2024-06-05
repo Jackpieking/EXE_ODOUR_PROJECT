@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ODour.Application.Share.Features;
 
@@ -13,7 +14,7 @@ public sealed class GetAllProductsResponse : IFeatureResponse
     {
         public IEnumerable<Product> Products { get; init; }
 
-        public long MaxPage { get; init; }
+        public long NumberOfPage { get; init; }
 
         public sealed class Product
         {
@@ -28,6 +29,24 @@ public sealed class GetAllProductsResponse : IFeatureResponse
             public int QuantityInStock { get; init; }
 
             public string ProductStatus { get; init; }
+
+            public ProductCategory Category { get; init; }
+
+            public IEnumerable<ProductMedia> Medias { get; init; }
+
+            public sealed class ProductMedia
+            {
+                public int UploadOrder { get; init; }
+
+                public string StorageUrl { get; init; }
+            }
+
+            public sealed class ProductCategory
+            {
+                public Guid Id { get; init; }
+
+                public string Name { get; init; }
+            }
         }
     }
 }

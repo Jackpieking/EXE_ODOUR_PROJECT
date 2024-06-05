@@ -39,7 +39,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     public async Task<LoginResponse> ExecuteAsync(LoginRequest command, CancellationToken ct)
     {
         // Find user by email.
-        var foundUser = await _userManager.Value.FindByNameAsync(userName: command.Email);
+        var foundUser = await _userManager.Value.FindByEmailAsync(email: command.Email);
 
         // User with email does not exist.
         if (Equals(objA: foundUser, objB: default))
@@ -66,14 +66,14 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         }
 
         // Is user temporarily banned by id.
-        var IsUserTemporarilyRemoved =
+        var IsUserBanned =
             await _unitOfWork.Value.ConfirmUserEmailRepository.IsUserBannedQueryAsync(
                 userId: foundUser.Id,
                 ct: ct
             );
 
         // User with id is temporarily banned.
-        if (IsUserTemporarilyRemoved)
+        if (IsUserBanned)
         {
             return new() { StatusCode = LoginResponseStatusCode.USER_IS_TEMPORARILY_BANNED };
         }

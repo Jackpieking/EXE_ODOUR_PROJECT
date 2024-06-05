@@ -691,6 +691,10 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<Guid>("AccountStatusId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AppPasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1036,7 +1040,7 @@ namespace ODour.PostgresRelationalDb.Migrations
             modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductMediaEntity", b =>
                 {
                     b.HasOne("ODour.Domain.Share.Product.Entities.ProductEntity", "Product")
-                        .WithMany("ProductImages")
+                        .WithMany("ProductMedias")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -1263,7 +1267,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                 {
                     b.Navigation("OrderItems");
 
-                    b.Navigation("ProductImages");
+                    b.Navigation("ProductMedias");
 
                     b.Navigation("ProductVouchers");
                 });

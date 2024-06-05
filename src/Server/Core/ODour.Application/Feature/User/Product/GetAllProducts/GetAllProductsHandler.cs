@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
+using ODour.Domain.Share.Product.Entities;
 
 namespace ODour.Application.Feature.User.Product.GetAllProducts;
 
@@ -37,14 +39,15 @@ internal sealed class GetAllProductsHandler
             numberOfPages += 1;
         }
 
-        // No page is found.
-        if (command.CurrentPage > numberOfPages)
+        // Set current page to the smallest page.
+        if (command.CurrentPage < 1)
         {
-            return new()
-            {
-                StatusCode = GetAllProductsResponseStatusCode.INPUT_VALIDATION_FAIL,
-                Body = new()
-            };
+            command.CurrentPage = 1;
+        }
+        // Set current page to the largest page.
+        else if (command.CurrentPage > numberOfPages)
+        {
+            command.CurrentPage = numberOfPages;
         }
         #endregion
 
@@ -54,21 +57,37 @@ internal sealed class GetAllProductsHandler
             ct: ct
         );
 
+        return GenerateResponse(foundProducts: products, numberOfPages: numberOfPages);
+    }
+
+    private static GetAllProductsResponse GenerateResponse(
+        IEnumerable<ProductEntity> foundProducts,
+        int numberOfPages
+    )
+    {
         return new()
         {
             StatusCode = GetAllProductsResponseStatusCode.OPERATION_SUCCESS,
             Body = new()
             {
-                MaxPage = numberOfPages,
-                Products = products.Select(
-                    product => new GetAllProductsResponse.ResponseBody.Product
+                NumberOfPage = numberOfPages,
+                Products = foundProducts.Select(
+                    selector: product => new GetAllProductsResponse.ResponseBody.Product
                     {
                         Id = product.Id,
                         Name = product.Name,
                         UnitPrice = product.UnitPrice,
                         Description = product.Description,
                         QuantityInStock = product.QuantityInStock,
-                        ProductStatus = product.ProductStatus.Name
+                        ProductStatus = product.ProductStatus.Name,
+                        Category = new() { Id = product.Category.Id, Name = product.Category.Name },
+                        Medias = product.ProductMedias.Select(
+                            selector: image => new GetAllProductsResponse.ResponseBody.Product.ProductMedia
+                            {
+                                UploadOrder = image.UploadOrder,
+                                StorageUrl = image.StorageUrl
+                            }
+                        )
                     }
                 )
             }

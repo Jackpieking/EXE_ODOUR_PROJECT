@@ -22,6 +22,7 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
 
     public async Task<bool> CreateAndAddUserToRoleCommandAsync(
         UserEntity newUser,
+        string password,
         IEnumerable<UserTokenEntity> emailConfirmTokens,
         UserManager<UserEntity> userManager,
         CancellationToken ct
@@ -39,7 +40,7 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
 
                 try
                 {
-                    var result = await userManager.CreateAsync(user: newUser);
+                    var result = await userManager.CreateAsync(user: newUser, password: password);
 
                     if (!result.Succeeded)
                     {

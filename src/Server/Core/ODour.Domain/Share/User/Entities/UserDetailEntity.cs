@@ -12,6 +12,8 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
     public Guid UserId { get; set; }
     #endregion
 
+    public string AppPasswordHash { get; set; }
+
     public string FirstName { get; set; }
 
     public string LastName { get; set; }
@@ -59,6 +61,11 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
         public static class AvatarUrl
         {
             public const int MinLength = 2;
+        }
+
+        public static class AppPasswordHash
+        {
+            public const int MinLength = 1;
         }
     }
     #endregion

@@ -99,6 +99,7 @@ internal sealed class RegisterAsUserHandler
         var dbResult =
             await _unitOfWork.Value.RegisterAsUserRepository.CreateAndAddUserToRoleCommandAsync(
                 newUser: newUser,
+                password: command.Password,
                 emailConfirmTokens: new List<UserTokenEntity>
                 {
                     userEmailConfirmedTokens["MainToken"]
@@ -205,9 +206,6 @@ internal sealed class RegisterAsUserHandler
     {
         newUser.Email = command.Email;
         newUser.UserName = command.Email;
-        newUser.PasswordHash = _dataProtectionHandler.Value.Protect(
-            plaintext: $"{newUser.Email.ToUpper()}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
-        );
         newUser.SecurityStamp = string.Concat(
             values: Array.ConvertAll(
                 array: Guid.NewGuid().ToByteArray(),
@@ -217,6 +215,9 @@ internal sealed class RegisterAsUserHandler
 
         newUser.UserDetail = new()
         {
+            AppPasswordHash = _dataProtectionHandler.Value.Protect(
+                plaintext: $"{newUser.Email.ToUpper()}{CommonConstant.App.DefaultStringSeparator}{command.Password}"
+            ),
             UserId = newUser.Id,
             FirstName = string.Empty,
             LastName = string.Empty,
