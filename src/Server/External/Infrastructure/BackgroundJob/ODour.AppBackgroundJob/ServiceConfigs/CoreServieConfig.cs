@@ -1,7 +1,7 @@
-﻿using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using ODour.AppBackgroundJob.Handler;
-using ODour.Domain.Share.System.Entities;
+using ODour.Application.Share.BackgroundJob;
+using ODour.Application.Share.Common;
 
 namespace ODour.AppBackgroundJob.ServiceConfigs;
 
@@ -12,6 +12,6 @@ internal static class CoreServiceConfig
 {
     internal static void Config(IServiceCollection services)
     {
-        services.AddJobQueues<JobRecordEntity, DefaultJobStorageProvider>();
+        services.AddSingleton<IJobHandler, AppJobHandler>().MakeSingletonLazy<IJobHandler>();
     }
 }

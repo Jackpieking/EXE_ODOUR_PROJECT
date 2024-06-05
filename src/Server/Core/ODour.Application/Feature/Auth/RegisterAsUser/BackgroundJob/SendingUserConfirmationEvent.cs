@@ -2,7 +2,7 @@ using FastEndpoints;
 
 namespace ODour.Application.Feature.Auth.RegisterAsUser.BackgroundJob;
 
-public sealed class SendingUserConfirmationCommand : ICommand
+public sealed class SendingUserConfirmationEvent : IEvent
 {
     public string MainTokenValue { get; init; }
 

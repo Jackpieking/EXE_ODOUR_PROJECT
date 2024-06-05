@@ -193,15 +193,12 @@ internal sealed class RegisterAsAdminHandler
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
+        var sendingEmailEvent = new BackgroundJob.SendingUserConfirmationEvent
         {
             MainTokenValue = emailConfirmedTokens["MainToken"].Value,
             Email = command.Email
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
-            ct: ct
-        );
+        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
     }
 }

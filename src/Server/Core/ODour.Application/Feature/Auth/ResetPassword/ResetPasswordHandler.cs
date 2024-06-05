@@ -180,14 +180,11 @@ public sealed class ResetPasswordHandler
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendSuccessfullyUserResetPasswordEmailCommand
+        var sendingEmailEvent = new BackgroundJob.SendSuccessfullyUserResetPasswordEmailEvent
         {
             Email = email
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
-            ct: ct
-        );
+        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
     }
 }

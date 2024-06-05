@@ -3,8 +3,9 @@ using System.Text;
 using System.Threading;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Hangfire;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +16,10 @@ using ODour.AppIdentityService;
 using ODour.Application;
 using ODour.Application.Share.DataProtection;
 using ODour.AppNotification;
-using ODour.Configuration.Presentation.WebApi.SecurityKey;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi;
+using ODour.FastEndpointApi.Shared.Authorization;
 using ODour.FastEndpointApi.Shared.Middlewares;
 using ODour.PostgresRelationalDb;
 using ODour.PostgresRelationalDb.Data;
@@ -40,7 +41,7 @@ services.AddApplication();
 services.AddWebApi(configuration: configuration);
 services.AddAppIdentityService();
 services.AddAppNotification();
-services.AddAppBackgroundJob();
+services.AddAppBackgroundJob(configuration: configuration);
 
 var app = builder.Build();
 
@@ -81,18 +82,23 @@ app.UseAppExceptionHandler()
     .UseAuthorization()
     .UseResponseCaching()
     .UseFastEndpoints()
-    .UseJobQueues(options: option =>
-    {
-        option.ExecutionTimeLimit = TimeSpan.FromSeconds(value: 12);
-        option.MaxConcurrency = 2;
-        option.StorageProbeDelay = TimeSpan.FromSeconds(value: 2);
-    })
     .UseSwaggerGen()
     .UseSwaggerUi(configure: options =>
     {
         options.Path = string.Empty;
         options.DefaultModelsExpandDepth = -1;
-    });
+    })
+    .UseHangfireDashboard(
+        options: new()
+        {
+            DashboardTitle = "ODour Hangfire Dashboard",
+            DisplayStorageConnectionString = false,
+            Authorization = new[]
+            {
+                app.Services.GetRequiredService<IDashboardAuthorizationFilter>()
+            }
+        }
+    );
 
 // Clear all current allocations.
 GC.Collect();

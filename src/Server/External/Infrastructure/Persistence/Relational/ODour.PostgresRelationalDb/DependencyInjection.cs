@@ -12,10 +12,7 @@ public static class DependencyInjection
     )
     {
         CoreServiceConfig.Config(services: services);
-        ODourMainDbContextServiceConfig.Config(
-            services: services,
-            configurationManager: configuration
-        );
+        ODourMainDbContextServiceConfig.Config(services: services, configuration: configuration);
         IdentityServiceConfig.Config(services: services, configuration: configuration);
     }
 }

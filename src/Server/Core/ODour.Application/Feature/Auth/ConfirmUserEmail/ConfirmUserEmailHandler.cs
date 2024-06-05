@@ -156,14 +156,11 @@ internal sealed class ConfirmUserEmailHandler
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendUserConfirmSuccessfullyEmailCommand
+        var sendingEmailEvent = new BackgroundJob.SendUserConfirmSuccessfullyEmailEvent
         {
             Email = email
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
-            ct: ct
-        );
+        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using ODour.Application.Share.Common;
 using ODour.Configuration.Infrastructure.Mail.GoogleGmail;
 using ODour.Configuration.Presentation.WebApi.Authentication;
 using ODour.Configuration.Presentation.WebApi.SecurityKey;
+using ODour.FastEndpointApi.Shared.Authorization;
 
 namespace ODour.FastEndpointApi.ServiceConfigs;
 
@@ -74,5 +76,11 @@ internal static class CoreServiceConfig
         services
             .MakeSingletonLazy<IDataProtectionProvider>()
             .MakeSingletonLazy<IServiceScopeFactory>();
+
+        // Authorization.
+        services.AddSingleton<
+            IDashboardAuthorizationFilter,
+            HangfireDashboardAdminKeyAuthorizationFilter
+        >();
     }
 }

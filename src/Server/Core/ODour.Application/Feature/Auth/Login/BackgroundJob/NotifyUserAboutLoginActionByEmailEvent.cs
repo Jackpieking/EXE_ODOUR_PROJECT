@@ -3,7 +3,7 @@ using FastEndpoints;
 
 namespace ODour.Application.Feature.Auth.Login.BackgroundJob;
 
-public sealed class NotifyUserAboutLoginActionByEmailCommand : ICommand
+public sealed class NotifyUserAboutLoginActionByEmailEvent : IEvent
 {
     public string Email { get; init; }
 

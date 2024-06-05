@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Application.Share.Tokens;
 using ODour.Domain.Feature.Main;
@@ -20,13 +21,15 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     private readonly Lazy<SignInManager<UserEntity>> _signInManager;
     private readonly Lazy<IRefreshTokenHandler> _refreshTokenHandler;
     private readonly Lazy<IAccessTokenHandler> _accessTokenHandler;
+    private readonly Lazy<IJobHandler> _jobHandler;
 
     public LoginHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
         Lazy<UserManager<UserEntity>> userManager,
         Lazy<SignInManager<UserEntity>> signInManager,
         Lazy<IRefreshTokenHandler> refreshTokenHandler,
-        Lazy<IAccessTokenHandler> accessTokenHandler
+        Lazy<IAccessTokenHandler> accessTokenHandler,
+        Lazy<IJobHandler> jobHandler
     )
     {
         _unitOfWork = unitOfWork;
@@ -34,6 +37,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         _signInManager = signInManager;
         _refreshTokenHandler = refreshTokenHandler;
         _accessTokenHandler = accessTokenHandler;
+        _jobHandler = jobHandler;
     }
 
     public async Task<LoginResponse> ExecuteAsync(LoginRequest command, CancellationToken ct)
@@ -145,16 +149,13 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.NotifyUserAboutLoginActionByEmailCommand
+        var sendingEmailEvent = new BackgroundJob.NotifyUserAboutLoginActionByEmailEvent
         {
             Email = email,
             CurrentTimeInUtc = DateTime.UtcNow
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
-            ct: ct
-        );
+        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
     }
 
     private UserTokenEntity InitNewRefreshToken(List<Claim> userClaims, bool isRememberMe)
