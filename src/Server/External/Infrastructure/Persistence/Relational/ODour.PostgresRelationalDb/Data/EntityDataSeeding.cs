@@ -984,6 +984,351 @@ public static class EntityDataSeeding
                             "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD22_ctzob2.jpg"
                     }
                 }
+            },
+            new()
+            {
+                Id = "LD23",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "CHANEL CHANCE",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\", \"Powdery - hương phấn.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Lục bình, hạt tiêu hồng, iris và dứa.\",\"HUONG_GIUA\":\"Cam quýt và hoa nhài.\",\"HUONG_CUOI\":\"Cỏ vetiver, vani, hoắc hương và xạ hương trắng.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "d8bc6f7e-5d0f-437c-879f-a290504ffb8f"),
+                        ProductId = "LD23",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD23_zhnvf5.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD24",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "J'ADORE DIOR",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort, tiêu hồng.\",\"HUONG_GIUA\":\"Hoa huệ, Hoa nhài Sambac, Ylang-Ylang, Lily-of-the-Valley, Hoa hồng.\",\"HUONG_CUOI\":\"Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "d3c4d8da-6062-49aa-9de5-fdef37d3f85d"),
+                        ProductId = "LD24",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD24_ecxlig.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD25",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "LANCOME LA VIE EST BELLE",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "8a92cdae-a420-4366-86ec-02326bf272ba"),
+                        ProductId = "LD25",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD25_rjmyrg.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD25",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "LANCOME LA VIE EST BELLE",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "8a92cdae-a420-4366-86ec-02326bf272ba"),
+                        ProductId = "LD25",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD25_rjmyrg.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD26",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "SCANDAL",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Chypre Floral - Hương hoa cỏ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Đỏ, Quýt.\",\"HUONG_GIUA\":\"Mật ong, Hoa nhài, Hoa cam, Đào, Hoa Sơn Chi.\",\"HUONG_CUOI\":\"Sáp ong, Caramel, Hoắc Hương, Cam Thảo.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "3622d6e4-56e4-4af6-8999-6fb7f130cdb0"),
+                        ProductId = "LD26",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567656/ODOUR_EXE/PRODUCT/LD26_gatspc.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD27",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "BEYONCE' HEAT RUSH",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\", \"Woody - tông mùi gỗ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam máu, anh đào và chanh dây.\",\"HUONG_GIUA\":\"Hoa phong lan, hoa dâm bụt và hoa xoài.\",\"HUONG_CUOI\":\"Gỗ tếch, hổ phách và xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "8842361c-f926-4ec3-ae66-f6347eb80217"),
+                        ProductId = "LD27",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD27_x3886v.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD28",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "NUDE BY RIHANNA",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Woody - tông mùi gỗ.\", \"Fruity - hương trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Ổi, cam mandarin, lê.\",\"HUONG_GIUA\":\"Hoa cam, hoa nhài, hoa dành dành.\",\"HUONG_CUOI\":\"Gỗ đàn hương, lan vani, xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "56073baa-f547-4ee5-99c6-7d9b0fef5b37"),
+                        ProductId = "LD28",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567658/ODOUR_EXE/PRODUCT/LD28_aqvmch.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD29",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "MARC JACOBS",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Hương hoa cỏ phương Đông - Oriental Floral.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả mận, hoa diên vĩ, nghệ tây.\",\"HUONG_GIUA\":\"Hoa hồng Bulgary, hoa nhài Sambac, hoa diên vĩ(Orris).\",\"HUONG_CUOI\":\"Hổ phách, cỏ hương bài, giấy cói.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "29791d5c-d984-4234-853c-8e7e3d0b8f17"),
+                        ProductId = "LD29",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567658/ODOUR_EXE/PRODUCT/LD29_hk6lwp.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD30",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "MY BURBERRY BLACK",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\", \"Floral - tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa nhài.\",\"HUONG_GIUA\":\"Keo hoa hồng và mật hoa đào.\",\"HUONG_CUOI\":\"Hổ phách, hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "f7cdaaa7-3864-42f4-96b6-d06a0997cbe3"),
+                        ProductId = "LD30",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567658/ODOUR_EXE/PRODUCT/LD30_nqeqyx.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD31",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "GOOD GIRL",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hạnh nhân, cà phê.\",\"HUONG_GIUA\":\"Hoa nhài Sambac, hoa huệ trắng.\",\"HUONG_CUOI\":\"Đậu tonka, cacao.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "fec7444a-b599-4240-9d88-fefb05a9f532"),
+                        ProductId = "LD31",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567659/ODOUR_EXE/PRODUCT/LD31_j4vcjw.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD32",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "CHANEL COCO",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\", \"Citrus - tông mùi cam chanh tươi mát.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam, quýt, hoa cam, cam bergamot.\",\"HUONG_GIUA\":\"Hoa mimosa, hoa nhài, hoa hồng, hoa ngọc lan tây.\",\"HUONG_CUOI\":\"Đậu tonka, cây patchouli, nhựa thơm tổng hợp, vani, cỏ vetiver, xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "3c671632-0046-4999-8869-53ef833d56dd"),
+                        ProductId = "LD32",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567658/ODOUR_EXE/PRODUCT/LD32_brzhj5.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD33",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "BLACK OPIUM",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental Vanilla - tông mùi Phương Đông + vanilla.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa cam và lê.\",\"HUONG_GIUA\":\"Đậu Tonka, hoa phong lữ, Ambroxan.\",\"HUONG_CUOI\":\"Gỗ của hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "3a30f8f6-ac56-4b0c-b1c9-40429493090c"),
+                        ProductId = "LD33",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567659/ODOUR_EXE/PRODUCT/LD33_i5mnrc.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD34",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "MIDNIGHT FANTASY",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Floral - Tông hương hoa trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Mận, Cherry, Mâm Xôi Đỏ.\",\"HUONG_GIUA\":\"Hoa Phong Lan, Hoa Diên Vĩ, Hoa Lan Nam Phi.\",\"HUONG_CUOI\":\"Vani, Hổ phách, xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 20 giờ.\",\"TREN_VAI\":\"3 - 4 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "392363bf-bded-48b7-aa5f-725758d30f65"),
+                        ProductId = "LD34",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567659/ODOUR_EXE/PRODUCT/LD34_rvb7ho.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD35",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "BACCARAT ROUGE 540",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Oriental Floral - Hương hoa cỏ Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Nghệ tây và Hạnh nhân đắng.\",\"HUONG_GIUA\":\"Gỗ tuyết tùng & Hoa nhài Ai cập.\",\"HUONG_CUOI\":\"Long diên hương, Xạ hương và hương gỗ.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "970ce716-ed10-4a82-bc28-863730112684"),
+                        ProductId = "LD35",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567660/ODOUR_EXE/PRODUCT/LD35_k3gk2q.jpg"
+                    }
+                }
+            },
+            new()
+            {
+                Id = "LD36",
+                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
+                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
+                Name = "LELABO ANOTHER 13",
+                UnitPrice = 199_000,
+                Description =
+                    "{\"NHOM_HUONG\":[\"Hương gỗ phương Đông.\"],\"TANG_HUONG\":\"Hương Iso E Super, Hương Amyl Salicylate, Xạ hương, Long diên hương, Cây vông vang, Quả lê.\"}",
+                QuantityInStock = 10,
+                IsTemporarilyRemoved = false,
+                ProductMedias = new List<ProductMediaEntity>
+                {
+                    new()
+                    {
+                        Id = Guid.Parse(input: "03c12343-68ac-4109-bd25-35c8162db6d2"),
+                        ProductId = "LD36",
+                        UploadOrder = 1,
+                        StorageUrl =
+                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567660/ODOUR_EXE/PRODUCT/LD36_qhkijr.jpg"
+                    }
+                }
             }
         };
 
