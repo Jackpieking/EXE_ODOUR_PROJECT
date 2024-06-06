@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
 using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Mail;
 
@@ -11,15 +10,15 @@ namespace ODour.Application.Feature.Auth.ResetPassword.BackgroundJob;
 internal sealed class SendSuccessfullyUserResetPasswordEmailEventHandler
     : IEventHandler<SendSuccessfullyUserResetPasswordEmailEvent>
 {
-    private readonly Lazy<IServiceScopeFactory> _serviceScopeFactory;
+    private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
     private readonly Lazy<IJobHandler> _jobHandler;
 
     public SendSuccessfullyUserResetPasswordEmailEventHandler(
-        Lazy<IServiceScopeFactory> serviceScopeFactory,
+        Lazy<ISendingMailHandler> sendingMailHandler,
         Lazy<IJobHandler> jobHandler
     )
     {
-        _serviceScopeFactory = serviceScopeFactory;
+        _sendingMailHandler = sendingMailHandler;
         _jobHandler = jobHandler;
     }
 
@@ -28,14 +27,8 @@ internal sealed class SendSuccessfullyUserResetPasswordEmailEventHandler
         CancellationToken ct
     )
     {
-        await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
-
-        var sendingMailHandler = scope.ServiceProvider.GetRequiredService<
-            Lazy<ISendingMailHandler>
-        >();
-
         var mailContent =
-            await sendingMailHandler.Value.GetUserPasswordChangedSuccessfullyMailContentAsync(
+            await _sendingMailHandler.Value.GetUserPasswordChangedSuccessfullyMailContentAsync(
                 to: eventModel.Email,
                 subject: "Đổi mật khẩu thành công",
                 cancellationToken: ct
@@ -43,7 +36,7 @@ internal sealed class SendSuccessfullyUserResetPasswordEmailEventHandler
 
         // Try to send mail.
         _jobHandler.Value.ExecuteOneTimeJob(
-            methodCall: () => sendingMailHandler.Value.SendAsync(mailContent, ct)
+            methodCall: () => _sendingMailHandler.Value.SendAsync(mailContent, ct)
         );
     }
 }

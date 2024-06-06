@@ -19,7 +19,6 @@ using ODour.AppNotification;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi;
-using ODour.FastEndpointApi.Shared.Authorization;
 using ODour.FastEndpointApi.Shared.Middlewares;
 using ODour.PostgresRelationalDb;
 using ODour.PostgresRelationalDb.Data;

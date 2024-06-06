@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
 using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Mail;
 
@@ -11,15 +10,15 @@ namespace ODour.Application.Feature.Auth.Login.BackgroundJob;
 internal sealed class NotifyUserAboutLoginActionByEmailEventHandler
     : IEventHandler<NotifyUserAboutLoginActionByEmailEvent>
 {
-    private readonly Lazy<IServiceScopeFactory> _serviceScopeFactory;
     private readonly Lazy<IJobHandler> _jobHandler;
+    private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
     public NotifyUserAboutLoginActionByEmailEventHandler(
-        Lazy<IServiceScopeFactory> serviceScopeFactory,
+        Lazy<ISendingMailHandler> sendingMailHandler,
         Lazy<IJobHandler> jobHandler
     )
     {
-        _serviceScopeFactory = serviceScopeFactory;
+        _sendingMailHandler = sendingMailHandler;
         _jobHandler = jobHandler;
     }
 
@@ -28,14 +27,8 @@ internal sealed class NotifyUserAboutLoginActionByEmailEventHandler
         CancellationToken ct
     )
     {
-        await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
-
-        var sendingMailHandler = scope.ServiceProvider.GetRequiredService<
-            Lazy<ISendingMailHandler>
-        >();
-
         var mailContent =
-            await sendingMailHandler.Value.GetNotifyUserAboutLoginActionMailContentAsync(
+            await _sendingMailHandler.Value.GetNotifyUserAboutLoginActionMailContentAsync(
                 to: eventModel.Email,
                 subject: "Cảnh báo đăng nhập",
                 currentTimeInLocal: TimeZoneInfo.ConvertTimeFromUtc(
@@ -49,7 +42,7 @@ internal sealed class NotifyUserAboutLoginActionByEmailEventHandler
 
         // Try to send mail.
         _jobHandler.Value.ExecuteOneTimeJob(
-            methodCall: () => sendingMailHandler.Value.SendAsync(mailContent, ct)
+            methodCall: () => _sendingMailHandler.Value.SendAsync(mailContent, ct)
         );
     }
 }
