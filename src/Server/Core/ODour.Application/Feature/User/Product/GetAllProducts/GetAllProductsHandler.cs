@@ -77,14 +77,11 @@ internal sealed class GetAllProductsHandler
                         Id = product.Id,
                         Name = product.Name,
                         UnitPrice = product.UnitPrice,
-                        Description = product.Description,
-                        QuantityInStock = product.QuantityInStock,
                         ProductStatus = product.ProductStatus.Name,
                         Category = new() { Id = product.Category.Id, Name = product.Category.Name },
                         Medias = product.ProductMedias.Select(
                             selector: image => new GetAllProductsResponse.ResponseBody.Product.ProductMedia
                             {
-                                UploadOrder = image.UploadOrder,
                                 StorageUrl = image.StorageUrl
                             }
                         )

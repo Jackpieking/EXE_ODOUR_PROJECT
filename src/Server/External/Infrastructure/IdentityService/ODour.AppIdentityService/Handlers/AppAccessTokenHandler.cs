@@ -13,7 +13,7 @@ namespace ODour.AppIdentityService.Handlers;
 /// <summary>
 ///     Implementation of jwt generator interface.
 /// </summary>
-internal sealed class AppAccessTokenHandler : IAccessTokenHandler
+public sealed class AppAccessTokenHandler : IAccessTokenHandler
 {
     private readonly Lazy<JwtAuthenticationOption> _jwtAuthenticationOption;
 

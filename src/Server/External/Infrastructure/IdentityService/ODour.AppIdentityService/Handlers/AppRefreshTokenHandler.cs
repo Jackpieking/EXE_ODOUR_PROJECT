@@ -7,7 +7,7 @@ namespace ODour.AppIdentityService.Handlers;
 /// <summary>
 ///     Implementation refresh token generator interface.
 /// </summary>
-internal sealed class AppRefreshTokenHandler : IRefreshTokenHandler
+public sealed class AppRefreshTokenHandler : IRefreshTokenHandler
 {
     public string Generate(int length)
     {

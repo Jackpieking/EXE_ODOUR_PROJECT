@@ -12,7 +12,7 @@ using ODour.Configuration.Infrastructure.Mail.GoogleGmail;
 
 namespace ODour.AppNotification.Handlers;
 
-internal sealed class GoogleSendingMailHandler : ISendingMailHandler
+public sealed class GoogleSendingMailHandler : ISendingMailHandler
 {
     private readonly Lazy<GoogleGmailSendingOption> _googleGmailSendingOption;
     private readonly IWebHostEnvironment _webHostEnvironment;

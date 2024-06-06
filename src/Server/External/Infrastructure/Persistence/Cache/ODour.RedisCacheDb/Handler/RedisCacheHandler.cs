@@ -10,11 +10,11 @@ namespace ODour.RedisCacheDb.Handler;
 /// <summary>
 ///     Implementation of cache handler using redis as storage.
 /// </summary>
-internal sealed class CacheHandler : ICacheHandler
+public sealed class RedisCacheHandler : ICacheHandler
 {
     private readonly IDistributedCache _distributedCache;
 
-    public CacheHandler(IDistributedCache distributedCache)
+    public RedisCacheHandler(IDistributedCache distributedCache)
     {
         _distributedCache = distributedCache;
     }

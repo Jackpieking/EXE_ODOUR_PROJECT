@@ -11,16 +11,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.JsonWebTokens;
-using ODour.AppBackgroundJob;
-using ODour.AppIdentityService;
-using ODour.Application;
 using ODour.Application.Share.DataProtection;
-using ODour.AppNotification;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
-using ODour.FastEndpointApi;
+using ODour.FastEndpointApi.ServiceConfigs;
 using ODour.FastEndpointApi.Shared.Middlewares;
-using ODour.PostgresRelationalDb;
 using ODour.PostgresRelationalDb.Data;
 
 // Comment this line if switch to another database.
@@ -35,12 +30,14 @@ var builder = WebApplication.CreateBuilder(args: args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-services.AddOdourPostgresRelationalDb(configuration: configuration);
-services.AddApplication();
-services.AddWebApi(configuration: configuration);
-services.AddAppIdentityService();
-services.AddAppNotification();
-services.AddAppBackgroundJob(configuration: configuration);
+PostgresRelationalDbServiceConfig.Config(services: services, configuration: configuration);
+WebApiServiceConfig.Config(services: services, configuration: configuration);
+RedisCachingDbServiceConfig.Config(services: services, configuration: configuration);
+CustomServiceConfig.Config(services: services, configuration: configuration);
+AppNotificationServiceConfig.Config(services: services, configuration: configuration);
+AppIdentityServiceConfig.Config(services: services, configuration: configuration);
+ApplicationServiceConfig.Config(services: services, configuration: configuration);
+AppBackgroundJobServiceConfig.Config(services: services, configuration: configuration);
 
 var app = builder.Build();
 

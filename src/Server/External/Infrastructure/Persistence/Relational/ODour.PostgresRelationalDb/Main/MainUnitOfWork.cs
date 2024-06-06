@@ -8,7 +8,7 @@ using ODour.PostgresRelationalDb.Main.User.Product;
 
 namespace ODour.PostgresRelationalDb.Main;
 
-internal sealed class MainUnitOfWork : IMainUnitOfWork
+public sealed class MainUnitOfWork : IMainUnitOfWork
 {
     private IRegisterAsUserRepository _registerAsUserRepository;
     private IRegisterAsAdminRepository _registerAsAdminRepository;

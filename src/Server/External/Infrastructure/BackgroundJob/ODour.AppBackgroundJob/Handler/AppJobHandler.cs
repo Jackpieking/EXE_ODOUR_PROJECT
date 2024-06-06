@@ -5,7 +5,7 @@ using ODour.Application.Share.BackgroundJob;
 
 namespace ODour.AppBackgroundJob.Handler;
 
-internal sealed class AppJobHandler : IJobHandler
+public sealed class AppJobHandler : IJobHandler
 {
     public void ExecuteOneTimeJob(Expression<Action> methodCall)
     {

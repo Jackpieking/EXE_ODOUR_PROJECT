@@ -970,7 +970,7 @@ public static class EntityDataSeeding
                 Name = "FOR HER",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Woody — tông mùi gỗ.\", \"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa hồng, Quả đào.\",\"HUONG_GIUA\":\"Xạ hương, Hổ phách.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Cây hoắc hương, Gỗ trầm hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Woody — tông mùi gỗ.\", \"Floral-Fruity — hoa cỏ trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa hồng, Hoa anh đào.\",\"HUONG_GIUA\":\"Hoa anh đào, Hoa đinh tử, Gỗ đàn hương.\",\"HUONG_CUOI\":\"Cam quýt, Cam Bergamot.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -993,7 +993,7 @@ public static class EntityDataSeeding
                 Name = "CHANEL CHANCE",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\", \"Powdery - hương phấn.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Lục bình, hạt tiêu hồng, iris và dứa.\",\"HUONG_GIUA\":\"Cam quýt và hoa nhài.\",\"HUONG_CUOI\":\"Cỏ vetiver, vani, hoắc hương và xạ hương trắng.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\", \"Powdery - hương phấn.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Lục bình, Hạt tiêu hồng, Iris, Dứa.\",\"HUONG_GIUA\":\"Cam quýt, Hoa nhài.\",\"HUONG_CUOI\":\"Cỏ Vetiver, Vani, Hoắc hương, Xạ hương trắng.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"12 - 16 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1016,7 +1016,7 @@ public static class EntityDataSeeding
                 Name = "J'ADORE DIOR",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort, tiêu hồng.\",\"HUONG_GIUA\":\"Hoa huệ, Hoa nhài Sambac, Ylang-Ylang, Lily-of-the-Valley, Hoa hồng.\",\"HUONG_CUOI\":\"Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort, Tiêu hồng.\",\"HUONG_GIUA\":\"Hoa Huệ, Hoa Nhài Sambac, Ylang-Ylang, Lily-of-the-Valley, Hoa hồng.\",\"HUONG_CUOI\":\"Gỗ đàn hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1039,7 +1039,7 @@ public static class EntityDataSeeding
                 Name = "LANCOME LA VIE EST BELLE",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, Hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1062,7 +1062,7 @@ public static class EntityDataSeeding
                 Name = "LANCOME LA VIE EST BELLE",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, Hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1085,7 +1085,7 @@ public static class EntityDataSeeding
                 Name = "SCANDAL",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Chypre Floral - Hương hoa cỏ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Đỏ, Quýt.\",\"HUONG_GIUA\":\"Mật ong, Hoa nhài, Hoa cam, Đào, Hoa Sơn Chi.\",\"HUONG_CUOI\":\"Sáp ong, Caramel, Hoắc Hương, Cam Thảo.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Chypre Floral - hương hoa cỏ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Đỏ, Quýt.\",\"HUONG_GIUA\":\"Mật ong, Hoa nhài, Hoa cam, Đào, Hoa Sơn Chi.\",\"HUONG_CUOI\":\"Sáp ong, Caramel, Hoắc Hương, Cam Thảo.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1108,7 +1108,7 @@ public static class EntityDataSeeding
                 Name = "BEYONCE' HEAT RUSH",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\", \"Woody - tông mùi gỗ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam máu, anh đào và chanh dây.\",\"HUONG_GIUA\":\"Hoa phong lan, hoa dâm bụt và hoa xoài.\",\"HUONG_CUOI\":\"Gỗ tếch, hổ phách và xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\", \"Woody - tông mùi gỗ.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam máu, Anh đào, Chanh dây.\",\"HUONG_GIUA\":\"Hoa phong lan, Hoa dâm bụt, Hoa xoài.\",\"HUONG_CUOI\":\"Gỗ tếch, Hổ phách, Xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1131,7 +1131,7 @@ public static class EntityDataSeeding
                 Name = "NUDE BY RIHANNA",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Woody - tông mùi gỗ.\", \"Fruity - hương trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Ổi, cam mandarin, lê.\",\"HUONG_GIUA\":\"Hoa cam, hoa nhài, hoa dành dành.\",\"HUONG_CUOI\":\"Gỗ đàn hương, lan vani, xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Woody - tông mùi gỗ.\", \"Fruity - hương trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Ổi, Cam Mandarin, Lê.\",\"HUONG_GIUA\":\"Hoa cam, Hoa nhài, Hoa dành dành.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Lan Vani, Xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1154,7 +1154,7 @@ public static class EntityDataSeeding
                 Name = "MARC JACOBS",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Hương hoa cỏ phương Đông - Oriental Floral.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả mận, hoa diên vĩ, nghệ tây.\",\"HUONG_GIUA\":\"Hoa hồng Bulgary, hoa nhài Sambac, hoa diên vĩ(Orris).\",\"HUONG_CUOI\":\"Hổ phách, cỏ hương bài, giấy cói.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Oriental Floral - hương hoa cỏ phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Quả mận, Hoa diên vĩ, Nghệ tây.\",\"HUONG_GIUA\":\"Hoa hồng Bulgary, Hoa nhài Sambac, Hoa diên vĩ (Orris).\",\"HUONG_CUOI\":\"Hổ phách, Cỏ hương bài, Giấy cói.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1177,7 +1177,7 @@ public static class EntityDataSeeding
                 Name = "MY BURBERRY BLACK",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\", \"Floral - tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa nhài.\",\"HUONG_GIUA\":\"Keo hoa hồng và mật hoa đào.\",\"HUONG_CUOI\":\"Hổ phách, hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\", \"Floral - tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa nhài.\",\"HUONG_GIUA\":\"Keo hoa hồng, Mật hoa đào.\",\"HUONG_CUOI\":\"Hổ phách, Hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1200,7 +1200,7 @@ public static class EntityDataSeeding
                 Name = "GOOD GIRL",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hạnh nhân, cà phê.\",\"HUONG_GIUA\":\"Hoa nhài Sambac, hoa huệ trắng.\",\"HUONG_CUOI\":\"Đậu tonka, cacao.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hạnh nhân, Cà phê.\",\"HUONG_GIUA\":\"Hoa nhài Sambac, Hoa huệ trắng.\",\"HUONG_CUOI\":\"Đậu tonka, Cacao.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1223,7 +1223,7 @@ public static class EntityDataSeeding
                 Name = "CHANEL COCO",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\", \"Citrus - tông mùi cam chanh tươi mát.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam, quýt, hoa cam, cam bergamot.\",\"HUONG_GIUA\":\"Hoa mimosa, hoa nhài, hoa hồng, hoa ngọc lan tây.\",\"HUONG_CUOI\":\"Đậu tonka, cây patchouli, nhựa thơm tổng hợp, vani, cỏ vetiver, xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Oriental - tông mùi Phương Đông.\", \"Citrus - tông mùi cam chanh tươi mát.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam, Quýt, Hoa cam, Cam Bergamot.\",\"HUONG_GIUA\":\"Hoa mimosa, Hoa nhài, Hoa hồng, Hoa ngọc lan tây.\",\"HUONG_CUOI\":\"Đậu Tonka, cây Patchouli, Nhựa thơm tổng hợp, Vani, Cỏ Vetiver, Xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1246,7 +1246,7 @@ public static class EntityDataSeeding
                 Name = "BLACK OPIUM",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Oriental Vanilla - tông mùi Phương Đông + vanilla.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa cam và lê.\",\"HUONG_GIUA\":\"Đậu Tonka, hoa phong lữ, Ambroxan.\",\"HUONG_CUOI\":\"Gỗ của hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Oriental Vanilla - tông mùi Phương Đông + vanilla.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hoa cam, Hoa lê.\",\"HUONG_GIUA\":\"Đậu Tonka, Hoa phong lữ, Ambroxan.\",\"HUONG_CUOI\":\"Gỗ của hoắc hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1269,7 +1269,7 @@ public static class EntityDataSeeding
                 Name = "MIDNIGHT FANTASY",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Floral - Tông hương hoa trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Mận, Cherry, Mâm Xôi Đỏ.\",\"HUONG_GIUA\":\"Hoa Phong Lan, Hoa Diên Vĩ, Hoa Lan Nam Phi.\",\"HUONG_CUOI\":\"Vani, Hổ phách, xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 20 giờ.\",\"TREN_VAI\":\"3 - 4 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Floral - tông hương hoa trái cây.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Mận, Cherry, Mâm xôi đỏ.\",\"HUONG_GIUA\":\"Hoa phong lan, Hoa diên vĩ, Hoa lan nam phi.\",\"HUONG_CUOI\":\"Vani, Hổ phách, Xạ hương.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"16 - 20 giờ.\",\"TREN_VAI\":\"3 - 4 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1292,7 +1292,7 @@ public static class EntityDataSeeding
                 Name = "BACCARAT ROUGE 540",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Oriental Floral - Hương hoa cỏ Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Nghệ tây và Hạnh nhân đắng.\",\"HUONG_GIUA\":\"Gỗ tuyết tùng & Hoa nhài Ai cập.\",\"HUONG_CUOI\":\"Long diên hương, Xạ hương và hương gỗ.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
+                    "{\"NHOM_HUONG\":[\"Oriental Floral - hương hoa cỏ Phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Nghệ tây, Hạnh nhân đắng.\",\"HUONG_GIUA\":\"Gỗ tuyết tùng, Hoa nhài Ai cập.\",\"HUONG_CUOI\":\"Long diên hương, Xạ hương, Hương gỗ.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>
@@ -1315,7 +1315,7 @@ public static class EntityDataSeeding
                 Name = "LELABO ANOTHER 13",
                 UnitPrice = 199_000,
                 Description =
-                    "{\"NHOM_HUONG\":[\"Hương gỗ phương Đông.\"],\"TANG_HUONG\":\"Hương Iso E Super, Hương Amyl Salicylate, Xạ hương, Long diên hương, Cây vông vang, Quả lê.\"}",
+                    "{\"NHOM_HUONG\":[\"Oriental Woody - hương gỗ phương Đông.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Hương Iso E Super.\",\"HUONG_GIUA\":\"Hương Amyl Salicylate, Xạ hương, Long diên hương.\",\"HUONG_CUOI\":\"Cây vông vang, Quả lê.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"Trên 3 ngày.\"}}",
                 QuantityInStock = 10,
                 IsTemporarilyRemoved = false,
                 ProductMedias = new List<ProductMediaEntity>

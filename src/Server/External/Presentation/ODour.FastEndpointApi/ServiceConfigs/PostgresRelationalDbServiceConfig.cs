@@ -1,18 +1,54 @@
 using System;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ODour.Configuration.Infrastructure.Persistence.AspNetCoreIdentity;
+using ODour.Configuration.Infrastructure.Persistence.Database;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.PostgresRelationalDb.Data;
 
-namespace ODour.PostgresRelationalDb.ServiceConfigs;
+namespace ODour.FastEndpointApi.ServiceConfigs;
 
-internal static class IdentityServiceConfig
+internal static class PostgresRelationalDbServiceConfig
 {
-    internal static void Config(IServiceCollection services, IConfiguration configuration)
+    internal static IServiceCollection Config(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
+        services.AddDbContextPool<DbContext, ODourContext>(optionsAction: config =>
+        {
+            var option = configuration
+                .GetRequiredSection(key: "Database")
+                .GetRequiredSection(key: "ODourMainDb")
+                .Get<ODourDatabaseOption>();
+
+            config
+                .UseNpgsql(
+                    connectionString: option.ConnectionString,
+                    npgsqlOptionsAction: npgsqlOptionsAction =>
+                    {
+                        npgsqlOptionsAction
+                            .CommandTimeout(commandTimeout: option.CommandTimeOut)
+                            .EnableRetryOnFailure(maxRetryCount: option.EnableRetryOnFailure)
+                            .MigrationsAssembly(
+                                assemblyName: typeof(ODourContext).Assembly.FullName
+                            );
+                    }
+                )
+                .EnableSensitiveDataLogging(
+                    sensitiveDataLoggingEnabled: option.EnableSensitiveDataLogging
+                )
+                .EnableDetailedErrors(detailedErrorsEnabled: option.EnableDetailedErrors)
+                .EnableThreadSafetyChecks(enableChecks: option.EnableThreadSafetyChecks)
+                .EnableServiceProviderCaching(
+                    cacheServiceProvider: option.EnableServiceProviderCaching
+                );
+        });
+
+        // ====
         services
             .AddIdentity<UserEntity, RoleEntity>(setupAction: config =>
             {
@@ -43,5 +79,7 @@ internal static class IdentityServiceConfig
             })
             .AddEntityFrameworkStores<ODourContext>()
             .AddDefaultTokenProviders();
+
+        return services;
     }
 }
