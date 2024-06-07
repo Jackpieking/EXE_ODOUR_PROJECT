@@ -46,8 +46,8 @@ internal sealed class SendingUserPasswordChangingEmailEventHandler
 
             if (!result)
             {
-                retryTime--;
+                retryTime -= 1;
             }
-        } while (retryTime != 0);
+        } while (retryTime != default);
     }
 }

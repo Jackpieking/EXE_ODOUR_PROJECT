@@ -31,7 +31,17 @@ internal sealed class SendUserConfirmSuccessfullyEmailEventHandler
                 cancellationToken: ct
             );
 
-        // Try to send mail.
-        await _sendingMailHandler.Value.SendAsync(mailContent, ct);
+        var retryTime = 3;
+
+        do
+        {
+            // Try to send mail.
+            var result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
+
+            if (!result)
+            {
+                retryTime -= 1;
+            }
+        } while (retryTime != default);
     }
 }
