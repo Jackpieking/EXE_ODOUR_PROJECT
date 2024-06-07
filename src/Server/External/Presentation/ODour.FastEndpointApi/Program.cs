@@ -89,18 +89,6 @@ app.UseAppExceptionHandler()
         options.ExecutionTimeLimit = TimeSpan.FromMinutes(value: 2);
     });
 
-// .UseHangfireDashboard(
-//     options: new()
-//     {
-//         DashboardTitle = "ODour Hangfire Dashboard",
-//         DisplayStorageConnectionString = false,
-//         Authorization = new[]
-//         {
-//             app.Services.GetRequiredService<IDashboardAuthorizationFilter>()
-//         }
-//     }
-// );
-
 // Clear all current allocations.
 GC.Collect();
 

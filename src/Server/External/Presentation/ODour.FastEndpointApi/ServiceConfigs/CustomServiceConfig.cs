@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using Hangfire.Dashboard;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +21,6 @@ using ODour.Configuration.Presentation.WebApi.SecurityKey;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
-using ODour.FastEndpointApi.Shared.Authorization;
 using ODour.PostgresRelationalDb.Main;
 using ODour.RedisCacheDb.Handler;
 
@@ -121,12 +119,6 @@ internal static class CustomServiceConfig
         services.MakeSingletonLazy<IServiceScopeFactory>();
 
         // ====
-        services.AddSingleton<
-            IDashboardAuthorizationFilter,
-            HangfireDashboardAdminKeyAuthorizationFilter
-        >();
-
-        // ====
         services.AddScoped<ICacheHandler, RedisCacheHandler>().MakeScopedLazy<ICacheHandler>();
 
         // ====
@@ -153,9 +145,6 @@ internal static class CustomServiceConfig
         services
             .AddSingleton<IAdminAccessKeyHandler, AppAdminAccessKeyHandler>()
             .MakeSingletonLazy<IAdminAccessKeyHandler>();
-
-        // ====
-        //services.AddSingleton<IJobHandler, AppJobHandler>().MakeSingletonLazy<IJobHandler>();
 
         // ====
         services
