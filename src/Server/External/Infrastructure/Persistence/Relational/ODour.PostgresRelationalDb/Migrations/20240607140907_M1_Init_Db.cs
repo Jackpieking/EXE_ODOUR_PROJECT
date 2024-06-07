@@ -124,6 +124,28 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
+                name: "JobRecords",
+                schema: "main.system",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    QueueID = table.Column<string>(type: "TEXT", nullable: false),
+                    ExecuteAfter = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    ExpireOn = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    IsComplete = table.Column<bool>(type: "boolean", nullable: false),
+                    CommandJson = table.Column<string>(type: "JSONB", nullable: false),
+                    FailureCount = table.Column<int>(type: "integer", nullable: false),
+                    CancelledOn = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
+                    FailureReason = table.Column<string>(type: "JSONB", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JobRecords", x => x.Id);
+                },
+                comment: "Contain job records."
+            );
+
+            migrationBuilder.CreateTable(
                 name: "OrderStatuses",
                 schema: "main.order",
                 columns: table => new
@@ -427,7 +449,7 @@ namespace ODour.PostgresRelationalDb.Migrations
                         scale: 2,
                         nullable: false
                     ),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "JSONB", nullable: false),
                     QuantityInStock = table.Column<int>(type: "integer", nullable: false),
                     IsTemporarilyRemoved = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -1104,6 +1126,8 @@ namespace ODour.PostgresRelationalDb.Migrations
             migrationBuilder.DropTable(name: "CartItems", schema: "main.order");
 
             migrationBuilder.DropTable(name: "EventSnapshots", schema: "main.event");
+
+            migrationBuilder.DropTable(name: "JobRecords", schema: "main.system");
 
             migrationBuilder.DropTable(name: "OrderItems", schema: "main.order");
 

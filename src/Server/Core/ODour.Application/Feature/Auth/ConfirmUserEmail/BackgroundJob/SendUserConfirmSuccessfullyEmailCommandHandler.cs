@@ -6,26 +6,26 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.ConfirmUserEmail.BackgroundJob;
 
-internal sealed class SendUserConfirmSuccessfullyEmailEventHandler
-    : IEventHandler<SendUserConfirmSuccessfullyEmailEvent>
+internal sealed class SendUserConfirmSuccessfullyEmailCommandHandler
+    : ICommandHandler<SendUserConfirmSuccessfullyEmailCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public SendUserConfirmSuccessfullyEmailEventHandler(
+    public SendUserConfirmSuccessfullyEmailCommandHandler(
         Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
         _sendingMailHandler = sendingMailHandler;
     }
 
-    public async Task HandleAsync(
-        SendUserConfirmSuccessfullyEmailEvent eventModel,
+    public async Task ExecuteAsync(
+        SendUserConfirmSuccessfullyEmailCommand command,
         CancellationToken ct
     )
     {
         var mailContent =
             await _sendingMailHandler.Value.GetUserConfirmSuccessfullyMailContentAsync(
-                to: eventModel.Email,
+                to: command.Email,
                 subject: "Xác nhận tài khoản thành công",
                 cancellationToken: ct
             );
@@ -35,16 +35,7 @@ internal sealed class SendUserConfirmSuccessfullyEmailEventHandler
 
         if (!result)
         {
-            for (int retryTime = 0; retryTime < 3; retryTime++)
-            {
-                // Try to send mail.
-                result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
-
-                if (result)
-                {
-                    break;
-                }
-            }
+            throw new ApplicationException(message: "Cannot send mail. Please try again later.");
         }
     }
 }

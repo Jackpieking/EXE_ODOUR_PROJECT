@@ -51,7 +51,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
                     await _context
                         .Value.Set<UserTokenEntity>()
                         .Where(predicate: token =>
-                            token.UserId.Equals(user.Id) && token.Name.Equals("EmailConfirmedToken")
+                            token.UserId == user.Id && token.Name.Equals("EmailConfirmedToken")
                         )
                         .ExecuteDeleteAsync(cancellationToken: ct);
 

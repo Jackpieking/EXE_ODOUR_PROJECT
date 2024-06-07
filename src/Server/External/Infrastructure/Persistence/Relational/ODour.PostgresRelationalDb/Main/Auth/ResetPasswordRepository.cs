@@ -19,7 +19,7 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
     }
 
     public Task<UserTokenEntity> GetResetPasswordTokenByTokenIdQueryAsync(
-        string tokenId,
+        string tokenValue,
         CancellationToken ct
     )
     {
@@ -27,7 +27,7 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
             .Where(predicate: token =>
-                token.LoginProvider == tokenId && token.ExpiredAt > DateTime.UtcNow
+                token.Value.Equals(tokenValue) && token.ExpiredAt > DateTime.UtcNow
             )
             .Select(selector: token => new UserTokenEntity { UserId = token.UserId })
             .FirstOrDefaultAsync(cancellationToken: ct);
@@ -54,7 +54,6 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
 
     public async Task<bool> ResetPasswordCommandAsync(
         UserEntity user,
-        Guid tokenId,
         string tokenValue,
         string newPassword,
         UserManager<UserEntity> userManager,
@@ -88,7 +87,9 @@ internal sealed class ResetPasswordRepository : IResetPasswordRepository
                     // Remove all token of given user.
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .Where(predicate: token => token.UserId == user.Id)
+                        .Where(predicate: token =>
+                            token.UserId == user.Id && token.Name.Equals("PasswordChanghingToken")
+                        )
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
                     await dbTransaction.CommitAsync(cancellationToken: ct);

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
@@ -21,7 +20,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     private readonly Lazy<SignInManager<UserEntity>> _signInManager;
     private readonly Lazy<IRefreshTokenHandler> _refreshTokenHandler;
     private readonly Lazy<IAccessTokenHandler> _accessTokenHandler;
-    private readonly Lazy<IJobHandler> _jobHandler;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public LoginHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
@@ -29,7 +28,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         Lazy<SignInManager<UserEntity>> signInManager,
         Lazy<IRefreshTokenHandler> refreshTokenHandler,
         Lazy<IAccessTokenHandler> accessTokenHandler,
-        Lazy<IJobHandler> jobHandler
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
@@ -37,7 +36,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         _signInManager = signInManager;
         _refreshTokenHandler = refreshTokenHandler;
         _accessTokenHandler = accessTokenHandler;
-        _jobHandler = jobHandler;
+        _queueHandler = queueHandler;
     }
 
     public async Task<LoginResponse> ExecuteAsync(LoginRequest command, CancellationToken ct)
@@ -143,19 +142,19 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     }
 
     #region Others
-    private static async Task SendingNotifyUserAboutLoginActionMailAsync(
+    private async Task SendingNotifyUserAboutLoginActionMailAsync(
         string email,
         CancellationToken ct
     )
     {
         // Try to send mail.
-        var sendingEmailEvent = new BackgroundJob.NotifyUserAboutLoginActionByEmailEvent
+        var sendingEmailCommand = new BackgroundJob.NotifyUserAboutLoginActionByEmailCommand
         {
             Email = email,
             CurrentTimeInUtc = DateTime.UtcNow
         };
 
-        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
+        await _queueHandler.Value.QueueAsync(sendingEmailCommand, ct: ct);
     }
 
     private UserTokenEntity InitNewRefreshToken(List<Claim> userClaims, bool isRememberMe)

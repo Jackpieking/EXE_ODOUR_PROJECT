@@ -1,10 +1,8 @@
-using System;
-using Hangfire;
-using Hangfire.PostgreSql;
+using FastEndpoints;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ODour.Configuration.Infrastructure.BackgroundJob;
-using ODour.Configuration.Infrastructure.Persistence.Database;
+using ODour.AppBackgroundJob.Share;
+using ODour.Domain.Share.System.Entities;
 
 namespace ODour.FastEndpointApi.ServiceConfigs;
 
@@ -16,34 +14,37 @@ internal static class AppBackgroundJobServiceConfig
     )
     {
         // ====
-        var hangfireOption = configuration
-            .GetRequiredSection(key: "BackgroundJob")
-            .GetRequiredSection(key: "HangFire")
-            .Get<HangFireOption>();
+        // var hangfireOption = configuration
+        //     .GetRequiredSection(key: "BackgroundJob")
+        //     .GetRequiredSection(key: "HangFire")
+        //     .Get<HangFireOption>();
 
-        var dbOption = configuration
-            .GetRequiredSection(key: "Database")
-            .GetRequiredSection(key: "ODourMainDb")
-            .Get<ODourDatabaseOption>();
+        // var dbOption = configuration
+        //     .GetRequiredSection(key: "Database")
+        //     .GetRequiredSection(key: "ODourMainDb")
+        //     .Get<ODourDatabaseOption>();
 
-        services
-            .AddHangfire(configuration: configuration =>
-            {
-                configuration
-                    .UseSimpleAssemblyNameTypeSerializer()
-                    .UseRecommendedSerializerSettings()
-                    .UsePostgreSqlStorage(configure: action =>
-                        action.UseNpgsqlConnection(connectionString: dbOption.ConnectionString)
-                    );
-            })
-            .AddHangfireServer(optionsAction: option =>
-            {
-                option.SchedulePollingInterval = TimeSpan.FromSeconds(
-                    value: hangfireOption.SchedulePollingIntervalInSeconds
-                );
-                option.ServerName = hangfireOption.ServerName;
-                option.WorkerCount = hangfireOption.WorkerCount;
-            });
+        // services
+        //     .AddHangfire(configuration: configuration =>
+        //     {
+        //         configuration
+        //             .UseSimpleAssemblyNameTypeSerializer()
+        //             .UseRecommendedSerializerSettings()
+        //             .UsePostgreSqlStorage(configure: action =>
+        //                 action.UseNpgsqlConnection(connectionString: dbOption.ConnectionString)
+        //             );
+        //     })
+        //     .AddHangfireServer(optionsAction: option =>
+        //     {
+        //         option.SchedulePollingInterval = TimeSpan.FromSeconds(
+        //             value: hangfireOption.SchedulePollingIntervalInSeconds
+        //         );
+        //         option.ServerName = hangfireOption.ServerName;
+        //         option.WorkerCount = hangfireOption.WorkerCount;
+        //     });
+
+        // ====
+        services.AddJobQueues<JobRecordEntity, FastEndpointJobStorageProvider>();
 
         return services;
     }

@@ -6,26 +6,26 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.ResetPassword.BackgroundJob;
 
-internal sealed class SendSuccessfullyUserResetPasswordEmailEventHandler
-    : IEventHandler<SendSuccessfullyUserResetPasswordEmailEvent>
+internal sealed class SendSuccessfullyUserResetPasswordEmailCommandHandler
+    : ICommandHandler<SendSuccessfullyUserResetPasswordEmailCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public SendSuccessfullyUserResetPasswordEmailEventHandler(
+    public SendSuccessfullyUserResetPasswordEmailCommandHandler(
         Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
         _sendingMailHandler = sendingMailHandler;
     }
 
-    public async Task HandleAsync(
-        SendSuccessfullyUserResetPasswordEmailEvent eventModel,
+    public async Task ExecuteAsync(
+        SendSuccessfullyUserResetPasswordEmailCommand command,
         CancellationToken ct
     )
     {
         var mailContent =
             await _sendingMailHandler.Value.GetUserPasswordChangedSuccessfullyMailContentAsync(
-                to: eventModel.Email,
+                to: command.Email,
                 subject: "Đổi mật khẩu thành công",
                 cancellationToken: ct
             );
@@ -35,16 +35,7 @@ internal sealed class SendSuccessfullyUserResetPasswordEmailEventHandler
 
         if (!result)
         {
-            for (int retryTime = 0; retryTime < 3; retryTime++)
-            {
-                // Try to send mail.
-                result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
-
-                if (result)
-                {
-                    break;
-                }
-            }
+            throw new ApplicationException(message: "Cannot send mail. Please try again later.");
         }
     }
 }

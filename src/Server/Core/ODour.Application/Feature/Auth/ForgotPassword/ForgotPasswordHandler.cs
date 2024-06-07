@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
-using ODour.Application.Share.Common;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
@@ -16,14 +14,17 @@ internal sealed class ForgotPasswordHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public ForgotPasswordHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<UserManager<UserEntity>> userManager
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _queueHandler = queueHandler;
     }
 
     public async Task<ForgotPasswordResponse> ExecuteAsync(
@@ -64,15 +65,12 @@ internal sealed class ForgotPasswordHandler
         var user = await _userManager.Value.FindByEmailAsync(email: command.Email);
 
         // Generate password changing token.
-        var passwordChangingTokens = await GenerateUserPasswordChangingTokenAsync(user: user);
+        var passwordChangingToken = await GenerateUserPasswordChangingTokenAsync(user: user);
 
         // Add token to the database.
         var dbResult =
-            await _unitOfWork.Value.ResendUserConfirmationEmailRepository.AddUserPasswordChangingTokenCommandAsync(
-                userTokenEntities: new List<UserTokenEntity>
-                {
-                    passwordChangingTokens["MainToken"]
-                },
+            await _unitOfWork.Value.ForgotPasswordRepository.AddUserPasswordChangingTokenCommandAsync(
+                userTokenEntity: passwordChangingToken,
                 ct: ct
             );
 
@@ -84,7 +82,7 @@ internal sealed class ForgotPasswordHandler
 
         // Send email.
         await SendingUserPasswordChangingMailAsync(
-            passwordChangingTokens: passwordChangingTokens,
+            passwordChangingTokenValue: passwordChangingToken.Value,
             command: command,
             ct: ct
         );
@@ -92,29 +90,18 @@ internal sealed class ForgotPasswordHandler
         return new() { StatusCode = ForgotPasswordResponseStatusCode.OPERATION_SUCCESS };
     }
 
-    private async Task<Dictionary<string, UserTokenEntity>> GenerateUserPasswordChangingTokenAsync(
-        UserEntity user
-    )
+    private async Task<UserTokenEntity> GenerateUserPasswordChangingTokenAsync(UserEntity user)
     {
-        Dictionary<string, UserTokenEntity> emailConfirmedTokens = new(capacity: 2);
-
         var tokenId = Guid.NewGuid();
 
-        // Add new token for password changing.
-        emailConfirmedTokens.Add(
-            key: "MainToken",
-            value: new()
-            {
-                UserId = user.Id,
-                Name = "PasswordChanghingToken",
-                Value =
-                    $"{await _userManager.Value.GeneratePasswordResetTokenAsync(user: user)}{CommonConstant.App.DefaultStringSeparator}{tokenId}",
-                ExpiredAt = DateTime.UtcNow.AddMinutes(value: 1),
-                LoginProvider = tokenId.ToString()
-            }
-        );
-
-        return emailConfirmedTokens;
+        return new()
+        {
+            UserId = user.Id,
+            Name = "PasswordChanghingToken",
+            Value = await _userManager.Value.GeneratePasswordResetTokenAsync(user: user),
+            ExpiredAt = DateTime.UtcNow.AddMinutes(value: 1),
+            LoginProvider = tokenId.ToString()
+        };
     }
 
     /// <summary>
@@ -123,8 +110,8 @@ internal sealed class ForgotPasswordHandler
     /// <param name="command">
     ///     Request model.
     /// </param>
-    /// <param name="newUser">
-    ///     New user.
+    /// <param name="passwordChangingTokenValue">
+    ///     Password changing token value.
     /// </param>
     /// <param name="ct">
     ///     The token to monitor cancellation requests.
@@ -132,19 +119,19 @@ internal sealed class ForgotPasswordHandler
     /// <returns>
     ///     Nothing
     /// </returns>
-    private static async Task SendingUserPasswordChangingMailAsync(
+    private async Task SendingUserPasswordChangingMailAsync(
         ForgotPasswordRequest command,
-        Dictionary<string, UserTokenEntity> passwordChangingTokens,
+        string passwordChangingTokenValue,
         CancellationToken ct
     )
     {
         //Try to send mail.
-        var sendingEmailEvent = new BackgroundJob.SendingUserPasswordChangingEmailEvent
+        var sendingEmailCommand = new BackgroundJob.SendingUserPasswordChangingEmailCommand
         {
-            MainTokenValue = passwordChangingTokens["MainToken"].Value,
+            MainTokenValue = passwordChangingTokenValue,
             Email = command.Email
         };
 
-        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
+        await _queueHandler.Value.QueueAsync(backgroundJobCommand: sendingEmailCommand, ct: ct);
     }
 }

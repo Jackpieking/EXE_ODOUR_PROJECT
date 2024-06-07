@@ -8,29 +8,29 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.ForgotPassword.BackgroundJob;
 
-internal sealed class SendingUserPasswordChangingEmailEventHandler
-    : IEventHandler<SendingUserPasswordChangingEmailEvent>
+internal sealed class SendingUserPasswordChangingEmailCommandHandler
+    : ICommandHandler<SendingUserPasswordChangingEmailCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public SendingUserPasswordChangingEmailEventHandler(
+    public SendingUserPasswordChangingEmailCommandHandler(
         Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
         _sendingMailHandler = sendingMailHandler;
     }
 
-    public async Task HandleAsync(
-        SendingUserPasswordChangingEmailEvent eventModel,
+    public async Task ExecuteAsync(
+        SendingUserPasswordChangingEmailCommand command,
         CancellationToken ct
     )
     {
         var mainToken = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(s: eventModel.MainTokenValue)
+            input: Encoding.UTF8.GetBytes(s: command.MainTokenValue)
         );
 
         var mailContent = await _sendingMailHandler.Value.GetUserResetPasswordMailContentAsync(
-            to: eventModel.Email,
+            to: command.Email,
             subject: "Đổi mật khẩu",
             resetPasswordLink: $"auth/passwordChanging?token={mainToken}",
             cancellationToken: ct
@@ -41,16 +41,7 @@ internal sealed class SendingUserPasswordChangingEmailEventHandler
 
         if (!result)
         {
-            for (int retryTime = 0; retryTime < 3; retryTime++)
-            {
-                // Try to send mail.
-                result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
-
-                if (result)
-                {
-                    break;
-                }
-            }
+            throw new ApplicationException(message: "Cannot send mail. Please try again later.");
         }
     }
 }

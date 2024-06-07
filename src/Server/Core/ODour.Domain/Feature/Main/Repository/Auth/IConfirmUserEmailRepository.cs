@@ -19,7 +19,7 @@ public interface IConfirmUserEmailRepository
     Task<AccountStatusEntity> GetSuccesfullyConfirmedAccountStatusQueryAsync(CancellationToken ct);
 
     Task<UserTokenEntity> GetUserConfirmedEmailTokenByTokenIdQueryAsync(
-        string tokenId,
+        string tokenValue,
         CancellationToken ct
     );
     #endregion

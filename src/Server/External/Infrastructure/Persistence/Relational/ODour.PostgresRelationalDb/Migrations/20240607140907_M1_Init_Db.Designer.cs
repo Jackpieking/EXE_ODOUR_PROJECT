@@ -10,7 +10,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240607033942_M1_Init_Db")]
+    [Migration("20240607140907_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
@@ -398,7 +398,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("JSONB");
 
                     b.Property<bool>("IsTemporarilyRemoved")
                         .HasColumnType("boolean");
@@ -553,6 +553,47 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.ToTable("AppExceptionLoggingEntities", "main.system", t =>
                         {
                             t.HasComment("Contain app exception loggings.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.System.Entities.JobRecordEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CancelledOn")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<string>("CommandJson")
+                        .IsRequired()
+                        .HasColumnType("JSONB");
+
+                    b.Property<DateTime>("ExecuteAfter")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<DateTime>("ExpireOn")
+                        .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<int>("FailureCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FailureReason")
+                        .IsRequired()
+                        .HasColumnType("JSONB");
+
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("QueueID")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JobRecords", "main.system", t =>
+                        {
+                            t.HasComment("Contain job records.");
                         });
                 });
 

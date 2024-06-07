@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,8 @@ internal sealed class ResendUserConfirmationEmailRepository : IResendUserConfirm
         _context = context;
     }
 
-    public async Task<bool> AddUserPasswordChangingTokenCommandAsync(
-        IEnumerable<UserTokenEntity> userTokenEntities,
+    public async Task<bool> AddUserConfirmedEmailTokenCommandAsync(
+        UserTokenEntity userTokenEntity,
         CancellationToken ct
     )
     {
@@ -26,7 +25,7 @@ internal sealed class ResendUserConfirmationEmailRepository : IResendUserConfirm
         {
             await _context
                 .Value.Set<UserTokenEntity>()
-                .AddRangeAsync(entities: userTokenEntities, cancellationToken: ct);
+                .AddAsync(entity: userTokenEntity, cancellationToken: ct);
 
             await _context.Value.SaveChangesAsync(cancellationToken: ct);
         }

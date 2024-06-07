@@ -2,9 +2,9 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
@@ -16,14 +16,17 @@ internal sealed class ConfirmUserEmailHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public ConfirmUserEmailHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<UserManager<UserEntity>> userManager
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _queueHandler = queueHandler;
     }
 
     public async Task<ConfirmUserEmailResponse> ExecuteAsync(
@@ -128,7 +131,7 @@ internal sealed class ConfirmUserEmailHandler
 
         var foundUserToken =
             await _unitOfWork.Value.ConfirmUserEmailRepository.GetUserConfirmedEmailTokenByTokenIdQueryAsync(
-                tokenId: tokenValue,
+                tokenValue: tokenValue,
                 ct: ct
             );
 
@@ -140,17 +143,17 @@ internal sealed class ConfirmUserEmailHandler
         return (foundUserToken.UserId, tokenValue);
     }
 
-    private static async Task SendingUserConfirmationSuccessfullyMailAsync(
+    private async Task SendingUserConfirmationSuccessfullyMailAsync(
         string email,
         CancellationToken ct
     )
     {
         // Try to send mail.
-        var sendingEmailEvent = new BackgroundJob.SendUserConfirmSuccessfullyEmailEvent
+        var sendingEmailCommand = new BackgroundJob.SendUserConfirmSuccessfullyEmailCommand
         {
             Email = email
         };
 
-        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
+        await _queueHandler.Value.QueueAsync(backgroundJobCommand: sendingEmailCommand, ct: ct);
     }
 }

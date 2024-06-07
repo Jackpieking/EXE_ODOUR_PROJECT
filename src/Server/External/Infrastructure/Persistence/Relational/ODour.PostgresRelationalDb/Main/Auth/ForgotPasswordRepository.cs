@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ internal sealed class ForgotPasswordRepository : IForgotPasswordRepository
     }
 
     public async Task<bool> AddUserPasswordChangingTokenCommandAsync(
-        IEnumerable<UserTokenEntity> userTokenEntities,
+        UserTokenEntity userTokenEntity,
         CancellationToken ct
     )
     {
@@ -28,7 +27,7 @@ internal sealed class ForgotPasswordRepository : IForgotPasswordRepository
             {
                 await _context
                     .Value.Set<UserTokenEntity>()
-                    .AddRangeAsync(entities: userTokenEntities, cancellationToken: ct);
+                    .AddAsync(entity: userTokenEntity, cancellationToken: ct);
 
                 await _context.Value.SaveChangesAsync(cancellationToken: ct);
             }

@@ -155,7 +155,12 @@ internal static class CustomServiceConfig
             .MakeSingletonLazy<IAdminAccessKeyHandler>();
 
         // ====
-        services.AddSingleton<IJobHandler, AppJobHandler>().MakeSingletonLazy<IJobHandler>();
+        //services.AddSingleton<IJobHandler, AppJobHandler>().MakeSingletonLazy<IJobHandler>();
+
+        // ====
+        services
+            .AddSingleton<IQueueHandler, FastEndpointQueueHandler>()
+            .MakeSingletonLazy<IQueueHandler>();
         #endregion
 
         return services;

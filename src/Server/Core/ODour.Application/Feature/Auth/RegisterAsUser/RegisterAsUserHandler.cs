@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.DataProtection;
 using ODour.Application.Share.Features;
@@ -17,16 +17,19 @@ internal sealed class RegisterAsUserHandler
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
     private readonly Lazy<IDataProtectionHandler> _dataProtectionHandler;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public RegisterAsUserHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
         Lazy<UserManager<UserEntity>> userManager,
-        Lazy<IDataProtectionHandler> dataProtectionHandler
+        Lazy<IDataProtectionHandler> dataProtectionHandler,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _dataProtectionHandler = dataProtectionHandler;
+        _queueHandler = queueHandler;
     }
 
     /// <summary>
@@ -194,8 +197,8 @@ internal sealed class RegisterAsUserHandler
     /// <param name="command">
     ///     Request model.
     /// </param>
-    /// <param name="newUser">
-    ///     New user.
+    /// <param name="emailConfirmedToken">
+    ///     Email confirmation token.
     /// </param>
     /// <param name="ct">
     ///     The token to monitor cancellation requests.
@@ -203,19 +206,19 @@ internal sealed class RegisterAsUserHandler
     /// <returns>
     ///     Nothing
     /// </returns>
-    private static async Task SendingUserConfirmationMailAsync(
+    private async Task SendingUserConfirmationMailAsync(
         RegisterAsUserRequest command,
         string emailConfirmedToken,
         CancellationToken ct
     )
     {
         // Try to send mail.
-        var sendingEmailEvent = new BackgroundJob.SendingUserConfirmationEvent
+        var sendingEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
             MainTokenValue = emailConfirmedToken,
             Email = command.Email
         };
 
-        await sendingEmailEvent.PublishAsync(waitMode: Mode.WaitForNone, cancellation: ct);
+        await _queueHandler.Value.QueueAsync(backgroundJobCommand: sendingEmailCommand, ct: ct);
     }
 }

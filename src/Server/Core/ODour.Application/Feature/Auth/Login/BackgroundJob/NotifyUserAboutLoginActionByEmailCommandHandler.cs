@@ -6,29 +6,29 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.Login.BackgroundJob;
 
-internal sealed class NotifyUserAboutLoginActionByEmailEventHandler
-    : IEventHandler<NotifyUserAboutLoginActionByEmailEvent>
+internal sealed class NotifyUserAboutLoginActionByEmailCommandHandler
+    : ICommandHandler<NotifyUserAboutLoginActionByEmailCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public NotifyUserAboutLoginActionByEmailEventHandler(
+    public NotifyUserAboutLoginActionByEmailCommandHandler(
         Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
         _sendingMailHandler = sendingMailHandler;
     }
 
-    public async Task HandleAsync(
-        NotifyUserAboutLoginActionByEmailEvent eventModel,
+    public async Task ExecuteAsync(
+        NotifyUserAboutLoginActionByEmailCommand command,
         CancellationToken ct
     )
     {
         var mailContent =
             await _sendingMailHandler.Value.GetNotifyUserAboutLoginActionMailContentAsync(
-                to: eventModel.Email,
+                to: command.Email,
                 subject: "Cảnh báo đăng nhập",
                 currentTimeInLocal: TimeZoneInfo.ConvertTimeFromUtc(
-                    dateTime: eventModel.CurrentTimeInUtc,
+                    dateTime: command.CurrentTimeInUtc,
                     destinationTimeZone: TimeZoneInfo.FindSystemTimeZoneById(
                         id: "SE Asia Standard Time"
                     )
@@ -41,16 +41,7 @@ internal sealed class NotifyUserAboutLoginActionByEmailEventHandler
 
         if (!result)
         {
-            for (int retryTime = 0; retryTime < 3; retryTime++)
-            {
-                // Try to send mail.
-                result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
-
-                if (result)
-                {
-                    break;
-                }
-            }
+            throw new ApplicationException(message: "Cannot send mail. Please try again later.");
         }
     }
 }

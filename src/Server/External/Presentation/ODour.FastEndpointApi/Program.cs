@@ -3,8 +3,6 @@ using System.Text;
 using System.Threading;
 using FastEndpoints;
 using FastEndpoints.Swagger;
-using Hangfire;
-using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -84,17 +82,24 @@ app.UseAppExceptionHandler()
         options.Path = string.Empty;
         options.DefaultModelsExpandDepth = -1;
     })
-    .UseHangfireDashboard(
-        options: new()
-        {
-            DashboardTitle = "ODour Hangfire Dashboard",
-            DisplayStorageConnectionString = false,
-            Authorization = new[]
-            {
-                app.Services.GetRequiredService<IDashboardAuthorizationFilter>()
-            }
-        }
-    );
+    .UseJobQueues(options: options =>
+    {
+        options.MaxConcurrency = 5;
+        options.StorageProbeDelay = TimeSpan.FromSeconds(value: 5);
+        options.ExecutionTimeLimit = TimeSpan.FromMinutes(value: 2);
+    });
+
+// .UseHangfireDashboard(
+//     options: new()
+//     {
+//         DashboardTitle = "ODour Hangfire Dashboard",
+//         DisplayStorageConnectionString = false,
+//         Authorization = new[]
+//         {
+//             app.Services.GetRequiredService<IDashboardAuthorizationFilter>()
+//         }
+//     }
+// );
 
 // Clear all current allocations.
 GC.Collect();

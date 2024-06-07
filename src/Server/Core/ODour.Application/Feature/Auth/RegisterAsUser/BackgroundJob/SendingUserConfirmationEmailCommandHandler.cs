@@ -8,25 +8,25 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.RegisterAsUser.BackgroundJob;
 
-internal sealed class SendingUserConfirmationEmailEventHandler
-    : IEventHandler<SendingUserConfirmationEvent>
+internal sealed class SendingUserConfirmationEmailCommandHandler
+    : ICommandHandler<SendingUserConfirmationCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public SendingUserConfirmationEmailEventHandler(Lazy<ISendingMailHandler> sendingMailHandler)
+    public SendingUserConfirmationEmailCommandHandler(Lazy<ISendingMailHandler> sendingMailHandler)
     {
         _sendingMailHandler = sendingMailHandler;
     }
 
-    public async Task HandleAsync(SendingUserConfirmationEvent eventModel, CancellationToken ct)
+    public async Task ExecuteAsync(SendingUserConfirmationCommand command, CancellationToken ct)
     {
         var mainToken = WebEncoders.Base64UrlEncode(
-            input: Encoding.UTF8.GetBytes(s: eventModel.MainTokenValue)
+            input: Encoding.UTF8.GetBytes(s: command.MainTokenValue)
         );
 
         var mailContent =
             await _sendingMailHandler.Value.GetUserAccountConfirmationMailContentAsync(
-                to: eventModel.Email,
+                to: command.Email,
                 subject: "Xác nhận tài khoản",
                 mainLink: $"auth/confirmEmail?token={mainToken}",
                 cancellationToken: ct
@@ -37,16 +37,7 @@ internal sealed class SendingUserConfirmationEmailEventHandler
 
         if (!result)
         {
-            for (int retryTime = 0; retryTime < 3; retryTime++)
-            {
-                // Try to send mail.
-                result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
-
-                if (result)
-                {
-                    break;
-                }
-            }
+            throw new ApplicationException(message: "Cannot send mail. Please try again later.");
         }
     }
 }

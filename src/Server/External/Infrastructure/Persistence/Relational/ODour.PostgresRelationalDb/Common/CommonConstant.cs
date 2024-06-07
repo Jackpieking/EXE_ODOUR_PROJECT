@@ -7,6 +7,8 @@ namespace ODour.PostgresRelationalDb.Common
             internal const string TEXT = "TEXT";
 
             internal const string TIMESTAMPTZ = "TIMESTAMPTZ";
+
+            internal const string JSONB = "JSONB";
         }
 
         internal static class DatabaseSchemaName

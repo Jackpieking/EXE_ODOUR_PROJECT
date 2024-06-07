@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ODour.Domain.Share.User.Entities;
@@ -7,7 +6,7 @@ namespace ODour.Domain.Feature.Main.Repository.Auth;
 
 public interface IResendUserConfirmationEmailRepository
 {
-    #region  Query
+    #region Query
     Task<bool> IsUserFoundByNormalizedEmailQueryAsync(string email, CancellationToken ct);
 
     Task<bool> IsUserBannedQueryAsync(string email, CancellationToken ct);
@@ -16,8 +15,8 @@ public interface IResendUserConfirmationEmailRepository
     #endregion
 
     #region Command
-    Task<bool> AddUserPasswordChangingTokenCommandAsync(
-        IEnumerable<UserTokenEntity> userTokenEntities,
+    Task<bool> AddUserConfirmedEmailTokenCommandAsync(
+        UserTokenEntity userTokenEntity,
         CancellationToken ct
     );
     #endregion

@@ -2,7 +2,7 @@ using FastEndpoints;
 
 namespace ODour.Application.Feature.Auth.ConfirmUserEmail.BackgroundJob;
 
-public sealed class SendUserConfirmSuccessfullyEmailEvent : IEvent
+public sealed class SendUserConfirmSuccessfullyEmailCommand : ICommand
 {
     public string Email { get; init; }
 }
