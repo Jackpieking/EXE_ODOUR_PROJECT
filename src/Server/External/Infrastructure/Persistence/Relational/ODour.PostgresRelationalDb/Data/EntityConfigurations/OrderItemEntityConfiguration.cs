@@ -38,13 +38,13 @@ internal sealed class OrderItemEntityConfiguration : IEntityTypeConfiguration<Or
             .HasOne(navigationExpression: orderItem => orderItem.Order)
             .WithMany(navigationExpression: order => order.OrderItems)
             .HasForeignKey(foreignKeyExpression: orderItem => orderItem.OrderId)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+            .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
 
         builder
             .HasOne(navigationExpression: order => order.Product)
             .WithMany(navigationExpression: product => product.OrderItems)
             .HasForeignKey(foreignKeyExpression: order => order.ProductId)
-            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+            .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
         #endregion
     }
 }

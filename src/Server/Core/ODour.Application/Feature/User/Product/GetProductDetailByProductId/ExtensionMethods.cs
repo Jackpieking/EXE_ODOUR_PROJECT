@@ -1,7 +1,7 @@
-namespace ODour.Application.Feature.User.Product.GetAllProducts;
+namespace ODour.Application.Feature.User.Product.GetProductDetailByProductId;
 
 /// <summary>
-///     Extension method for get all products feature.
+///     Extension method for get product detail by product id feature.
 /// </summary>
 public static class ExtensionMethods
 {
@@ -15,8 +15,8 @@ public static class ExtensionMethods
     /// <returns>
     ///     New app code.
     /// </returns>
-    public static string ToAppCode(this GetAllProductsResponseStatusCode statusCode)
+    public static string ToAppCode(this GetProductDetailByProductIdResponseStatusCode statusCode)
     {
-        return $"{nameof(User)}.{nameof(Product)}.{nameof(GetAllProducts)}.{statusCode}";
+        return $"{nameof(User)}.{nameof(Product)}.{nameof(GetProductDetailByProductId)}.{statusCode}";
     }
 }

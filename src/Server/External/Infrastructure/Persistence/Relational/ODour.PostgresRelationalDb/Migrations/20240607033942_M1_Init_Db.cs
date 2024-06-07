@@ -16,11 +16,11 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.EnsureSchema(name: "main.system");
 
+            migrationBuilder.EnsureSchema(name: "main.order");
+
             migrationBuilder.EnsureSchema(name: "main.category");
 
             migrationBuilder.EnsureSchema(name: "main.event");
-
-            migrationBuilder.EnsureSchema(name: "main.order");
 
             migrationBuilder.EnsureSchema(name: "main.payment");
 
@@ -121,25 +121,6 @@ namespace ODour.PostgresRelationalDb.Migrations
                     table.PrimaryKey("PK_Events", x => x.Id);
                 },
                 comment: "Contain events."
-            );
-
-            migrationBuilder.CreateTable(
-                name: "JobRecords",
-                schema: "main.system",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    QueueID = table.Column<string>(type: "TEXT", nullable: false),
-                    ExecuteAfter = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    ExpireOn = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false),
-                    IsComplete = table.Column<bool>(type: "boolean", nullable: false),
-                    CommandJson = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_JobRecords", x => x.Id);
-                },
-                comment: "Contain job records."
             );
 
             migrationBuilder.CreateTable(
@@ -815,14 +796,16 @@ namespace ODour.PostgresRelationalDb.Migrations
                         column: x => x.OrderId,
                         principalSchema: "main.order",
                         principalTable: "Orders",
-                        principalColumn: "Id"
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
                         name: "FK_OrderItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalSchema: "main.product",
                         principalTable: "Products",
-                        principalColumn: "Id"
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
                     );
                 },
                 comment: "Contain order items."
@@ -854,6 +837,41 @@ namespace ODour.PostgresRelationalDb.Migrations
                     );
                 },
                 comment: "Contain product medias."
+            );
+
+            migrationBuilder.CreateTable(
+                name: "CartItems",
+                schema: "main.order",
+                columns: table => new
+                {
+                    ProductId = table.Column<string>(
+                        type: "character varying(10)",
+                        nullable: false
+                    ),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CartItems", x => new { x.ProductId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_CartItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalSchema: "main.product",
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_CartItems_UserDetails_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "main.user",
+                        principalTable: "UserDetails",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                },
+                comment: "Contain cart items."
             );
 
             migrationBuilder.CreateTable(
@@ -924,6 +942,13 @@ namespace ODour.PostgresRelationalDb.Migrations
                     );
                 },
                 comment: "Contain user vouchers."
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CartItems_UserId",
+                schema: "main.order",
+                table: "CartItems",
+                column: "UserId"
             );
 
             migrationBuilder.CreateIndex(
@@ -1076,9 +1101,9 @@ namespace ODour.PostgresRelationalDb.Migrations
         {
             migrationBuilder.DropTable(name: "AppExceptionLoggingEntities", schema: "main.system");
 
-            migrationBuilder.DropTable(name: "EventSnapshots", schema: "main.event");
+            migrationBuilder.DropTable(name: "CartItems", schema: "main.order");
 
-            migrationBuilder.DropTable(name: "JobRecords", schema: "main.system");
+            migrationBuilder.DropTable(name: "EventSnapshots", schema: "main.event");
 
             migrationBuilder.DropTable(name: "OrderItems", schema: "main.order");
 

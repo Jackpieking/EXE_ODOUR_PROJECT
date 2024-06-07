@@ -1056,29 +1056,6 @@ public static class EntityDataSeeding
             },
             new()
             {
-                Id = "LD25",
-                ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
-                CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),
-                Name = "LANCOME LA VIE EST BELLE",
-                UnitPrice = 199_000,
-                Description =
-                    "{\"NHOM_HUONG\":[\"Floral — tông hoa.\"],\"TANG_HUONG\":{\"HUONG_DAU\":\"Cam Bergamort.\",\"HUONG_GIUA\":\"Hoa cam, Hoa trắng.\",\"HUONG_CUOI\":\"Gỗ đàn hương, Hương Vani.\"},\"DO_LUU_HUONG\":{\"TREN_DA\":\"14 - 18 giờ.\",\"TREN_VAI\":\"2 - 3 ngày.\"}}",
-                QuantityInStock = 10,
-                IsTemporarilyRemoved = false,
-                ProductMedias = new List<ProductMediaEntity>
-                {
-                    new()
-                    {
-                        Id = Guid.Parse(input: "8a92cdae-a420-4366-86ec-02326bf272ba"),
-                        ProductId = "LD25",
-                        UploadOrder = 1,
-                        StorageUrl =
-                            "https://res.cloudinary.com/dsyysapur/image/upload/v1717567654/ODOUR_EXE/PRODUCT/LD25_rjmyrg.jpg"
-                    }
-                }
-            },
-            new()
-            {
                 Id = "LD26",
                 ProductStatusId = Guid.Parse(input: "a185f047-b809-46be-b40a-d6c9c185def9"),
                 CategoryId = Guid.Parse(input: "f081ab44-7eb4-4ae9-9a35-5dfaf6e82c1c"),

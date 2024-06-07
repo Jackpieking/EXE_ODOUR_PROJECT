@@ -27,5 +27,7 @@ public interface IMainUnitOfWork
 
     #region User.Product
     IGetAllProductsRepository GetAllProductsRepository { get; }
+
+    IGetProductDetailByProductIdRepository GetProductDetailByProductIdRepository { get; }
     #endregion
 }

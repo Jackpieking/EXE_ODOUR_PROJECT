@@ -16,25 +16,25 @@ internal sealed class AppExceptionLoggingEntityConfiguration
             buildAction: table => table.HasComment(comment: "Contain app exception loggings.")
         );
 
-        builder.HasKey(keyExpression: errorLogging => errorLogging.Id);
+        builder.HasKey(keyExpression: entity => entity.Id);
 
         builder
-            .Property(propertyExpression: userDetail => userDetail.ErrorMessage)
+            .Property(propertyExpression: entity => entity.ErrorMessage)
             .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: userDetail => userDetail.ErrorStackTrace)
+            .Property(propertyExpression: entity => entity.ErrorStackTrace)
             .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: userDetail => userDetail.CreatedAt)
+            .Property(propertyExpression: entity => entity.CreatedAt)
             .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
 
         builder
-            .Property(propertyExpression: userDetail => userDetail.Data)
+            .Property(propertyExpression: entity => entity.Data)
             .HasColumnType(typeName: DatabaseNativeType.TEXT)
             .IsRequired(required: true);
     }

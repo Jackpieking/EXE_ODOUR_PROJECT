@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ODour.Domain.Share.AccountStatus.Entities;
 using ODour.Domain.Share.Base.Entities;
+using ODour.Domain.Share.Cart.Entities;
 using ODour.Domain.Share.Voucher.Entities;
 
 namespace ODour.Domain.Share.User.Entities;
@@ -36,8 +37,9 @@ public sealed class UserDetailEntity : IEntity, ITemporarilyRemovedEntity
 
     #region NavigationCollections
     public IEnumerable<UserVoucherEntity> UserVouchers { get; set; }
-    #endregion
 
+    public IEnumerable<CartItemEntity> CartItems { get; set; }
+    #endregion
 
     #region MetaData
     public static class MetaData

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,43 +8,45 @@ using ODour.Domain.Share.Product.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.User.Product;
 
-internal sealed class GetAllProductsRepository : IGetAllProductsRepository
+internal sealed class GetProductDetailByProductIdRepository : IGetProductDetailByProductIdRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    public GetAllProductsRepository(Lazy<DbContext> context)
+    public GetProductDetailByProductIdRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<ProductEntity>> GetAllProductsQueryAsync(
-        int currentPage,
-        int pageSize,
+    public async Task<ProductEntity> GetProductDetailByProductIdQueryAsync(
+        string productId,
         CancellationToken ct
     )
     {
         return await _context
             .Value.Set<ProductEntity>()
             .AsNoTracking()
+            .Where(predicate: product => product.Id.Equals(productId))
             .Select(selector: product => new ProductEntity
             {
                 Id = product.Id,
                 Name = product.Name,
                 UnitPrice = product.UnitPrice,
+                Description = product.Description,
+                QuantityInStock = product.QuantityInStock,
                 ProductStatus = new() { Name = product.ProductStatus.Name },
                 ProductMedias = product.ProductMedias.Select(image => new ProductMediaEntity
                 {
+                    UploadOrder = image.UploadOrder,
                     StorageUrl = image.StorageUrl
-                }),
-                Category = new() { Id = product.Category.Id, Name = product.Category.Name }
+                })
             })
-            .Skip(count: (currentPage - 1) * pageSize)
-            .Take(count: pageSize)
-            .ToListAsync(cancellationToken: ct);
+            .FirstAsync(cancellationToken: ct);
     }
 
-    public Task<int> GetProductsCountQueryAsync(CancellationToken ct)
+    public Task<bool> IsProductFoundByProductIdQueryAsync(string productId, CancellationToken ct)
     {
-        return _context.Value.Set<ProductEntity>().CountAsync(cancellationToken: ct);
+        return _context
+            .Value.Set<ProductEntity>()
+            .AnyAsync(predicate: product => product.Id.Equals(productId), cancellationToken: ct);
     }
 }
