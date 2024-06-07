@@ -103,6 +103,8 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
         await using var scope = _scopeFactory.CreateAsyncScope();
         var context = scope.TryResolve<Lazy<DbContext>>();
 
+        const int MaxRetryCount = 3;
+
         await context
             .Value.Database.CreateExecutionStrategy()
             .ExecuteAsync(operation: async () =>
@@ -113,7 +115,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
 
                 try
                 {
-                    if (r.FailureCount == 3)
+                    if (r.FailureCount == MaxRetryCount)
                     {
                         var failureReasonseAsJson = JsonSerializer.Serialize(exception.Message);
 
@@ -132,7 +134,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                                 cancellationToken: ct
                             );
                     }
-                    else if (r.FailureCount == default)
+                    else if (r.FailureCount < MaxRetryCount)
                     {
                         var failureReasonseAsJson = JsonSerializer.Serialize(exception.Message);
 
