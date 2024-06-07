@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.WebUtilities;
-using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.RegisterAsUser.BackgroundJob;
@@ -13,15 +12,10 @@ internal sealed class SendingUserConfirmationEmailEventHandler
     : IEventHandler<SendingUserConfirmationEvent>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
-    private readonly Lazy<IJobHandler> _jobHandler;
 
-    public SendingUserConfirmationEmailEventHandler(
-        Lazy<ISendingMailHandler> sendingMailHandler,
-        Lazy<IJobHandler> jobHandler
-    )
+    public SendingUserConfirmationEmailEventHandler(Lazy<ISendingMailHandler> sendingMailHandler)
     {
         _sendingMailHandler = sendingMailHandler;
-        _jobHandler = jobHandler;
     }
 
     public async Task HandleAsync(SendingUserConfirmationEvent eventModel, CancellationToken ct)
@@ -39,8 +33,6 @@ internal sealed class SendingUserConfirmationEmailEventHandler
             );
 
         // Try to send mail.
-        _jobHandler.Value.ExecuteOneTimeJob(
-            methodCall: () => _sendingMailHandler.Value.SendAsync(mailContent, ct)
-        );
+        await _sendingMailHandler.Value.SendAsync(mailContent, ct);
     }
 }

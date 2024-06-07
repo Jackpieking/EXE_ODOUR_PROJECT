@@ -11,15 +11,12 @@ internal sealed class SendUserConfirmSuccessfullyEmailEventHandler
     : IEventHandler<SendUserConfirmSuccessfullyEmailEvent>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
-    private readonly Lazy<IJobHandler> _jobHandler;
 
     public SendUserConfirmSuccessfullyEmailEventHandler(
-        Lazy<ISendingMailHandler> sendingMailHandler,
-        Lazy<IJobHandler> jobHandler
+        Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
         _sendingMailHandler = sendingMailHandler;
-        _jobHandler = jobHandler;
     }
 
     public async Task HandleAsync(
@@ -35,8 +32,6 @@ internal sealed class SendUserConfirmSuccessfullyEmailEventHandler
             );
 
         // Try to send mail.
-        _jobHandler.Value.ExecuteOneTimeJob(
-            methodCall: () => _sendingMailHandler.Value.SendAsync(mailContent, ct)
-        );
+        await _sendingMailHandler.Value.SendAsync(mailContent, ct);
     }
 }

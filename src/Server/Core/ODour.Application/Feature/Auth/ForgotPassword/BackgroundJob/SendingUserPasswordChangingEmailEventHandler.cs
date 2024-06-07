@@ -13,15 +13,12 @@ internal sealed class SendingUserPasswordChangingEmailEventHandler
     : IEventHandler<SendingUserPasswordChangingEmailEvent>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
-    private readonly Lazy<IJobHandler> _jobHandler;
 
     public SendingUserPasswordChangingEmailEventHandler(
-        Lazy<ISendingMailHandler> sendingMailHandler,
-        Lazy<IJobHandler> jobHandler
+        Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
         _sendingMailHandler = sendingMailHandler;
-        _jobHandler = jobHandler;
     }
 
     public async Task HandleAsync(
@@ -40,9 +37,17 @@ internal sealed class SendingUserPasswordChangingEmailEventHandler
             cancellationToken: ct
         );
 
-        // Try to send mail.
-        _jobHandler.Value.ExecuteOneTimeJob(
-            methodCall: () => _sendingMailHandler.Value.SendAsync(mailContent, ct)
-        );
+        var retryTime = 3;
+
+        do
+        {
+            // Try to send mail.
+            var result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
+
+            if (!result)
+            {
+                retryTime--;
+            }
+        } while (retryTime != 0);
     }
 }
