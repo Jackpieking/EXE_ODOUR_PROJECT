@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.WebUtilities;
-using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.ForgotPassword.BackgroundJob;
@@ -37,17 +36,21 @@ internal sealed class SendingUserPasswordChangingEmailEventHandler
             cancellationToken: ct
         );
 
-        var retryTime = 3;
+        // Try to send mail.
+        var result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
 
-        do
+        if (!result)
         {
-            // Try to send mail.
-            var result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
-
-            if (!result)
+            for (int retryTime = 0; retryTime < 3; retryTime++)
             {
-                retryTime -= 1;
+                // Try to send mail.
+                result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
+
+                if (result)
+                {
+                    break;
+                }
             }
-        } while (retryTime != default);
+        }
     }
 }
