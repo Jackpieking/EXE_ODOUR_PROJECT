@@ -42,7 +42,7 @@ internal static class AppBackgroundJobServiceConfig
                     value: hangfireOption.SchedulePollingIntervalInSeconds
                 );
                 option.ServerName = hangfireOption.ServerName;
-                option.WorkerCount = 5;
+                option.WorkerCount = hangfireOption.WorkerCount;
             });
 
         return services;
