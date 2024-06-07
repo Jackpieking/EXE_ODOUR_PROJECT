@@ -35,7 +35,7 @@ internal sealed class ConfirmUserEmailHandler
     {
         // Validate input token.
         #region InputValidation
-        var (userId, tokenId, tokenValue) = await ValidateTokenAsync(token: command.Token, ct: ct);
+        var (userId, tokenValue) = await ValidateTokenAsync(tokenValue: command.Token, ct: ct);
 
         // Invalid token.
         if (userId == Guid.Empty)
@@ -102,7 +102,6 @@ internal sealed class ConfirmUserEmailHandler
         var dbResult =
             await _unitOfWork.Value.ConfirmUserEmailRepository.ConfirmUserEmailCommandAsync(
                 user: foundUser,
-                tokenId: tokenId,
                 tokenValue: tokenValue,
                 accountStatusId: accountStatus.Id,
                 userManager: _userManager.Value,
@@ -120,34 +119,27 @@ internal sealed class ConfirmUserEmailHandler
         return new() { StatusCode = ConfirmUserEmailResponseStatusCode.OPERATION_SUCCESS };
     }
 
-    private async Task<(Guid, Guid, string)> ValidateTokenAsync(string token, CancellationToken ct)
+    private async Task<(Guid, string)> ValidateTokenAsync(string tokenValue, CancellationToken ct)
     {
-        token = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token));
+        tokenValue = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: tokenValue));
 
-        if (string.IsNullOrWhiteSpace(value: token))
+        if (string.IsNullOrWhiteSpace(value: tokenValue))
         {
-            return (Guid.Empty, Guid.Empty, string.Empty);
-        }
-
-        var tokens = token.Split(separator: CommonConstant.App.DefaultStringSeparator);
-
-        if (!tokens.Any())
-        {
-            return (Guid.Empty, Guid.Empty, string.Empty);
+            return (Guid.Empty, string.Empty);
         }
 
         var foundUserToken =
             await _unitOfWork.Value.ConfirmUserEmailRepository.GetUserConfirmedEmailTokenByTokenIdQueryAsync(
-                tokenId: tokens[1],
+                tokenId: tokenValue,
                 ct: ct
             );
 
         if (Equals(objA: foundUserToken, objB: default))
         {
-            return (Guid.Empty, Guid.Empty, string.Empty);
+            return (Guid.Empty, string.Empty);
         }
 
-        return (foundUserToken.UserId, Guid.Parse(input: tokens[1]), tokens[0]);
+        return (foundUserToken.UserId, tokenValue);
     }
 
     private static async Task SendingUserConfirmationSuccessfullyMailAsync(

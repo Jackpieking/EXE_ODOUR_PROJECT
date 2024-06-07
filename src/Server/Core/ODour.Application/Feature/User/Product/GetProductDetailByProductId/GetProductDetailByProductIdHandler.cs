@@ -64,6 +64,11 @@ internal sealed class GetProductDetailByProductIdHandler
                     Description = foundProduct.Description,
                     QuantityInStock = foundProduct.QuantityInStock,
                     ProductStatus = foundProduct.ProductStatus.Name,
+                    Category = new()
+                    {
+                        Id = foundProduct.Category.Id,
+                        Name = foundProduct.Category.Name
+                    },
                     Medias = foundProduct.ProductMedias.Select(
                         image => new GetProductDetailByProductIdResponse.ResponseBody.ProductEntity.ProductMedia
                         {

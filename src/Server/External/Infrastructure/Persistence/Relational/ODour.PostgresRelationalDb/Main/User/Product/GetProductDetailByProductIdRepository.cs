@@ -34,6 +34,7 @@ internal sealed class GetProductDetailByProductIdRepository : IGetProductDetailB
                 Description = product.Description,
                 QuantityInStock = product.QuantityInStock,
                 ProductStatus = new() { Name = product.ProductStatus.Name },
+                Category = new() { Id = product.Category.Id, Name = product.Category.Name },
                 ProductMedias = product.ProductMedias.Select(image => new ProductMediaEntity
                 {
                     UploadOrder = image.UploadOrder,

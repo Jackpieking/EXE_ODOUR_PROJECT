@@ -8,8 +8,6 @@ public interface IMainUnitOfWork
     #region Auth
     IRegisterAsUserRepository RegisterAsUserRepository { get; }
 
-    IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
-
     IResendUserConfirmationEmailRepository ResendUserConfirmationEmailRepository { get; }
 
     IConfirmUserEmailRepository ConfirmUserEmailRepository { get; }

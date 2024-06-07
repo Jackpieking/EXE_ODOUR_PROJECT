@@ -20,15 +20,14 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
         _context = context;
     }
 
-    public async Task<bool> CreateAndAddUserToRoleCommandAsync(
+    public async Task<string> CreateAndAddUserToRoleCommandAsync(
         UserEntity newUser,
         string password,
-        IEnumerable<UserTokenEntity> emailConfirmTokens,
         UserManager<UserEntity> userManager,
         CancellationToken ct
     )
     {
-        var executedTransactionResult = false;
+        var dbResult = string.Empty;
 
         await _context
             .Value.Database.CreateExecutionStrategy()
@@ -54,15 +53,26 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
                         throw new DbUpdateConcurrencyException();
                     }
 
+                    var emailConfirmedToken = new UserTokenEntity
+                    {
+                        UserId = newUser.Id,
+                        Name = "EmailConfirmedToken",
+                        Value = await userManager.GenerateEmailConfirmationTokenAsync(
+                            user: newUser
+                        ),
+                        ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
+                        LoginProvider = Guid.NewGuid().ToString()
+                    };
+
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .AddRangeAsync(entities: emailConfirmTokens, cancellationToken: ct);
+                        .AddAsync(entity: emailConfirmedToken, cancellationToken: ct);
 
                     await _context.Value.SaveChangesAsync(cancellationToken: ct);
 
                     await dbTransaction.CommitAsync(cancellationToken: ct);
 
-                    executedTransactionResult = true;
+                    dbResult = emailConfirmedToken.Value;
                 }
                 catch
                 {
@@ -70,7 +80,7 @@ internal sealed class RegisterAsUserRepository : IRegisterAsUserRepository
                 }
             });
 
-        return executedTransactionResult;
+        return dbResult;
     }
 
     public Task<AccountStatusEntity> GetPendingConfirmedAccountStatusQueryAsync(

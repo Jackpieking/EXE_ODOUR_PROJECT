@@ -92,31 +92,24 @@ internal sealed class RegisterAsUserHandler
             newAccountStatus: newAccountStatus.Id
         );
 
-        // Get admin email confirmed tokens.
-        var userEmailConfirmedTokens = await GenerateUserEmailConfirmedTokenAsync(newUser: newUser);
-
         // Create and add user to role.
-        var dbResult =
+        var emailConfirmedToken =
             await _unitOfWork.Value.RegisterAsUserRepository.CreateAndAddUserToRoleCommandAsync(
                 newUser: newUser,
                 password: command.Password,
-                emailConfirmTokens: new List<UserTokenEntity>
-                {
-                    userEmailConfirmedTokens["MainToken"]
-                },
                 userManager: _userManager.Value,
                 ct: ct
             );
 
         // Cannot create or add user to role.
-        if (!dbResult)
+        if (string.IsNullOrWhiteSpace(value: emailConfirmedToken))
         {
             return new() { StatusCode = RegisterAsUserResponseStatusCode.OPERATION_FAIL };
         }
 
         // Sending user confirmation mail.
         await SendingUserConfirmationMailAsync(
-            emailConfirmedTokens: userEmailConfirmedTokens,
+            emailConfirmedToken: emailConfirmedToken,
             command: command,
             ct: ct
         );
@@ -157,31 +150,6 @@ internal sealed class RegisterAsUserHandler
         return result.Succeeded;
     }
 
-    private async Task<Dictionary<string, UserTokenEntity>> GenerateUserEmailConfirmedTokenAsync(
-        UserEntity newUser
-    )
-    {
-        Dictionary<string, UserTokenEntity> emailConfirmedTokens = new(capacity: 2);
-
-        var tokenId = Guid.NewGuid();
-
-        // Add new token for email confirmed.
-        emailConfirmedTokens.Add(
-            key: "MainToken",
-            value: new()
-            {
-                UserId = newUser.Id,
-                Name = "EmailConfirmedToken",
-                Value =
-                    $"{await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: newUser)}{CommonConstant.App.DefaultStringSeparator}{tokenId}",
-                ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = tokenId.ToString()
-            }
-        );
-
-        return emailConfirmedTokens;
-    }
-
     /// <summary>
     ///     Finishes filling the user with default
     ///     values for the newly created user.
@@ -206,13 +174,6 @@ internal sealed class RegisterAsUserHandler
     {
         newUser.Email = command.Email;
         newUser.UserName = command.Email;
-        newUser.SecurityStamp = string.Concat(
-            values: Array.ConvertAll(
-                array: Guid.NewGuid().ToByteArray(),
-                converter: myByte => myByte.ToString(format: "X2")
-            )
-        );
-
         newUser.UserDetail = new()
         {
             AppPasswordHash = _dataProtectionHandler.Value.Protect(
@@ -245,14 +206,14 @@ internal sealed class RegisterAsUserHandler
     /// </returns>
     private static async Task SendingUserConfirmationMailAsync(
         RegisterAsUserRequest command,
-        Dictionary<string, UserTokenEntity> emailConfirmedTokens,
+        string emailConfirmedToken,
         CancellationToken ct
     )
     {
         // Try to send mail.
         var sendingEmailEvent = new BackgroundJob.SendingUserConfirmationEvent
         {
-            MainTokenValue = emailConfirmedTokens["MainToken"].Value,
+            MainTokenValue = emailConfirmedToken,
             Email = command.Email
         };
 

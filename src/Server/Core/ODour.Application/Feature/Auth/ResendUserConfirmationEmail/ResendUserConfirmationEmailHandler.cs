@@ -130,8 +130,7 @@ internal sealed class ResendUserConfirmationEmailHandler
             {
                 UserId = user.Id,
                 Name = "EmailConfirmedToken",
-                Value =
-                    $"{await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: user)}{CommonConstant.App.DefaultStringSeparator}{tokenId}",
+                Value = await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: user),
                 ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
                 LoginProvider = tokenId.ToString()
             }

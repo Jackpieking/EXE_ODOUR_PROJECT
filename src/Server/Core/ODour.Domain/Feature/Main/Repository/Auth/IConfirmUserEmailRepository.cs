@@ -27,7 +27,6 @@ public interface IConfirmUserEmailRepository
     #region Command
     Task<bool> ConfirmUserEmailCommandAsync(
         UserEntity user,
-        Guid tokenId,
         string tokenValue,
         Guid accountStatusId,
         UserManager<UserEntity> userManager,

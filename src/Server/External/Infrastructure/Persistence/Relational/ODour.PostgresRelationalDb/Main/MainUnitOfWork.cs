@@ -11,7 +11,6 @@ namespace ODour.PostgresRelationalDb.Main;
 public sealed class MainUnitOfWork : IMainUnitOfWork
 {
     private IRegisterAsUserRepository _registerAsUserRepository;
-    private IRegisterAsAdminRepository _registerAsAdminRepository;
     private IResendUserConfirmationEmailRepository _resendUserConfirmationEmailRepository;
     private IConfirmUserEmailRepository _confirmUserEmailRepository;
     private IForgotPasswordRepository _forgotPasswordRepository;
@@ -33,14 +32,6 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _registerAsUserRepository ??= new RegisterAsUserRepository(context: _context);
-        }
-    }
-
-    public IRegisterAsAdminRepository RegisterAsAdminRepository
-    {
-        get
-        {
-            return _registerAsAdminRepository ??= new RegisterAsAdminRepository(context: _context);
         }
     }
 

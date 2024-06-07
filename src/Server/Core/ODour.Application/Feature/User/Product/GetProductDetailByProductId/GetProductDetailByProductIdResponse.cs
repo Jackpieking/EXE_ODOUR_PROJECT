@@ -28,6 +28,8 @@ public sealed class GetProductDetailByProductIdResponse : IFeatureResponse
 
             public string ProductStatus { get; init; }
 
+            public ProductCategory Category { get; init; }
+
             public IEnumerable<ProductMedia> Medias { get; init; }
 
             public sealed class ProductMedia
@@ -35,6 +37,13 @@ public sealed class GetProductDetailByProductIdResponse : IFeatureResponse
                 public int UploadOrder { get; init; }
 
                 public string StorageUrl { get; init; }
+            }
+
+            public sealed class ProductCategory
+            {
+                public Guid Id { get; init; }
+
+                public string Name { get; init; }
             }
         }
     }
