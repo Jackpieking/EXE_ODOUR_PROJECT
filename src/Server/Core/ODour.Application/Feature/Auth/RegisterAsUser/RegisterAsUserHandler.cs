@@ -219,6 +219,11 @@ internal sealed class RegisterAsUserHandler
             Email = command.Email
         };
 
-        await _queueHandler.Value.QueueAsync(backgroundJobCommand: sendingEmailCommand, ct: ct);
+        await _queueHandler.Value.QueueAsync(
+            backgroundJobCommand: sendingEmailCommand,
+            executeAfter: null,
+            expireOn: DateTime.UtcNow.AddSeconds(value: 60),
+            ct: ct
+        );
     }
 }

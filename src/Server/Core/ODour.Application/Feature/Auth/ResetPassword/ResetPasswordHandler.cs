@@ -178,6 +178,11 @@ public sealed class ResetPasswordHandler
             Email = email
         };
 
-        await _queueHandler.Value.QueueAsync(sendingEmailCommand, ct: ct);
+        await _queueHandler.Value.QueueAsync(
+            sendingEmailCommand,
+            executeAfter: null,
+            expireOn: DateTime.UtcNow.AddSeconds(value: 60),
+            ct: ct
+        );
     }
 }

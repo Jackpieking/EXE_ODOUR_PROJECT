@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
@@ -7,8 +8,17 @@ namespace ODour.AppBackgroundJob.Handler;
 
 public sealed class FastEndpointQueueHandler : IQueueHandler
 {
-    public Task QueueAsync(ICommand backgroundJobCommand, CancellationToken ct)
+    public Task QueueAsync(
+        ICommand backgroundJobCommand,
+        DateTime? executeAfter,
+        DateTime? expireOn,
+        CancellationToken ct
+    )
     {
-        return backgroundJobCommand.QueueJobAsync(ct: ct);
+        return backgroundJobCommand.QueueJobAsync(
+            executeAfter: executeAfter,
+            expireOn: expireOn,
+            ct: ct
+        );
     }
 }

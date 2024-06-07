@@ -52,6 +52,8 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
 
                 try
                 {
+                    var failureReasonseAsJson = JsonSerializer.Serialize(value: string.Empty);
+
                     //if this is a recurring job command, reschedule the next execution like so:
                     if (r.Command is IRecurringJob cronJob)
                     {
@@ -61,14 +63,13 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                             .ExecuteUpdateAsync(
                                 setPropertyCalls: builder =>
                                     builder
-                                        .SetProperty(entity => entity.IsComplete, false)
                                         .SetProperty(
                                             entity => entity.ExecuteAfter,
                                             DateTime.UtcNow.Add(cronJob.Frequency)
                                         )
                                         .SetProperty(
-                                            entity => entity.ExpireOn,
-                                            DateTime.MaxValue.ToUniversalTime()
+                                            entity => entity.FailureReason,
+                                            failureReasonseAsJson
                                         ),
                                 cancellationToken: ct
                             );
@@ -80,7 +81,12 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                             .Where(predicate: entity => entity.Id == r.Id)
                             .ExecuteUpdateAsync(
                                 setPropertyCalls: builder =>
-                                    builder.SetProperty(entity => entity.IsComplete, true),
+                                    builder
+                                        .SetProperty(entity => entity.IsComplete, true)
+                                        .SetProperty(
+                                            entity => entity.FailureReason,
+                                            failureReasonseAsJson
+                                        ),
                                 cancellationToken: ct
                             );
                     }
@@ -117,7 +123,9 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                 {
                     if (r.FailureCount == MaxRetryCount)
                     {
-                        var failureReasonseAsJson = JsonSerializer.Serialize(exception.Message);
+                        var failureReasonseAsJson = JsonSerializer.Serialize(
+                            value: exception.Message
+                        );
 
                         await context
                             .Value.Set<JobRecordEntity>()
@@ -136,32 +144,60 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                     }
                     else if (r.FailureCount < MaxRetryCount)
                     {
-                        var failureReasonseAsJson = JsonSerializer.Serialize(exception.Message);
+                        var failureReasonseAsJson = JsonSerializer.Serialize(
+                            value: exception.Message
+                        );
 
-                        await context
-                            .Value.Set<JobRecordEntity>()
-                            .Where(predicate: entity => entity.Id == r.Id)
-                            .ExecuteUpdateAsync(
-                                setPropertyCalls: builder =>
-                                    builder
-                                        .SetProperty(
-                                            entity => entity.FailureReason,
-                                            failureReasonseAsJson
-                                        )
-                                        .SetProperty(
-                                            entity => entity.FailureCount,
-                                            r.FailureCount + 1
-                                        )
-                                        .SetProperty(
-                                            entity => entity.ExecuteAfter,
-                                            DateTime.UtcNow.AddSeconds(10)
-                                        )
-                                        .SetProperty(
-                                            entity => entity.ExpireOn,
-                                            DateTime.UtcNow.AddSeconds(60)
-                                        ),
-                                cancellationToken: ct
-                            );
+                        if (r.Command is IRecurringJob cronJob)
+                        {
+                            await context
+                                .Value.Set<JobRecordEntity>()
+                                .Where(predicate: entity => entity.Id == r.Id)
+                                .ExecuteUpdateAsync(
+                                    setPropertyCalls: builder =>
+                                        builder
+                                            .SetProperty(
+                                                entity => entity.ExecuteAfter,
+                                                DateTime.UtcNow.Add(cronJob.Frequency)
+                                            )
+                                            .SetProperty(
+                                                entity => entity.FailureCount,
+                                                r.FailureCount + 1
+                                            )
+                                            .SetProperty(
+                                                entity => entity.FailureReason,
+                                                failureReasonseAsJson
+                                            ),
+                                    cancellationToken: ct
+                                );
+                        }
+                        else
+                        {
+                            await context
+                                .Value.Set<JobRecordEntity>()
+                                .Where(predicate: entity => entity.Id == r.Id)
+                                .ExecuteUpdateAsync(
+                                    setPropertyCalls: builder =>
+                                        builder
+                                            .SetProperty(
+                                                entity => entity.FailureReason,
+                                                failureReasonseAsJson
+                                            )
+                                            .SetProperty(
+                                                entity => entity.FailureCount,
+                                                r.FailureCount + 1
+                                            )
+                                            .SetProperty(
+                                                entity => entity.ExecuteAfter,
+                                                DateTime.UtcNow.AddSeconds(10)
+                                            )
+                                            .SetProperty(
+                                                entity => entity.ExpireOn,
+                                                DateTime.UtcNow.AddSeconds(60)
+                                            ),
+                                    cancellationToken: ct
+                                );
+                        }
                     }
 
                     await dbTransaction.CommitAsync(cancellationToken: ct);
@@ -214,6 +250,12 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
         r.FailureReason = JsonSerializer.Serialize(value: string.Empty);
         r.CancelledOn = App.MinTimeInUTC;
         r.FailureCount = default;
+
+        if (r.Command is IRecurringJob)
+        {
+            r.IsComplete = false;
+            r.ExpireOn = DateTime.MinValue.ToUniversalTime();
+        }
 
         await context.Value.Set<JobRecordEntity>().AddAsync(entity: r, cancellationToken: ct);
 

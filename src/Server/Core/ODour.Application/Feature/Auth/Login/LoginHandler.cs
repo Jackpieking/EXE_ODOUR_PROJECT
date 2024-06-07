@@ -154,7 +154,12 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
             CurrentTimeInUtc = DateTime.UtcNow
         };
 
-        await _queueHandler.Value.QueueAsync(sendingEmailCommand, ct: ct);
+        await _queueHandler.Value.QueueAsync(
+            sendingEmailCommand,
+            executeAfter: null,
+            expireOn: DateTime.UtcNow.AddSeconds(value: 60),
+            ct: ct
+        );
     }
 
     private UserTokenEntity InitNewRefreshToken(List<Claim> userClaims, bool isRememberMe)
