@@ -27,5 +27,7 @@ public interface IMainUnitOfWork
     IGetAllProductsRepository GetAllProductsRepository { get; }
 
     IGetProductDetailByProductIdRepository GetProductDetailByProductIdRepository { get; }
+
+    IGetRelatedProductsByCategoryIdRepository GetRelatedProductsByCategoryIdRepository { get; }
     #endregion
 }

@@ -24,7 +24,7 @@ internal sealed class GetAllProductsRepository : IGetAllProductsRepository
         CancellationToken ct
     )
     {
-        return await _context
+        var foundProducts = await _context
             .Value.Set<ProductEntity>()
             .AsNoTracking()
             .Select(selector: product => new ProductEntity
@@ -42,6 +42,10 @@ internal sealed class GetAllProductsRepository : IGetAllProductsRepository
             .Skip(count: (currentPage - 1) * pageSize)
             .Take(count: pageSize)
             .ToListAsync(cancellationToken: ct);
+
+        foundProducts.TrimExcess();
+
+        return foundProducts;
     }
 
     public Task<int> GetProductsCountQueryAsync(CancellationToken ct)

@@ -20,6 +20,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IRefreshAccessTokenRepository _refreshAccessTokenRepository;
     private IGetAllProductsRepository _getAllProductsRepository;
     private IGetProductDetailByProductIdRepository _getProductDetailByProductIdRepository;
+    private IGetRelatedProductsByCategoryIdRepository _getRelatedProductsByCategoryIdRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -101,6 +102,15 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         {
             return _getProductDetailByProductIdRepository ??=
                 new GetProductDetailByProductIdRepository(context: _context);
+        }
+    }
+
+    public IGetRelatedProductsByCategoryIdRepository GetRelatedProductsByCategoryIdRepository
+    {
+        get
+        {
+            return _getRelatedProductsByCategoryIdRepository ??=
+                new GetRelatedProductsByCategoryIdRepository(context: _context);
         }
     }
 }

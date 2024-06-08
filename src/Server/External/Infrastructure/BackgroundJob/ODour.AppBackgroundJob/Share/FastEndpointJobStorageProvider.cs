@@ -254,7 +254,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
         if (r.Command is IRecurringJob)
         {
             r.IsComplete = false;
-            r.ExpireOn = DateTime.MinValue.ToUniversalTime();
+            r.ExpireOn = DateTime.MaxValue.ToUniversalTime();
         }
 
         await context.Value.Set<JobRecordEntity>().AddAsync(entity: r, cancellationToken: ct);

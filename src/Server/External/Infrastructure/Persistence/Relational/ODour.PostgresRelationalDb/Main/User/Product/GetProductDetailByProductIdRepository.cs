@@ -41,7 +41,7 @@ internal sealed class GetProductDetailByProductIdRepository : IGetProductDetailB
                     StorageUrl = image.StorageUrl
                 })
             })
-            .FirstAsync(cancellationToken: ct);
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
     public Task<bool> IsProductFoundByProductIdQueryAsync(string productId, CancellationToken ct)
