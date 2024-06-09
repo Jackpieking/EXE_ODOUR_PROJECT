@@ -18,6 +18,8 @@ internal sealed class GetRelatedProductsByCategoryIdEndpoint
         AllowAnonymous();
         DontThrowIfValidationFails();
         PreProcessor<GetRelatedProductsByCategoryIdValidationPreProcessor>();
+        PreProcessor<GetRelatedProductsByCategoryIdCachingPreProcessor>();
+        PostProcessor<GetRelatedProductsByCategoryIdCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
@@ -65,6 +67,9 @@ internal sealed class GetRelatedProductsByCategoryIdEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

@@ -17,6 +17,8 @@ internal sealed class GetProductDetailByProductIdEndpoint
         AllowAnonymous();
         DontThrowIfValidationFails();
         PreProcessor<GetProductDetailByProductIdValidationPreProcessor>();
+        PreProcessor<GetProductDetailByProductIdCachingPreProcessor>();
+        PostProcessor<GetProductDetailByProductIdCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
@@ -63,6 +65,9 @@ internal sealed class GetProductDetailByProductIdEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // set http code of http response to default for not serializing.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

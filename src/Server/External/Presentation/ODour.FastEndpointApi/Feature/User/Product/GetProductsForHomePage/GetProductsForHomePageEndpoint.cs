@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.User.Product.GetProductsForHomePage;
 using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.Common;
 using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.HttpResponse;
+using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.Middlewares;
 
 namespace ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage;
 
@@ -16,6 +17,8 @@ internal sealed class GetProductsForHomePageEndpoint
         Get(routePatterns: "product/home");
         AllowAnonymous();
         DontThrowIfValidationFails();
+        PreProcessor<GetProductsForHomePageCachingPreProcessor>();
+        PostProcessor<GetProductsForHomePageCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
@@ -63,6 +66,9 @@ internal sealed class GetProductsForHomePageEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

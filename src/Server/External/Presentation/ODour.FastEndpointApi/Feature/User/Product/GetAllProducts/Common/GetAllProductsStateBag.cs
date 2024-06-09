@@ -4,5 +4,5 @@ internal sealed class GetAllProductsStateBag
 {
     public string CacheKey { get; set; }
 
-    public int CacheDurationInSeconds { get; } = 60;
+    public int CacheDurationInSeconds { get; } = 180;
 }

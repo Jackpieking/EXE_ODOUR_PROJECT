@@ -3,26 +3,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
-using ODour.Application.Feature.User.Product.GetAllProducts;
 using ODour.Application.Share.Caching;
-using ODour.FastEndpointApi.Feature.User.Product.GetAllProducts.Common;
-using ODour.FastEndpointApi.Feature.User.Product.GetAllProducts.HttpResponse;
+using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.Common;
+using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.HttpResponse;
 
-namespace ODour.FastEndpointApi.Feature.User.Product.GetAllProducts.Middlewares;
+namespace ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.Middlewares;
 
-internal sealed class GetAllProductsCachingPreProcessor
-    : PreProcessor<GetAllProductsRequest, GetAllProductsStateBag>
+internal sealed class GetProductsForHomePageCachingPreProcessor
+    : PreProcessor<EmptyRequest, GetProductsForHomePageStateBag>
 {
     private readonly Lazy<IServiceScopeFactory> _serviceScopeFactory;
 
-    public GetAllProductsCachingPreProcessor(Lazy<IServiceScopeFactory> serviceScopeFactory)
+    public GetProductsForHomePageCachingPreProcessor(Lazy<IServiceScopeFactory> serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
     }
 
     public override async Task PreProcessAsync(
-        IPreProcessorContext<GetAllProductsRequest> context,
-        GetAllProductsStateBag state,
+        IPreProcessorContext<EmptyRequest> context,
+        GetProductsForHomePageStateBag state,
         CancellationToken ct
     )
     {
@@ -31,19 +30,23 @@ internal sealed class GetAllProductsCachingPreProcessor
             return;
         }
 
-        state.CacheKey =
-            $"{nameof(GetAllProducts)}__req__{context.Request.CategoryId}_{context.Request.CurrentPage}_req_{context.Request.SortType}";
+        state.CacheKey = nameof(GetProductsForHomePage);
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 
         var cacheHandler = scope.Resolve<Lazy<ICacheHandler>>();
 
-        var cacheModel = await cacheHandler.Value.GetAsync<GetAllProductsHttpResponse>(
+        var cacheModel = await cacheHandler.Value.GetAsync<GetProductsForHomePageHttpResponse>(
             key: state.CacheKey,
             cancellationToken: ct
         );
 
-        if (!Equals(objA: cacheModel, objB: AppCacheModel<GetAllProductsHttpResponse>.NotFound))
+        if (
+            !Equals(
+                objA: cacheModel,
+                objB: AppCacheModel<GetProductsForHomePageHttpResponse>.NotFound
+            )
+        )
         {
             var httpCode = cacheModel.Value.HttpCode;
             cacheModel.Value.HttpCode = default;
