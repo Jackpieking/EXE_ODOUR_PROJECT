@@ -41,6 +41,9 @@ internal sealed class GetAllProductsEndpoint
         CancellationToken ct
     )
     {
+        // Normalize sort type.
+        req.SortType = req.SortType.ToLower();
+
         // Get app feature response.
         var appResponse = await req.ExecuteAsync(ct: ct);
 

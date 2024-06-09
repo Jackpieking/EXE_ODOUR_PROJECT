@@ -3,6 +3,8 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ODour.PostgresRelationalDb.Data;
 
 #nullable disable
@@ -10,7 +12,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240607140907_M1_Init_Db")]
+    [Migration("20240609050645_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
