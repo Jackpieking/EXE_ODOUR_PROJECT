@@ -8,20 +8,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using ODour.Application.Feature.Auth.Logout;
+using ODour.Application.Feature.User.Cart.GetCartDetail;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
-using ODour.FastEndpointApi.Feature.Auth.Logout.Common;
-using ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
+using ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.Common;
+using ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.HttpResponse;
 
-namespace ODour.FastEndpointApi.Feature.Auth.Logout.Middlewares;
+namespace ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.Middlewares;
 
-internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyRequest, LogoutStateBag>
+internal sealed class GetCartDetailAuthorizationPreProcessor
+    : PreProcessor<EmptyRequest, GetCartDetailStateBag>
 {
     private readonly Lazy<IServiceScopeFactory> _serviceScopeFactory;
     private readonly Lazy<TokenValidationParameters> _tokenValidationParameters;
 
-    public LogoutAuthorizationPreProcessor(
+    public GetCartDetailAuthorizationPreProcessor(
         Lazy<IServiceScopeFactory> serviceScopeFactory,
         Lazy<TokenValidationParameters> tokenValidationParameters
     )
@@ -32,13 +33,10 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
 
     public override async Task PreProcessAsync(
         IPreProcessorContext<EmptyRequest> context,
-        LogoutStateBag state,
+        GetCartDetailStateBag state,
         CancellationToken ct
     )
     {
-        // Set new app request.
-        state.AppRequest = new();
-
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -60,7 +58,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         )
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                statusCode: GetCartDetailResponseStatusCode.UN_AUTHORIZED,
                 appRequest: state.AppRequest,
                 context: context.HttpContext,
                 ct: ct
@@ -76,7 +74,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
 
         #region Part1
         // Get refresh token.
-        var refreshToken = await unitOfWork.Value.LogoutRepository.GetRefreshTokenQueryAsync(
+        var refreshToken = await unitOfWork.Value.GetCartDetailRepository.GetRefreshTokenQueryAsync(
             refreshTokenId: Guid.Parse(
                     input: context.HttpContext.User.FindFirstValue(
                         claimType: JwtRegisteredClaimNames.Jti
@@ -90,7 +88,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         if (Equals(objA: refreshToken, objB: default))
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                statusCode: GetCartDetailResponseStatusCode.FORBIDDEN,
                 appRequest: state.AppRequest,
                 context: context.HttpContext,
                 ct: ct
@@ -103,7 +101,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         if (refreshToken.ExpiredAt < DateTime.UtcNow)
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
+                statusCode: GetCartDetailResponseStatusCode.UN_AUTHORIZED,
                 appRequest: state.AppRequest,
                 context: context.HttpContext,
                 ct: ct
@@ -114,21 +112,18 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         #endregion
 
         #region Part2
-        // Find user by user id.
-        var foundUser = await userManager.Value.FindByIdAsync(
-            userId: Guid.Parse(
-                    input: context.HttpContext.User.FindFirstValue(
-                        claimType: JwtRegisteredClaimNames.Sub
-                    )
-                )
-                .ToString()
+        var foundUserId = Guid.Parse(
+            input: context.HttpContext.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Sub)
         );
+
+        // Find user by user id.
+        var foundUser = await userManager.Value.FindByIdAsync(userId: foundUserId.ToString());
 
         // User is not found
         if (Equals(objA: foundUser, objB: default))
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                statusCode: GetCartDetailResponseStatusCode.FORBIDDEN,
                 appRequest: state.AppRequest,
                 context: context.HttpContext,
                 ct: ct
@@ -141,7 +136,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         #region Part3
         // Is user temporarily removed.
         var isUserTemporarilyRemoved =
-            await unitOfWork.Value.LogoutRepository.IsUserBannedQueryAsync(
+            await unitOfWork.Value.GetCartDetailRepository.IsUserBannedQueryAsync(
                 userId: foundUser.Id,
                 ct: ct
             );
@@ -150,7 +145,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         if (isUserTemporarilyRemoved)
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                statusCode: GetCartDetailResponseStatusCode.FORBIDDEN,
                 appRequest: state.AppRequest,
                 context: context.HttpContext,
                 ct: ct
@@ -171,7 +166,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         if (!isUserInRole)
         {
             await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
+                statusCode: GetCartDetailResponseStatusCode.FORBIDDEN,
                 appRequest: state.AppRequest,
                 context: context.HttpContext,
                 ct: ct
@@ -181,18 +176,18 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         }
         #endregion
 
-        // Set new found refresh token value.
-        state.FoundRefreshTokenValue = refreshToken.Value;
+        // Set user id.
+        state.AppRequest.SetUserId(userId: foundUser.Id);
     }
 
     private static Task SendResponseAsync(
-        LogoutResponseStatusCode statusCode,
-        LogoutRequest appRequest,
+        GetCartDetailResponseStatusCode statusCode,
+        GetCartDetailRequest appRequest,
         HttpContext context,
         CancellationToken ct
     )
     {
-        var httpResponse = LogoutHttpResponseManager
+        var httpResponse = GetCartDetailHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: appRequest, arg2: new() { StatusCode = statusCode });
 

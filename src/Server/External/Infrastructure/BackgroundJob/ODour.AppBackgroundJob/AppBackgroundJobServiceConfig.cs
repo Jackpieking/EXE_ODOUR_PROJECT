@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using ODour.AppBackgroundJob.Share;
 using ODour.Domain.Share.System.Entities;
 
-namespace ODour.FastEndpointApi.ServiceConfigs;
+namespace ODour.AppBackgroundJob;
 
-internal static class AppBackgroundJobServiceConfig
+public static class AppBackgroundJobServiceConfig
 {
-    internal static IServiceCollection Config(
+    public static IServiceCollection Config(
         this IServiceCollection services,
         IConfiguration configuration
     )

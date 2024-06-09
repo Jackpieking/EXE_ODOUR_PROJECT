@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +14,7 @@ using ODour.Application.Share.Caching;
 using ODour.Application.Share.Common;
 using ODour.Application.Share.DataProtection;
 using ODour.Application.Share.Mail;
+using ODour.Application.Share.Session;
 using ODour.Application.Share.Tokens;
 using ODour.AppNotification.Handlers;
 using ODour.Configuration.Infrastructure.Mail.GoogleGmail;
@@ -23,6 +25,7 @@ using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.PostgresRelationalDb.Main;
 using ODour.RedisCacheDb.Handler;
+using ODour.RedisSessionStorage.Handler;
 
 namespace ODour.FastEndpointApi.ServiceConfigs;
 
@@ -150,6 +153,14 @@ internal static class CustomServiceConfig
         services
             .AddSingleton<IQueueHandler, FastEndpointQueueHandler>()
             .MakeSingletonLazy<IQueueHandler>();
+
+        // ====
+        services.MakeSingletonLazy<IHttpContextAccessor>();
+
+        // ====
+        services
+            .AddSingleton<IUserSession, UserSessionHandler>()
+            .MakeSingletonLazy<IUserSession>();
         #endregion
 
         return services;

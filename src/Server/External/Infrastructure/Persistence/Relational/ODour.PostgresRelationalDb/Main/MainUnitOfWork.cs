@@ -2,8 +2,10 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.User.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 using ODour.PostgresRelationalDb.Main.Auth;
+using ODour.PostgresRelationalDb.Main.User.Cart;
 using ODour.PostgresRelationalDb.Main.User.Product;
 
 namespace ODour.PostgresRelationalDb.Main;
@@ -22,6 +24,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetProductDetailByProductIdRepository _getProductDetailByProductIdRepository;
     private IGetRelatedProductsByCategoryIdRepository _getRelatedProductsByCategoryIdRepository;
     private IGetProductsForHomePageRepository _getProductsForHomePageRepository;
+    private IGetCartDetailRepository _getCartDetailRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -123,5 +126,10 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
                 context: _context
             );
         }
+    }
+
+    public IGetCartDetailRepository GetCartDetailRepository
+    {
+        get { return _getCartDetailRepository ??= new GetCartDetailRepository(context: _context); }
     }
 }

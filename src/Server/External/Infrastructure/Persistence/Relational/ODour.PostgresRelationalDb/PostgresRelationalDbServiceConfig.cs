@@ -9,11 +9,11 @@ using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.PostgresRelationalDb.Data;
 
-namespace ODour.FastEndpointApi.ServiceConfigs;
+namespace ODour.PostgresRelationalDb;
 
-internal static class PostgresRelationalDbServiceConfig
+public static class PostgresRelationalDbServiceConfig
 {
-    internal static IServiceCollection Config(
+    public static IServiceCollection Config(
         this IServiceCollection services,
         IConfiguration configuration
     )

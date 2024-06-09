@@ -9,12 +9,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.JsonWebTokens;
+using ODour.AppBackgroundJob;
+using ODour.AppIdentityService;
+using ODour.Application;
 using ODour.Application.Share.DataProtection;
+using ODour.AppNotification;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi.ServiceConfigs;
 using ODour.FastEndpointApi.Shared.Middlewares;
+using ODour.PostgresRelationalDb;
 using ODour.PostgresRelationalDb.Data;
+using ODour.RedisCacheDb;
+using ODour.RedisSessionStorage;
 
 // Comment this line if switch to another database.
 AppContext.SetSwitch(switchName: "Npgsql.DisableDateTimeInfinityConversions", isEnabled: true);
@@ -36,6 +43,7 @@ AppNotificationServiceConfig.Config(services: services, configuration: configura
 AppIdentityServiceConfig.Config(services: services, configuration: configuration);
 ApplicationServiceConfig.Config(services: services, configuration: configuration);
 AppBackgroundJobServiceConfig.Config(services: services, configuration: configuration);
+RedisSessionStorageServiceConfig.Config(services: services, configuration: configuration);
 
 var app = builder.Build();
 
@@ -74,6 +82,7 @@ app.UseAppExceptionHandler()
     .UseCors()
     .UseAuthentication()
     .UseAuthorization()
+    .UseSession()
     .UseResponseCaching()
     .UseFastEndpoints()
     .UseSwaggerGen()

@@ -2,11 +2,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ODour.Configuration.Infrastructure.Persistence.Cache.Redis;
 
-namespace ODour.FastEndpointApi.ServiceConfigs;
+namespace ODour.RedisCacheDb;
 
-internal static class RedisCachingDbServiceConfig
+public static class RedisCachingDbServiceConfig
 {
-    internal static IServiceCollection Config(
+    public static IServiceCollection Config(
         this IServiceCollection services,
         IConfiguration configuration
     )

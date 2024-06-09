@@ -1,19 +1,15 @@
-using FastEndpoints;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ODour.FastEndpointApi.ServiceConfigs;
+namespace ODour.AppNotification;
 
-internal static class ApplicationServiceConfig
+public static class AppNotificationServiceConfig
 {
-    internal static IServiceCollection Config(
+    public static IServiceCollection Config(
         this IServiceCollection services,
         IConfiguration configuration
     )
     {
-        // ====
-        services.AddFastEndpoints();
-
         return services;
     }
 }

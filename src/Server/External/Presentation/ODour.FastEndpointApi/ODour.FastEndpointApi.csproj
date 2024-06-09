@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\Infrastructure\IdentityService\ODour.AppIdentityService\ODour.AppIdentityService.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Notification\ODour.AppNotification\ODour.AppNotification.csproj" />
     <ProjectReference Include="..\..\Infrastructure\BackgroundJob\ODour.AppBackgroundJob\ODour.AppBackgroundJob.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Persistence\Session\ODour.RedisSessionStorage\ODour.RedisSessionStorage.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">

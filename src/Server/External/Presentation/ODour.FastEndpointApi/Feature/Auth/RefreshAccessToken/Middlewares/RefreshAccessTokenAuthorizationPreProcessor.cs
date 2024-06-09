@@ -81,123 +81,112 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         var unitOfWork = scope.Resolve<Lazy<IMainUnitOfWork>>();
         var userManager = scope.Resolve<Lazy<UserManager<UserEntity>>>();
 
-        try
-        {
-            #region Part1
-            // Get refresh token.
-            var refreshToken =
-                await unitOfWork.Value.RefreshAccessTokenRepository.GetRefreshTokenQueryAsync(
-                    refreshToken: context.Request.RefreshToken,
-                    refreshTokenId: Guid.Parse(
-                            input: context.HttpContext.User.FindFirstValue(
-                                claimType: JwtRegisteredClaimNames.Jti
-                            )
-                        )
-                        .ToString(),
-                    ct: ct
-                );
-
-            // Refresh token is not found.
-            if (Equals(objA: refreshToken, objB: default))
-            {
-                await SendResponseAsync(
-                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                    context: context,
-                    ct: ct
-                );
-
-                return;
-            }
-
-            // Refresh token is expired.
-            if (refreshToken.ExpiredAt < DateTime.UtcNow)
-            {
-                await SendResponseAsync(
-                    statusCode: RefreshAccessTokenResponseStatusCode.UN_AUTHORIZED,
-                    context: context,
-                    ct: ct
-                );
-
-                return;
-            }
-            #endregion
-
-            #region Part2
-            // Find user by user id.
-            var foundUser = await userManager.Value.FindByIdAsync(
-                userId: Guid.Parse(
+        #region Part1
+        // Get refresh token.
+        var refreshToken =
+            await unitOfWork.Value.RefreshAccessTokenRepository.GetRefreshTokenQueryAsync(
+                refreshToken: context.Request.RefreshToken,
+                refreshTokenId: Guid.Parse(
                         input: context.HttpContext.User.FindFirstValue(
-                            claimType: JwtRegisteredClaimNames.Sub
+                            claimType: JwtRegisteredClaimNames.Jti
                         )
                     )
-                    .ToString()
+                    .ToString(),
+                ct: ct
             );
 
-            // User is not found
-            if (Equals(objA: foundUser, objB: default))
-            {
-                await SendResponseAsync(
-                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                    context: context,
-                    ct: ct
-                );
-
-                return;
-            }
-            #endregion
-
-            #region Part3
-            // Is user temporarily removed.
-            var isUserTemporarilyRemoved =
-                await unitOfWork.Value.RefreshAccessTokenRepository.IsUserBannedQueryAsync(
-                    userId: foundUser.Id,
-                    ct: ct
-                );
-
-            // User is temporarily removed.
-            if (isUserTemporarilyRemoved)
-            {
-                await SendResponseAsync(
-                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                    context: context,
-                    ct: ct
-                );
-
-                return;
-            }
-            #endregion
-
-            #region Part4
-            // Is user in role.
-            var isUserInRole = await userManager.Value.IsInRoleAsync(
-                user: foundUser,
-                role: context.HttpContext.User.FindFirstValue(claimType: "role")
-            );
-
-            // User is not in role.
-            if (!isUserInRole)
-            {
-                await SendResponseAsync(
-                    statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                    context: context,
-                    ct: ct
-                );
-
-                return;
-            }
-            #endregion
-
-            // State some changes.
-            state.FoundUserId = foundUser.Id;
-        }
-        catch (FormatException)
+        // Refresh token is not found.
+        if (Equals(objA: refreshToken, objB: default))
         {
             await SendResponseAsync(
                 statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
                 context: context,
                 ct: ct
             );
+
+            return;
         }
+
+        // Refresh token is expired.
+        if (refreshToken.ExpiredAt < DateTime.UtcNow)
+        {
+            await SendResponseAsync(
+                statusCode: RefreshAccessTokenResponseStatusCode.UN_AUTHORIZED,
+                context: context,
+                ct: ct
+            );
+
+            return;
+        }
+        #endregion
+
+        #region Part2
+        // Find user by user id.
+        var foundUser = await userManager.Value.FindByIdAsync(
+            userId: Guid.Parse(
+                    input: context.HttpContext.User.FindFirstValue(
+                        claimType: JwtRegisteredClaimNames.Sub
+                    )
+                )
+                .ToString()
+        );
+
+        // User is not found
+        if (Equals(objA: foundUser, objB: default))
+        {
+            await SendResponseAsync(
+                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
+                context: context,
+                ct: ct
+            );
+
+            return;
+        }
+        #endregion
+
+        #region Part3
+        // Is user temporarily removed.
+        var isUserTemporarilyRemoved =
+            await unitOfWork.Value.RefreshAccessTokenRepository.IsUserBannedQueryAsync(
+                userId: foundUser.Id,
+                ct: ct
+            );
+
+        // User is temporarily removed.
+        if (isUserTemporarilyRemoved)
+        {
+            await SendResponseAsync(
+                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
+                context: context,
+                ct: ct
+            );
+
+            return;
+        }
+        #endregion
+
+        #region Part4
+        // Is user in role.
+        var isUserInRole = await userManager.Value.IsInRoleAsync(
+            user: foundUser,
+            role: context.HttpContext.User.FindFirstValue(claimType: "role")
+        );
+
+        // User is not in role.
+        if (!isUserInRole)
+        {
+            await SendResponseAsync(
+                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
+                context: context,
+                ct: ct
+            );
+
+            return;
+        }
+        #endregion
+
+        // State some changes.
+        state.FoundUserId = foundUser.Id;
     }
 
     private static Task SendResponseAsync(

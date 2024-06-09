@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ODour.FastEndpointApi.ServiceConfigs;
+namespace ODour.AppIdentityService;
 
-internal static class AppIdentityServiceConfig
+public static class AppIdentityServiceConfig
 {
-    internal static IServiceCollection Config(
+    public static IServiceCollection Config(
         this IServiceCollection services,
         IConfiguration configuration
     )

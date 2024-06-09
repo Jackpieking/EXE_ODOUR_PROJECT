@@ -133,6 +133,9 @@ internal static class WebApiServiceConfig
             documentOption.EnableJWTBearerAuth = swaggerOption.EnableJWTBearerAuth;
         });
 
+        // ====
+        services.AddHttpContextAccessor();
+
         return services;
     }
 }
