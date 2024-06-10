@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ODour.Application.Share.Common;
 using ODour.Application.Share.Features;
-using ODour.Application.Share.Session;
-using ODour.Domain.Share.Cart.Entities;
+using ODour.Domain.Feature.Main;
 
 namespace ODour.Application.Feature.User.Cart.GetCartDetail;
 
 internal sealed class GetCartDetailHandler
     : IFeatureHandler<GetCartDetailRequest, GetCartDetailResponse>
 {
-    private readonly Lazy<IUserSession> _userSession;
+    private readonly Lazy<IMainUnitOfWork> _mainUnitOfWork;
 
-    public GetCartDetailHandler(Lazy<IUserSession> userSession)
+    public GetCartDetailHandler(Lazy<IMainUnitOfWork> mainUnitOfWork)
     {
-        _userSession = userSession;
+        _mainUnitOfWork = mainUnitOfWork;
     }
 
     public async Task<GetCartDetailResponse> ExecuteAsync(
@@ -25,32 +23,19 @@ internal sealed class GetCartDetailHandler
         CancellationToken ct
     )
     {
-        var session = await _userSession.Value.GetAsync<List<CartItemEntity>>(
-            key: CommonConstant.App.AppCartSessionKey,
-            ct: ct
-        );
-
-        if (Equals(objA: session, objB: AppSessionModel<List<CartItemEntity>>.NotFound))
-        {
-            await _userSession.Value.AddAsync<List<CartItemEntity>>(
-                key: $"{command.GetUserId()}{CommonConstant.App.DefaultStringSeparator}{CommonConstant.App.AppCartSessionKey}",
-                value: new(capacity: default),
+        // Get cart items of the user from database.
+        var foundCartItems =
+            await _mainUnitOfWork.Value.GetCartDetailRepository.GetCartItemsOfUserQueryAsync(
+                userId: command.GetUserId(),
                 ct: ct
             );
-
-            return new()
-            {
-                StatusCode = GetCartDetailResponseStatusCode.OPERATION_SUCCESS,
-                Body = new()
-            };
-        }
 
         #region ProjectToResponse
         var foundProductsInCart = new List<GetCartDetailResponse.ResponseBody.Product>();
 
         decimal orderBill = default;
 
-        foreach (var cartItem in session.Value)
+        foreach (var cartItem in foundCartItems)
         {
             var productTotalPrice = cartItem.Product.UnitPrice * cartItem.Quantity;
 
@@ -59,7 +44,7 @@ internal sealed class GetCartDetailHandler
             foundProductsInCart.Add(
                 new()
                 {
-                    Id = cartItem.Product.Id,
+                    Id = cartItem.ProductId,
                     Name = cartItem.Product.Name,
                     FirstImage = cartItem.Product.ProductMedias.First().StorageUrl,
                     UnitPrice = cartItem.Product.UnitPrice,

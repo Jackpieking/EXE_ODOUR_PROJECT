@@ -25,6 +25,8 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetRelatedProductsByCategoryIdRepository _getRelatedProductsByCategoryIdRepository;
     private IGetProductsForHomePageRepository _getProductsForHomePageRepository;
     private IGetCartDetailRepository _getCartDetailRepository;
+    private IAddToCartRepository _addToCartRepository;
+    private IRemoveFromCartRepository _removeFromCartRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -131,5 +133,18 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     public IGetCartDetailRepository GetCartDetailRepository
     {
         get { return _getCartDetailRepository ??= new GetCartDetailRepository(context: _context); }
+    }
+
+    public IAddToCartRepository AddToCartRepository
+    {
+        get { return _addToCartRepository ??= new AddToCartRepository(context: _context); }
+    }
+
+    public IRemoveFromCartRepository RemoveFromCartRepository
+    {
+        get
+        {
+            return _removeFromCartRepository ??= new RemoveFromCartRepository(context: _context);
+        }
     }
 }

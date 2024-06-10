@@ -4,5 +4,5 @@ internal sealed class GetRelatedProductsByCategoryIdStateBag
 {
     public string CacheKey { get; set; }
 
-    public int CacheDurationInSeconds { get; } = 30;
+    public int CacheDurationInSeconds { get; } = 15;
 }

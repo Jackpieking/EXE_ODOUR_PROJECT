@@ -1,20 +1,22 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ODour.Domain.Share.Cart.Entities;
 using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Feature.Main.Repository.User.Cart;
 
-public interface IGetCartDetailRepository
+public interface IRemoveFromCartRepository
 {
     #region Query
     Task<UserTokenEntity> GetRefreshTokenQueryAsync(string refreshTokenId, CancellationToken ct);
 
     Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
 
-    Task<IEnumerable<CartItemEntity>> GetCartItemsOfUserQueryAsync(
+    Task<bool> IsInputValidQueryAsync(string productId, int quantity, CancellationToken ct);
+
+    Task<bool> UpdateQuantityQueryAsync(
+        string productId,
+        int newQuantity,
         Guid userId,
         CancellationToken ct
     );

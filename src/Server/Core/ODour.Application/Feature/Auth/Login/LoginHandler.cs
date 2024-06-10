@@ -4,7 +4,10 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
+using ODour.Application.Feature.Auth.Login.BackgroundJob;
+using ODour.Application.Feature.Auth.ResetPassword.BackgroundJob;
 using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Application.Share.Tokens;
@@ -148,7 +151,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     )
     {
         // Try to send mail.
-        var sendingEmailCommand = new BackgroundJob.NotifyUserAboutLoginActionByEmailCommand
+        var sendingEmailCommand = new EmailUserAboutLoginSuccessfullyCommand
         {
             Email = email,
             CurrentTimeInUtc = DateTime.UtcNow

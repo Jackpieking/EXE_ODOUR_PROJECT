@@ -9,7 +9,5 @@ public sealed class GetCartDetailRequestValidator : Validator<GetCartDetailReque
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
         ClassLevelCascadeMode = CascadeMode.Stop;
-
-        RuleFor(expression: request => request.GetUserId()).NotEmpty();
     }
 }

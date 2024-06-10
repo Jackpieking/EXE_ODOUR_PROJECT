@@ -19,6 +19,8 @@ internal sealed class GetCartDetailEndpoint : Endpoint<EmptyRequest, GetCartDeta
         DontThrowIfValidationFails();
         PreProcessor<GetCartDetailValidationPreProcessor>();
         PreProcessor<GetCartDetailAuthorizationPreProcessor>();
+        PreProcessor<GetCartDetailCachingPreProcessor>();
+        PostProcessor<GetCartDetailCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);

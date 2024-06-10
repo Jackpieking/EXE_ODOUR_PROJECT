@@ -6,12 +6,12 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.Login.BackgroundJob;
 
-internal sealed class NotifyUserAboutLoginActionByEmailCommandHandler
-    : ICommandHandler<NotifyUserAboutLoginActionByEmailCommand>
+internal sealed class EmailUserAboutLoginSuccessfullyCommandHandler
+    : ICommandHandler<EmailUserAboutLoginSuccessfullyCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public NotifyUserAboutLoginActionByEmailCommandHandler(
+    public EmailUserAboutLoginSuccessfullyCommandHandler(
         Lazy<ISendingMailHandler> sendingMailHandler
     )
     {
@@ -19,7 +19,7 @@ internal sealed class NotifyUserAboutLoginActionByEmailCommandHandler
     }
 
     public async Task ExecuteAsync(
-        NotifyUserAboutLoginActionByEmailCommand command,
+        EmailUserAboutLoginSuccessfullyCommand command,
         CancellationToken ct
     )
     {
@@ -37,7 +37,10 @@ internal sealed class NotifyUserAboutLoginActionByEmailCommandHandler
             );
 
         // Try to send mail.
-        var result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
+        var result = await _sendingMailHandler.Value.SendAsync(
+            mailContent: mailContent,
+            cancellationToken: ct
+        );
 
         if (!result)
         {

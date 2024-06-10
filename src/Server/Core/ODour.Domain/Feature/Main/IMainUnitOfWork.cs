@@ -36,5 +36,9 @@ public interface IMainUnitOfWork
 
     #region User.Cart
     IGetCartDetailRepository GetCartDetailRepository { get; }
+
+    IAddToCartRepository AddToCartRepository { get; }
+
+    IRemoveFromCartRepository RemoveFromCartRepository { get; }
     #endregion
 }
