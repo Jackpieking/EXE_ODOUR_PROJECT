@@ -37,6 +37,12 @@ internal sealed class GetCartDetailAuthorizationPreProcessor
         CancellationToken ct
     )
     {
+        // Bypass if response has started.
+        if (context.HttpContext.ResponseStarted())
+        {
+            return;
+        }
+
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -189,8 +195,6 @@ internal sealed class GetCartDetailAuthorizationPreProcessor
         var httpResponse = GetCartDetailHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: appRequest, arg2: new() { StatusCode = statusCode });
-
-        context.MarkResponseStart();
 
         /*
         * Store the real http code of http response into a temporary variable.

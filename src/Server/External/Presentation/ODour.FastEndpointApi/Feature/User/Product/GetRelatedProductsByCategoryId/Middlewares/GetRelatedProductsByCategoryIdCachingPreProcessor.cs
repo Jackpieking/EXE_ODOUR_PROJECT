@@ -62,8 +62,6 @@ internal sealed class GetRelatedProductsByCategoryIdCachingPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

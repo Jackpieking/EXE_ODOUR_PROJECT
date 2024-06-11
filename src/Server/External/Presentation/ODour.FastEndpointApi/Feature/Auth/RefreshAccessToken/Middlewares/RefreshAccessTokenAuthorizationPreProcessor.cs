@@ -36,6 +36,12 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         CancellationToken ct
     )
     {
+        // Bypass if response has started.
+        if (context.HttpContext.ResponseStarted())
+        {
+            return;
+        }
+
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -198,8 +204,6 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         var httpResponse = RefreshAccessTokenHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: context.Request, arg2: new() { StatusCode = statusCode });
-
-        context.HttpContext.MarkResponseStart();
 
         /*
         * Store the real http code of http response into a temporary variable.

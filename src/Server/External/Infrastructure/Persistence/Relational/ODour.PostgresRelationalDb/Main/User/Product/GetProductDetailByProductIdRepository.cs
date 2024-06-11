@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 using ODour.Domain.Share.Product.Entities;
+using ODour.PostgresRelationalDb.Common;
 
 namespace ODour.PostgresRelationalDb.Main.User.Product;
 
@@ -25,7 +26,10 @@ internal sealed class GetProductDetailByProductIdRepository : IGetProductDetailB
         return await _context
             .Value.Set<ProductEntity>()
             .AsNoTracking()
-            .Where(predicate: product => product.Id.Equals(productId))
+            .Where(predicate: product =>
+                EF.Functions.Collate(product.Id, CommonConstant.DatabaseCollation.CASE_INSENSITIVE)
+                    .Equals(productId)
+            )
             .Select(selector: product => new ProductEntity
             {
                 Id = product.Id,
@@ -48,6 +52,14 @@ internal sealed class GetProductDetailByProductIdRepository : IGetProductDetailB
     {
         return _context
             .Value.Set<ProductEntity>()
-            .AnyAsync(predicate: product => product.Id.Equals(productId), cancellationToken: ct);
+            .AnyAsync(
+                predicate: product =>
+                    EF.Functions.Collate(
+                            product.Id,
+                            CommonConstant.DatabaseCollation.CASE_INSENSITIVE
+                        )
+                        .Equals(productId),
+                cancellationToken: ct
+            );
     }
 }

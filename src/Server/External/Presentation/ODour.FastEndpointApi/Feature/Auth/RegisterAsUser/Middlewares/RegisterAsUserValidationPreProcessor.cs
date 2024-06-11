@@ -5,7 +5,7 @@ using ODour.Application.Feature.Auth.RegisterAsUser;
 using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.Common;
 using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.HttpResponse;
 
-namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.Middlewares.Validation;
+namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.Middlewares;
 
 internal sealed class RegisterAsUserValidationPreProcessor
     : PreProcessor<RegisterAsUserRequest, RegisterAsUserStateBag>
@@ -37,8 +37,6 @@ internal sealed class RegisterAsUserValidationPreProcessor
                 statusCode: httpCode,
                 cancellation: ct
             );
-
-            context.HttpContext.MarkResponseStart();
 
             return;
         }

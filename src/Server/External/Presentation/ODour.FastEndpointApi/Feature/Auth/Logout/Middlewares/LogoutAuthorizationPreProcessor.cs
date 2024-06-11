@@ -36,6 +36,12 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         CancellationToken ct
     )
     {
+        // Bypass if response has started.
+        if (context.HttpContext.ResponseStarted())
+        {
+            return;
+        }
+
         // Set new app request.
         state.AppRequest = new();
 
@@ -195,8 +201,6 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         var httpResponse = LogoutHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: appRequest, arg2: new() { StatusCode = statusCode });
-
-        context.MarkResponseStart();
 
         /*
         * Store the real http code of http response into a temporary variable.

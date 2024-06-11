@@ -38,8 +38,6 @@ internal sealed class ConfirmUserEmailValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

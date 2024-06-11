@@ -54,8 +54,6 @@ internal sealed class GetAllProductsCachingPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

@@ -196,8 +196,6 @@ internal sealed class RemoveFromCartAuthorizationPreProcessor
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: appRequest, arg2: new() { StatusCode = statusCode });
 
-        context.MarkResponseStart();
-
         /*
         * Store the real http code of http response into a temporary variable.
         * Set the http code of http response to default for not serializing.

@@ -41,8 +41,6 @@ internal sealed class GetProductDetailByProductIdValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

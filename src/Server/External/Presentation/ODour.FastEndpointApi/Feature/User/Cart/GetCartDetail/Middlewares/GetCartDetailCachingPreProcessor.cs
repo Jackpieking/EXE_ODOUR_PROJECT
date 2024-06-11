@@ -52,8 +52,6 @@ internal sealed class GetCartDetailCachingPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }
