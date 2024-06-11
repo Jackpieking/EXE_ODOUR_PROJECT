@@ -156,14 +156,13 @@ internal sealed class GetCartDetailAuthorizationPreProcessor
         #endregion
 
         #region Part4
-        // Is user in role.
-        var isUserInRole = await userManager.Value.IsInRoleAsync(
-            user: foundUser,
-            role: context.HttpContext.User.FindFirstValue(claimType: "role")
-        );
+        var roleClaim = context.HttpContext.User.FindFirstValue(claimType: "role");
 
-        // User is not in role.
-        if (!isUserInRole)
+        // Is user in role
+        if (
+            !roleClaim.Equals(value: "user")
+            || !(await userManager.Value.IsInRoleAsync(user: foundUser, role: roleClaim))
+        )
         {
             await SendResponseAsync(
                 statusCode: GetCartDetailResponseStatusCode.FORBIDDEN,
