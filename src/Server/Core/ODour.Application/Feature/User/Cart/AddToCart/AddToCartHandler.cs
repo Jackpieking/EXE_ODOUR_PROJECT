@@ -22,87 +22,34 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
     {
         // Validate input at database
         #region Validation
-        var isInputValid = await _mainUnitOfWork.Value.AddToCartRepository.IsInputValidQueryAsync(
+        var foundProduct = await _mainUnitOfWork.Value.AddToCartRepository.FindProductQueryAsync(
             productId: command.ProductId,
-            quantity: command.Quantity,
             ct: ct
         );
 
-        if (!isInputValid)
+        if (Equals(objA: foundProduct, objB: default))
+        {
+            return new() { StatusCode = AddToCartResponseStatusCode.INPUT_VALIDATION_FAIL };
+        }
+
+        // Is cart item found
+        var foundCartItem = await _mainUnitOfWork.Value.AddToCartRepository.FindCartItemQueryAsync(
+            productId: command.ProductId,
+            ct: ct
+        );
+
+        if (
+            !Equals(objA: foundCartItem, objB: default)
+            && foundCartItem.Quantity + command.Quantity > foundProduct.QuantityInStock
+        )
         {
             return new() { StatusCode = AddToCartResponseStatusCode.INPUT_VALIDATION_FAIL };
         }
         #endregion
 
-        // !!!!!! ONLY WHEN ACCEPT UN-AUTHENTICATED USER.
-        // // Find all cart items in the session
-        // var session = await _userSession.Value.GetAsync<List<CartItemEntity>>(
-        //     key: $"{command.GetUserId()}{CommonConstant.App.DefaultStringSeparator}{CommonConstant.App.AppCartSessionKey}",
-        //     ct: ct
-        // );
-
-        // List<CartItemEntity> cartItems;
-
-        // // Not initialize the session
-        // if (Equals(objA: session, objB: AppSessionModel<List<CartItemEntity>>.NotFound))
-        // {
-        //     cartItems = new(capacity: 0);
-        // }
-        // else
-        // {
-        //     cartItems = session.Value;
-        // }
-
-        // // is product in cart
-        // var isProductInCart = cartItems.Any(cartItem => cartItem.ProductId == command.ProductId);
-
-        // // Add to cart if not in cart
-        // if (!isProductInCart)
-        // {
-        //     // Get product details
-        //     var productDetail =
-        //         await _mainUnitOfWork.Value.AddToCartRepository.FindProductQueryAsync(
-        //             productId: command.ProductId,
-        //             ct: ct
-        //         );
-
-        //     // Add to cart
-        //     cartItems.Add(
-        //         new()
-        //         {
-        //             ProductId = command.ProductId,
-        //             Quantity = command.Quantity,
-        //             UserId = command.GetUserId(),
-        //             Product = productDetail
-        //         }
-        //     );
-        // }
-        // else
-        // {
-        //     // Update quantity
-        //     cartItems
-        //         .First(predicate: cartItem => cartItem.ProductId == command.ProductId)
-        //         .Quantity += command.Quantity;
-        // }
-
-        // // Update session
-        // await _userSession.Value.AddAsync(
-        //     key: $"{command.GetUserId()}{CommonConstant.App.DefaultStringSeparator}{CommonConstant.App.AppCartSessionKey}",
-        //     value: cartItems,
-        //     ct: ct
-        // );
-
-        // Is cart item found
-        var isCartItemFound =
-            await _mainUnitOfWork.Value.AddToCartRepository.IsCartItemFoundQueryAsync(
-                productId: command.ProductId,
-                userId: command.GetUserId(),
-                ct: ct
-            );
-
         bool dbResult;
 
-        if (!isCartItemFound)
+        if (Equals(objA: foundCartItem, objB: default))
         {
             // Add to cart
             dbResult = await _mainUnitOfWork.Value.AddToCartRepository.AddItemToCartQueryAsync(
@@ -117,6 +64,12 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
         }
         else
         {
+            // Bypass if quantity is zero
+            if (command.Quantity == default)
+            {
+                return new() { StatusCode = AddToCartResponseStatusCode.OPERATION_SUCCESS };
+            }
+
             // Update quantity
             dbResult = await _mainUnitOfWork.Value.AddToCartRepository.UpdateQuantityQueryAsync(
                 productId: command.ProductId,

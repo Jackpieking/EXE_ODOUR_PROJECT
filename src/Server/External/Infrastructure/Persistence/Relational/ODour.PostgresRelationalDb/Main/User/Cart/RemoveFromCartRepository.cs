@@ -24,7 +24,7 @@ internal sealed class RemoveFromCartRepository : IRemoveFromCartRepository
             .Value.Set<CartItemEntity>()
             .AnyAsync(
                 predicate: cartItem =>
-                    cartItem.ProductId.Equals(productId) && cartItem.Quantity >= quantity,
+                    cartItem.ProductId.Equals(productId) && cartItem.Quantity - quantity >= 0,
                 cancellationToken: ct
             );
     }

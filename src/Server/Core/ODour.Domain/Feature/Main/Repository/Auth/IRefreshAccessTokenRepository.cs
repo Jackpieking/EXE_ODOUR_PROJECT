@@ -16,4 +16,12 @@ public interface IRefreshAccessTokenRepository
 
     Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
     #endregion
+
+    #region Commands
+    Task<bool> UpdateRefreshTokenQueryAsync(
+        string oldRefreshTokenId,
+        string newRefreshTokenId,
+        CancellationToken ct
+    );
+    #endregion
 }

@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using FastEndpoints;
 
 namespace ODour.Application.Feature.Auth.Login.BackgroundJob;
 
-public sealed class EmailUserAboutLoginSuccessfullyCommand : ICommand
+internal sealed class LoginSuccessfullyCommand : ICommand
 {
     public string Email { get; init; }
 

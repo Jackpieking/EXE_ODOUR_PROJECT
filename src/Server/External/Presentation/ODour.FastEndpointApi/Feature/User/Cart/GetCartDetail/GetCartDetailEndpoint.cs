@@ -69,6 +69,9 @@ internal sealed class GetCartDetailEndpoint : Endpoint<EmptyRequest, GetCartDeta
             cancellation: ct
         );
 
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
+
         return httpResponse;
     }
 }

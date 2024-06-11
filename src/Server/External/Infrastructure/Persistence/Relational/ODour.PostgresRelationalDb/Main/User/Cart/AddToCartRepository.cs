@@ -19,35 +19,6 @@ internal sealed class AddToCartRepository : IAddToCartRepository
         _context = context;
     }
 
-    public Task<bool> IsInputValidQueryAsync(string productId, int quantity, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<ProductEntity>()
-            .AnyAsync(
-                predicate: product =>
-                    product.Id.Equals(productId) && product.QuantityInStock >= quantity,
-                cancellationToken: ct
-            );
-    }
-
-    public Task<ProductEntity> FindProductQueryAsync(string productId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<ProductEntity>()
-            .AsNoTracking()
-            .Where(predicate: product => product.Id.Equals(productId))
-            .Select(selector: product => new ProductEntity
-            {
-                Name = product.Name,
-                ProductMedias = product.ProductMedias.Select(media => new ProductMediaEntity
-                {
-                    StorageUrl = media.StorageUrl
-                }),
-                UnitPrice = product.UnitPrice
-            })
-            .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
     public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
         string refreshTokenId,
         CancellationToken ct
@@ -139,18 +110,6 @@ internal sealed class AddToCartRepository : IAddToCartRepository
                             cancellationToken: ct
                         );
 
-                    await _context
-                        .Value.Set<ProductEntity>()
-                        .Where(predicate: product => product.Id.Equals(productId))
-                        .ExecuteUpdateAsync(
-                            setPropertyCalls: update =>
-                                update.SetProperty(
-                                    entity => entity.QuantityInStock,
-                                    entity => entity.QuantityInStock - newQuantity
-                                ),
-                            cancellationToken: ct
-                        );
-
                     await dbTransaction.CommitAsync(cancellationToken: ct);
 
                     dbResult = true;
@@ -162,5 +121,26 @@ internal sealed class AddToCartRepository : IAddToCartRepository
             });
 
         return dbResult;
+    }
+
+    public Task<CartItemEntity> FindCartItemQueryAsync(string productId, CancellationToken ct)
+    {
+        return _context
+            .Value.Set<CartItemEntity>()
+            .Where(predicate: cartItem => cartItem.ProductId.Equals(productId))
+            .Select(selector: cartItem => new CartItemEntity { Quantity = cartItem.Quantity })
+            .FirstOrDefaultAsync(cancellationToken: ct);
+    }
+
+    public Task<ProductEntity> FindProductQueryAsync(string productId, CancellationToken ct)
+    {
+        return _context
+            .Value.Set<ProductEntity>()
+            .Where(predicate: product => product.Id.Equals(productId))
+            .Select(selector: product => new ProductEntity
+            {
+                QuantityInStock = product.QuantityInStock
+            })
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 }

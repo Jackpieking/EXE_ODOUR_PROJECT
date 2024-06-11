@@ -16,11 +16,9 @@ public interface IAddToCartRepository
 
     Task<ProductEntity> FindProductQueryAsync(string productId, CancellationToken ct);
 
-    Task<bool> IsInputValidQueryAsync(string productId, int quantity, CancellationToken ct);
-
     Task<bool> AddItemToCartQueryAsync(CartItemEntity cartItem, CancellationToken ct);
 
-    Task<bool> IsCartItemFoundQueryAsync(string productId, Guid userId, CancellationToken ct);
+    Task<CartItemEntity> FindCartItemQueryAsync(string productId, CancellationToken ct);
 
     Task<bool> UpdateQuantityQueryAsync(
         string productId,

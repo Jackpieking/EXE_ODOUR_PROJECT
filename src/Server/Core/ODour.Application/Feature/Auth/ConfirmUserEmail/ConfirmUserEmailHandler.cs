@@ -92,7 +92,7 @@ internal sealed class ConfirmUserEmailHandler
 
         // Getting successfully confirmed account status.
         var accountStatus =
-            await _unitOfWork.Value.ConfirmUserEmailRepository.GetSuccesfullyConfirmedAccountStatusQueryAsync(
+            await _unitOfWork.Value.ConfirmUserEmailRepository.GetSuccessfullyConfirmedAccountStatusQueryAsync(
                 ct: ct
             );
 

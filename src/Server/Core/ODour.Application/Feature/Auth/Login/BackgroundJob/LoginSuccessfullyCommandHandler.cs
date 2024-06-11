@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
@@ -6,22 +6,16 @@ using ODour.Application.Share.Mail;
 
 namespace ODour.Application.Feature.Auth.Login.BackgroundJob;
 
-internal sealed class EmailUserAboutLoginSuccessfullyCommandHandler
-    : ICommandHandler<EmailUserAboutLoginSuccessfullyCommand>
+internal sealed class LoginSuccessfullyCommandHandler : ICommandHandler<LoginSuccessfullyCommand>
 {
     private readonly Lazy<ISendingMailHandler> _sendingMailHandler;
 
-    public EmailUserAboutLoginSuccessfullyCommandHandler(
-        Lazy<ISendingMailHandler> sendingMailHandler
-    )
+    public LoginSuccessfullyCommandHandler(Lazy<ISendingMailHandler> sendingMailHandler)
     {
         _sendingMailHandler = sendingMailHandler;
     }
 
-    public async Task ExecuteAsync(
-        EmailUserAboutLoginSuccessfullyCommand command,
-        CancellationToken ct
-    )
+    public async Task ExecuteAsync(LoginSuccessfullyCommand command, CancellationToken ct)
     {
         var mailContent =
             await _sendingMailHandler.Value.GetNotifyUserAboutLoginActionMailContentAsync(

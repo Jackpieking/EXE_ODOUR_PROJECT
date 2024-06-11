@@ -77,7 +77,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
         return executedTransactionResult;
     }
 
-    public Task<AccountStatusEntity> GetSuccesfullyConfirmedAccountStatusQueryAsync(
+    public Task<AccountStatusEntity> GetSuccessfullyConfirmedAccountStatusQueryAsync(
         CancellationToken ct
     )
     {

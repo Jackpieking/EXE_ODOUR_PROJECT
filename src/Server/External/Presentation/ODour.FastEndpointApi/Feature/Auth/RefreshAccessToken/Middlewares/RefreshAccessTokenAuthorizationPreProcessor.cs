@@ -82,16 +82,15 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         var userManager = scope.Resolve<Lazy<UserManager<UserEntity>>>();
 
         #region Part1
+        var foundAccessTokenId = Guid.Parse(
+            input: context.HttpContext.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Jti)
+        );
+
         // Get refresh token.
         var refreshToken =
             await unitOfWork.Value.RefreshAccessTokenRepository.GetRefreshTokenQueryAsync(
                 refreshToken: context.Request.RefreshToken,
-                refreshTokenId: Guid.Parse(
-                        input: context.HttpContext.User.FindFirstValue(
-                            claimType: JwtRegisteredClaimNames.Jti
-                        )
-                    )
-                    .ToString(),
+                refreshTokenId: foundAccessTokenId.ToString(),
                 ct: ct
             );
 
@@ -187,6 +186,7 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
 
         // State some changes.
         state.FoundUserId = foundUser.Id;
+        state.FoundAccessTokenId = foundAccessTokenId;
     }
 
     private static Task SendResponseAsync(

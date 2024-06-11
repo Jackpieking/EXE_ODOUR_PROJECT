@@ -48,6 +48,7 @@ internal sealed class RefreshAccessTokenEndpoint
         var stateBag = ProcessorState<RefreshAccessTokenStateBag>();
 
         req.SetUserId(userId: stateBag.FoundUserId);
+        req.SetAccessTokenId(accessTokenId: stateBag.FoundAccessTokenId);
 
         // Get app feature response.
         var appResponse = await req.ExecuteAsync(ct: ct);

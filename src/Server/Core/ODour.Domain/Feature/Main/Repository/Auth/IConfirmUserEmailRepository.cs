@@ -16,7 +16,7 @@ public interface IConfirmUserEmailRepository
 
     Task<bool> HasUserConfirmedEmailQueryAsync(Guid userId, CancellationToken ct);
 
-    Task<AccountStatusEntity> GetSuccesfullyConfirmedAccountStatusQueryAsync(CancellationToken ct);
+    Task<AccountStatusEntity> GetSuccessfullyConfirmedAccountStatusQueryAsync(CancellationToken ct);
 
     Task<UserTokenEntity> GetUserConfirmedEmailTokenByTokenIdQueryAsync(
         string tokenValue,
