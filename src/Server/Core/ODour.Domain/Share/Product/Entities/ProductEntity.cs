@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ODour.Domain.Share.Base.Entities;
+using ODour.Domain.Share.Cart.Entities;
 using ODour.Domain.Share.Category.Entities;
 using ODour.Domain.Share.Order.Entities;
 using ODour.Domain.Share.Voucher.Entities;
@@ -41,6 +42,8 @@ public sealed class ProductEntity : IEntity, ITemporarilyRemovedEntity
     public IEnumerable<OrderItemEntity> OrderItems { get; set; }
 
     public IEnumerable<ProductVoucherEntity> ProductVouchers { get; set; }
+
+    public IEnumerable<CartItemEntity> CartItems { get; set; }
     #endregion
 
     #region MetaData

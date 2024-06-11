@@ -1,12 +1,10 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using ODour.Application.Share.Common;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
@@ -18,14 +16,17 @@ internal sealed class ConfirmUserEmailHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public ConfirmUserEmailHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<UserManager<UserEntity>> userManager
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _queueHandler = queueHandler;
     }
 
     public async Task<ConfirmUserEmailResponse> ExecuteAsync(
@@ -35,7 +36,7 @@ internal sealed class ConfirmUserEmailHandler
     {
         // Validate input token.
         #region InputValidation
-        var (userId, tokenId, tokenValue) = await ValidateTokenAsync(token: command.Token, ct: ct);
+        var (userId, tokenValue) = await ValidateTokenAsync(tokenValue: command.Token, ct: ct);
 
         // Invalid token.
         if (userId == Guid.Empty)
@@ -91,7 +92,7 @@ internal sealed class ConfirmUserEmailHandler
 
         // Getting successfully confirmed account status.
         var accountStatus =
-            await _unitOfWork.Value.ConfirmUserEmailRepository.GetSuccesfullyConfirmedAccountStatusQueryAsync(
+            await _unitOfWork.Value.ConfirmUserEmailRepository.GetSuccessfullyConfirmedAccountStatusQueryAsync(
                 ct: ct
             );
 
@@ -102,7 +103,6 @@ internal sealed class ConfirmUserEmailHandler
         var dbResult =
             await _unitOfWork.Value.ConfirmUserEmailRepository.ConfirmUserEmailCommandAsync(
                 user: foundUser,
-                tokenId: tokenId,
                 tokenValue: tokenValue,
                 accountStatusId: accountStatus.Id,
                 userManager: _userManager.Value,
@@ -120,49 +120,44 @@ internal sealed class ConfirmUserEmailHandler
         return new() { StatusCode = ConfirmUserEmailResponseStatusCode.OPERATION_SUCCESS };
     }
 
-    private async Task<(Guid, Guid, string)> ValidateTokenAsync(string token, CancellationToken ct)
+    private async Task<(Guid, string)> ValidateTokenAsync(string tokenValue, CancellationToken ct)
     {
-        token = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token));
+        tokenValue = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: tokenValue));
 
-        if (string.IsNullOrWhiteSpace(value: token))
+        if (string.IsNullOrWhiteSpace(value: tokenValue))
         {
-            return (Guid.Empty, Guid.Empty, string.Empty);
-        }
-
-        var tokens = token.Split(separator: CommonConstant.App.DefaultStringSeparator);
-
-        if (!tokens.Any())
-        {
-            return (Guid.Empty, Guid.Empty, string.Empty);
+            return (Guid.Empty, string.Empty);
         }
 
         var foundUserToken =
             await _unitOfWork.Value.ConfirmUserEmailRepository.GetUserConfirmedEmailTokenByTokenIdQueryAsync(
-                tokenId: tokens[1],
+                tokenValue: tokenValue,
                 ct: ct
             );
 
         if (Equals(objA: foundUserToken, objB: default))
         {
-            return (Guid.Empty, Guid.Empty, string.Empty);
+            return (Guid.Empty, string.Empty);
         }
 
-        return (foundUserToken.UserId, Guid.Parse(input: tokens[1]), tokens[0]);
+        return (foundUserToken.UserId, tokenValue);
     }
 
-    private static async Task SendingUserConfirmationSuccessfullyMailAsync(
+    private async Task SendingUserConfirmationSuccessfullyMailAsync(
         string email,
         CancellationToken ct
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendUserConfirmSuccessfullyEmailCommand
+        var sendingEmailCommand = new BackgroundJob.SendUserConfirmSuccessfullyEmailCommand
         {
             Email = email
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+        await _queueHandler.Value.QueueAsync(
+            backgroundJobCommand: sendingEmailCommand,
+            executeAfter: null,
+            expireOn: DateTime.UtcNow.AddSeconds(value: 60),
             ct: ct
         );
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,9 +12,15 @@ public interface IGetAllProductsRepository
     Task<IEnumerable<ProductEntity>> GetAllProductsQueryAsync(
         int currentPage,
         int pageSize,
+        Guid categoryId,
+        string sortType,
         CancellationToken ct
     );
 
-    Task<int> GetProductsCountQueryAsync(CancellationToken ct);
+    Task<int> GetProductsCountQueryAsync(Guid categoryId, CancellationToken ct);
+
+    bool IsSortFilterFoundQuery(string sortType);
+
+    Task<bool> IsCategoryFoundQueryAsync(Guid categoryId, CancellationToken ct);
     #endregion
 }

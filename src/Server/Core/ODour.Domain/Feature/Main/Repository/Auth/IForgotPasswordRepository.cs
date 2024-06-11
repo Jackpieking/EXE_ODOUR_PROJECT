@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ODour.Domain.Share.User.Entities;
@@ -17,7 +16,7 @@ public interface IForgotPasswordRepository
 
     #region Command
     Task<bool> AddUserPasswordChangingTokenCommandAsync(
-        IEnumerable<UserTokenEntity> userTokenEntities,
+        UserTokenEntity userTokenEntity,
         CancellationToken ct
     );
     #endregion

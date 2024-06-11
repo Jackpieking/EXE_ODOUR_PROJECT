@@ -2,6 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ODour.PostgresRelationalDb.Data;
 
 #nullable disable
@@ -175,6 +177,27 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.ToTable("AccountStatuses", "main.account_status", t =>
                         {
                             t.HasComment("Contain account statuses.");
+                        });
+                });
+
+            modelBuilder.Entity("ODour.Domain.Share.Cart.Entities.CartItemEntity", b =>
+                {
+                    b.Property<string>("ProductId")
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProductId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CartItems", "main.order", t =>
+                        {
+                            t.HasComment("Contain cart items.");
                         });
                 });
 
@@ -374,7 +397,7 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("JSONB");
 
                     b.Property<bool>("IsTemporarilyRemoved")
                         .HasColumnType("boolean");
@@ -538,15 +561,25 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CancelledOn")
+                        .HasColumnType("TIMESTAMPTZ");
+
                     b.Property<string>("CommandJson")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("JSONB");
 
                     b.Property<DateTime>("ExecuteAfter")
                         .HasColumnType("TIMESTAMPTZ");
 
                     b.Property<DateTime>("ExpireOn")
                         .HasColumnType("TIMESTAMPTZ");
+
+                    b.Property<int>("FailureCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FailureReason")
+                        .IsRequired()
+                        .HasColumnType("JSONB");
 
                     b.Property<bool>("IsComplete")
                         .HasColumnType("boolean");
@@ -969,6 +1002,25 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasDiscriminator().HasValue("UserTokenEntity");
                 });
 
+            modelBuilder.Entity("ODour.Domain.Share.Cart.Entities.CartItemEntity", b =>
+                {
+                    b.HasOne("ODour.Domain.Share.Product.Entities.ProductEntity", "Product")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserDetailEntity", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ODour.Domain.Share.Events.EventSnapshotEntity", b =>
                 {
                     b.HasOne("ODour.Domain.Share.Events.EventEntity", "Event")
@@ -1004,13 +1056,13 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.HasOne("ODour.Domain.Share.Order.Entities.OrderEntity", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ODour.Domain.Share.Product.Entities.ProductEntity", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -1265,6 +1317,8 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             modelBuilder.Entity("ODour.Domain.Share.Product.Entities.ProductEntity", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("OrderItems");
 
                     b.Navigation("ProductMedias");
@@ -1297,6 +1351,8 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserDetailEntity", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("UserVouchers");
                 });
 

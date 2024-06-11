@@ -13,4 +13,10 @@ public sealed class RefreshAccessTokenRequest : IFeatureRequest<RefreshAccessTok
     public Guid GetUserId() => _userId;
 
     public void SetUserId(Guid userId) => _userId = userId;
+
+    private Guid _accessTokenId;
+
+    public Guid GetAccessTokenId() => _accessTokenId;
+
+    public void SetAccessTokenId(Guid accessTokenId) => _accessTokenId = accessTokenId;
 }

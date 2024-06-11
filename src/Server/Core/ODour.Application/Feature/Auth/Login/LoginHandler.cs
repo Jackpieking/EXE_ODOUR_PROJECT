@@ -4,8 +4,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
+using ODour.Application.Feature.Auth.Login.BackgroundJob;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Application.Share.Tokens;
 using ODour.Domain.Feature.Main;
@@ -20,13 +21,15 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     private readonly Lazy<SignInManager<UserEntity>> _signInManager;
     private readonly Lazy<IRefreshTokenHandler> _refreshTokenHandler;
     private readonly Lazy<IAccessTokenHandler> _accessTokenHandler;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public LoginHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
         Lazy<UserManager<UserEntity>> userManager,
         Lazy<SignInManager<UserEntity>> signInManager,
         Lazy<IRefreshTokenHandler> refreshTokenHandler,
-        Lazy<IAccessTokenHandler> accessTokenHandler
+        Lazy<IAccessTokenHandler> accessTokenHandler,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
@@ -34,6 +37,7 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
         _signInManager = signInManager;
         _refreshTokenHandler = refreshTokenHandler;
         _accessTokenHandler = accessTokenHandler;
+        _queueHandler = queueHandler;
     }
 
     public async Task<LoginResponse> ExecuteAsync(LoginRequest command, CancellationToken ct)
@@ -139,20 +143,22 @@ internal sealed class LoginHandler : IFeatureHandler<LoginRequest, LoginResponse
     }
 
     #region Others
-    private static async Task SendingNotifyUserAboutLoginActionMailAsync(
+    private async Task SendingNotifyUserAboutLoginActionMailAsync(
         string email,
         CancellationToken ct
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.NotifyUserAboutLoginActionByEmailCommand
+        var sendingEmailCommand = new LoginSuccessfullyCommand
         {
             Email = email,
             CurrentTimeInUtc = DateTime.UtcNow
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+        await _queueHandler.Value.QueueAsync(
+            sendingEmailCommand,
+            executeAfter: null,
+            expireOn: null,
             ct: ct
         );
     }

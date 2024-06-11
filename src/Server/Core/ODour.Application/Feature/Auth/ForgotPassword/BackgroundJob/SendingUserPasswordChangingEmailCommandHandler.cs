@@ -37,6 +37,11 @@ internal sealed class SendingUserPasswordChangingEmailCommandHandler
         );
 
         // Try to send mail.
-        await _sendingMailHandler.Value.SendAsync(mailContent: mailContent, cancellationToken: ct);
+        var result = await _sendingMailHandler.Value.SendAsync(mailContent, ct);
+
+        if (!result)
+        {
+            throw new ApplicationException(message: "Cannot send mail. Please try again later.");
+        }
     }
 }

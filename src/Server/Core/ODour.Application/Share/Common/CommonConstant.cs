@@ -25,6 +25,8 @@ public static class CommonConstant
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
 
-        public const string DefaultStringSeparator = "<||>";
+        public const string DefaultStringSeparator = "<APP_TK>";
+
+        public const string AppCartSessionKey = "AppCart";
     }
 }

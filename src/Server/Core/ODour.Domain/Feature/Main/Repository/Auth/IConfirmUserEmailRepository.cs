@@ -16,10 +16,10 @@ public interface IConfirmUserEmailRepository
 
     Task<bool> HasUserConfirmedEmailQueryAsync(Guid userId, CancellationToken ct);
 
-    Task<AccountStatusEntity> GetSuccesfullyConfirmedAccountStatusQueryAsync(CancellationToken ct);
+    Task<AccountStatusEntity> GetSuccessfullyConfirmedAccountStatusQueryAsync(CancellationToken ct);
 
     Task<UserTokenEntity> GetUserConfirmedEmailTokenByTokenIdQueryAsync(
-        string tokenId,
+        string tokenValue,
         CancellationToken ct
     );
     #endregion
@@ -27,7 +27,6 @@ public interface IConfirmUserEmailRepository
     #region Command
     Task<bool> ConfirmUserEmailCommandAsync(
         UserEntity user,
-        Guid tokenId,
         string tokenValue,
         Guid accountStatusId,
         UserManager<UserEntity> userManager,

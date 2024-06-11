@@ -21,7 +21,6 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
 
     public async Task<bool> ConfirmUserEmailCommandAsync(
         UserEntity user,
-        Guid tokenId,
         string tokenValue,
         Guid accountStatusId,
         UserManager<UserEntity> userManager,
@@ -51,7 +50,9 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
                     // Remove all email confirmed token of given user.
                     await _context
                         .Value.Set<UserTokenEntity>()
-                        .Where(predicate: token => token.LoginProvider.Equals(tokenId.ToString()))
+                        .Where(predicate: token =>
+                            token.UserId == user.Id && token.Name.Equals("EmailConfirmedToken")
+                        )
                         .ExecuteDeleteAsync(cancellationToken: ct);
 
                     await _context
@@ -76,7 +77,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
         return executedTransactionResult;
     }
 
-    public Task<AccountStatusEntity> GetSuccesfullyConfirmedAccountStatusQueryAsync(
+    public Task<AccountStatusEntity> GetSuccessfullyConfirmedAccountStatusQueryAsync(
         CancellationToken ct
     )
     {
@@ -89,7 +90,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
     }
 
     public Task<UserTokenEntity> GetUserConfirmedEmailTokenByTokenIdQueryAsync(
-        string tokenId,
+        string tokenValue,
         CancellationToken ct
     )
     {
@@ -97,7 +98,7 @@ internal sealed class ConfirmUserEmailRepository : IConfirmUserEmailRepository
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
             .Where(predicate: token =>
-                token.LoginProvider == tokenId && token.ExpiredAt > DateTime.UtcNow
+                token.Value.Equals(tokenValue) && token.ExpiredAt > DateTime.UtcNow
             )
             .Select(selector: token => new UserTokenEntity { UserId = token.UserId })
             .FirstOrDefaultAsync(cancellationToken: ct);

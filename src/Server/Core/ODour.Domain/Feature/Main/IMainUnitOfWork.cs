@@ -1,4 +1,5 @@
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.User.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 
 namespace ODour.Domain.Feature.Main;
@@ -7,8 +8,6 @@ public interface IMainUnitOfWork
 {
     #region Auth
     IRegisterAsUserRepository RegisterAsUserRepository { get; }
-
-    IRegisterAsAdminRepository RegisterAsAdminRepository { get; }
 
     IResendUserConfirmationEmailRepository ResendUserConfirmationEmailRepository { get; }
 
@@ -27,5 +26,19 @@ public interface IMainUnitOfWork
 
     #region User.Product
     IGetAllProductsRepository GetAllProductsRepository { get; }
+
+    IGetProductDetailByProductIdRepository GetProductDetailByProductIdRepository { get; }
+
+    IGetRelatedProductsByCategoryIdRepository GetRelatedProductsByCategoryIdRepository { get; }
+
+    IGetProductsForHomePageRepository GetProductsForHomePageRepository { get; }
+    #endregion
+
+    #region User.Cart
+    IGetCartDetailRepository GetCartDetailRepository { get; }
+
+    IAddToCartRepository AddToCartRepository { get; }
+
+    IRemoveFromCartRepository RemoveFromCartRepository { get; }
     #endregion
 }

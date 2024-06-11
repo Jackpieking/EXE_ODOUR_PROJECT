@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -16,10 +15,9 @@ public interface IRegisterAsUserRepository
     #endregion
 
     #region Command
-    Task<bool> CreateAndAddUserToRoleCommandAsync(
+    Task<string> CreateAndAddUserToRoleCommandAsync(
         UserEntity newUser,
         string password,
-        IEnumerable<UserTokenEntity> emailConfirmTokens,
         UserManager<UserEntity> userManager,
         CancellationToken ct
     );

@@ -4,7 +4,7 @@ using ODour.Configuration.Presentation.WebApi.SecurityKey;
 
 namespace ODour.AppIdentityService.Handlers;
 
-internal sealed class AppAdminAccessKeyHandler : IAdminAccessKeyHandler
+public sealed class AppAdminAccessKeyHandler : IAdminAccessKeyHandler
 {
     private readonly Lazy<AdminAccessSecurityKeyOption> _option;
 

@@ -24,10 +24,6 @@ public sealed class GetAllProductsResponse : IFeatureResponse
 
             public decimal UnitPrice { get; init; }
 
-            public string Description { get; init; }
-
-            public int QuantityInStock { get; init; }
-
             public string ProductStatus { get; init; }
 
             public ProductCategory Category { get; init; }
@@ -36,8 +32,6 @@ public sealed class GetAllProductsResponse : IFeatureResponse
 
             public sealed class ProductMedia
             {
-                public int UploadOrder { get; init; }
-
                 public string StorageUrl { get; init; }
             }
 

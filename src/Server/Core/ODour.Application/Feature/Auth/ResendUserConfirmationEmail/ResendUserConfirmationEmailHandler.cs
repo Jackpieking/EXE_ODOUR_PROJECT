@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
-using ODour.Application.Share.Common;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
@@ -16,14 +14,17 @@ internal sealed class ResendUserConfirmationEmailHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public ResendUserConfirmationEmailHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<UserManager<UserEntity>> userManager
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _queueHandler = queueHandler;
     }
 
     public async Task<ResendUserConfirmationEmailResponse> ExecuteAsync(
@@ -84,12 +85,12 @@ internal sealed class ResendUserConfirmationEmailHandler
         var user = await _userManager.Value.FindByEmailAsync(email: command.Email);
 
         // Generate email confirm token.
-        var emailConfirmedTokens = await GenerateUserEmailConfirmedTokenAsync(user: user);
+        var emailConfirmedToken = await GenerateUserEmailConfirmedTokenAsync(user: user);
 
         // Add email confirm token to the database.
         var dbResult =
-            await _unitOfWork.Value.ResendUserConfirmationEmailRepository.AddUserPasswordChangingTokenCommandAsync(
-                userTokenEntities: new List<UserTokenEntity> { emailConfirmedTokens["MainToken"] },
+            await _unitOfWork.Value.ResendUserConfirmationEmailRepository.AddUserConfirmedEmailTokenCommandAsync(
+                userTokenEntity: emailConfirmedToken,
                 ct: ct
             );
 
@@ -104,7 +105,7 @@ internal sealed class ResendUserConfirmationEmailHandler
 
         // Resend email again.
         await SendingUserConfirmationMailAsync(
-            emailConfirmedTokens: emailConfirmedTokens,
+            emailConfirmedTokenValue: emailConfirmedToken.Value,
             command: command,
             ct: ct
         );
@@ -115,29 +116,18 @@ internal sealed class ResendUserConfirmationEmailHandler
         };
     }
 
-    private async Task<Dictionary<string, UserTokenEntity>> GenerateUserEmailConfirmedTokenAsync(
-        UserEntity user
-    )
+    private async Task<UserTokenEntity> GenerateUserEmailConfirmedTokenAsync(UserEntity user)
     {
-        Dictionary<string, UserTokenEntity> emailConfirmedTokens = new(capacity: 2);
-
         var tokenId = Guid.NewGuid();
 
-        // Add new token for email confirmed.
-        emailConfirmedTokens.Add(
-            key: "MainToken",
-            value: new()
-            {
-                UserId = user.Id,
-                Name = "EmailConfirmedToken",
-                Value =
-                    $"{await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: user)}{CommonConstant.App.DefaultStringSeparator}{tokenId}",
-                ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
-                LoginProvider = tokenId.ToString()
-            }
-        );
-
-        return emailConfirmedTokens;
+        return new()
+        {
+            UserId = user.Id,
+            Name = "EmailConfirmedToken",
+            Value = await _userManager.Value.GenerateEmailConfirmationTokenAsync(user: user),
+            ExpiredAt = DateTime.UtcNow.AddHours(value: 48),
+            LoginProvider = tokenId.ToString()
+        };
     }
 
     /// <summary>
@@ -146,8 +136,8 @@ internal sealed class ResendUserConfirmationEmailHandler
     /// <param name="command">
     ///     Request model.
     /// </param>
-    /// <param name="newUser">
-    ///     New user.
+    /// <param name="emailConfirmedTokenValue">
+    ///     email confirm token value.
     /// </param>
     /// <param name="ct">
     ///     The token to monitor cancellation requests.
@@ -155,21 +145,23 @@ internal sealed class ResendUserConfirmationEmailHandler
     /// <returns>
     ///     Nothing
     /// </returns>
-    private static async Task SendingUserConfirmationMailAsync(
+    private async Task SendingUserConfirmationMailAsync(
         ResendUserConfirmationEmailRequest command,
-        Dictionary<string, UserTokenEntity> emailConfirmedTokens,
+        string emailConfirmedTokenValue,
         CancellationToken ct
     )
     {
         //Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
+        var sendingEmailCommand = new BackgroundJob.SendingUserConfirmationCommand
         {
-            MainTokenValue = emailConfirmedTokens["MainToken"].Value,
+            MainTokenValue = emailConfirmedTokenValue,
             Email = command.Email,
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+        await _queueHandler.Value.QueueAsync(
+            backgroundJobCommand: sendingEmailCommand,
+            executeAfter: null,
+            expireOn: DateTime.UtcNow.AddSeconds(value: 60),
             ct: ct
         );
     }

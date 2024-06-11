@@ -44,7 +44,7 @@ internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Prod
 
         builder
             .Property(propertyExpression: builder => builder.Description)
-            .HasColumnType(typeName: DatabaseNativeType.TEXT)
+            .HasColumnType(typeName: DatabaseNativeType.JSONB)
             .IsRequired(required: true);
 
         builder

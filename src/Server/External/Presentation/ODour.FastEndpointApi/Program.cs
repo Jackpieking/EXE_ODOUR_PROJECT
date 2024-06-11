@@ -4,7 +4,6 @@ using System.Threading;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,13 +14,14 @@ using ODour.AppIdentityService;
 using ODour.Application;
 using ODour.Application.Share.DataProtection;
 using ODour.AppNotification;
-using ODour.Configuration.Presentation.WebApi.SecurityKey;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
-using ODour.FastEndpointApi;
+using ODour.FastEndpointApi.ServiceConfigs;
 using ODour.FastEndpointApi.Shared.Middlewares;
 using ODour.PostgresRelationalDb;
 using ODour.PostgresRelationalDb.Data;
+using ODour.RedisCacheDb;
+using ODour.RedisSessionStorage;
 
 // Comment this line if switch to another database.
 AppContext.SetSwitch(switchName: "Npgsql.DisableDateTimeInfinityConversions", isEnabled: true);
@@ -35,12 +35,15 @@ var builder = WebApplication.CreateBuilder(args: args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-services.AddOdourPostgresRelationalDb(configuration: configuration);
-services.AddApplication();
-services.AddWebApi(configuration: configuration);
-services.AddAppIdentityService();
-services.AddAppNotification();
-services.AddAppBackgroundJob();
+PostgresRelationalDbServiceConfig.Config(services: services, configuration: configuration);
+WebApiServiceConfig.Config(services: services, configuration: configuration);
+RedisCachingDbServiceConfig.Config(services: services, configuration: configuration);
+CustomServiceConfig.Config(services: services, configuration: configuration);
+AppNotificationServiceConfig.Config(services: services, configuration: configuration);
+AppIdentityServiceConfig.Config(services: services, configuration: configuration);
+ApplicationServiceConfig.Config(services: services, configuration: configuration);
+AppBackgroundJobServiceConfig.Config(services: services, configuration: configuration);
+RedisSessionStorageServiceConfig.Config(services: services, configuration: configuration);
 
 var app = builder.Build();
 
@@ -79,19 +82,20 @@ app.UseAppExceptionHandler()
     .UseCors()
     .UseAuthentication()
     .UseAuthorization()
+    .UseSession()
     .UseResponseCaching()
     .UseFastEndpoints()
-    .UseJobQueues(options: option =>
-    {
-        option.ExecutionTimeLimit = TimeSpan.FromSeconds(value: 12);
-        option.MaxConcurrency = 2;
-        option.StorageProbeDelay = TimeSpan.FromSeconds(value: 2);
-    })
     .UseSwaggerGen()
     .UseSwaggerUi(configure: options =>
     {
         options.Path = string.Empty;
         options.DefaultModelsExpandDepth = -1;
+    })
+    .UseJobQueues(options: options =>
+    {
+        options.MaxConcurrency = 5;
+        options.StorageProbeDelay = TimeSpan.FromSeconds(value: 5);
+        options.ExecutionTimeLimit = TimeSpan.FromMinutes(value: 2);
     });
 
 // Clear all current allocations.

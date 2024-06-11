@@ -14,7 +14,7 @@ public interface IResetPasswordRepository
     Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
 
     Task<UserTokenEntity> GetResetPasswordTokenByTokenIdQueryAsync(
-        string tokenId,
+        string tokenValue,
         CancellationToken ct
     );
     #endregion
@@ -22,7 +22,6 @@ public interface IResetPasswordRepository
     #region Command
     Task<bool> ResetPasswordCommandAsync(
         UserEntity user,
-        Guid tokenId,
         string tokenValue,
         string newPassword,
         UserManager<UserEntity> userManager,

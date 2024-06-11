@@ -9,5 +9,13 @@ public sealed class GetAllProductsRequestValidator : Validator<GetAllProductsReq
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
         ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(expression: request => request.CurrentPage)
+            .NotEmpty()
+            .GreaterThan(valueToCompare: default);
+
+        RuleFor(expression: request => request.SortType).NotEmpty();
+
+        RuleFor(expression: request => request.CategoryId).NotEmpty();
     }
 }

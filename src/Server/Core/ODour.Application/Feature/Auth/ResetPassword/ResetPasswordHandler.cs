@@ -1,12 +1,10 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using ODour.Application.Share.Common;
+using ODour.Application.Share.BackgroundJob;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Share.User.Entities;
@@ -18,14 +16,17 @@ public sealed class ResetPasswordHandler
 {
     private readonly Lazy<IMainUnitOfWork> _unitOfWork;
     private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<IQueueHandler> _queueHandler;
 
     public ResetPasswordHandler(
         Lazy<IMainUnitOfWork> unitOfWork,
-        Lazy<UserManager<UserEntity>> userManager
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<IQueueHandler> queueHandler
     )
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _queueHandler = queueHandler;
     }
 
     public async Task<ResetPasswordResponse> ExecuteAsync(
@@ -35,8 +36,8 @@ public sealed class ResetPasswordHandler
     {
         #region InputValidation
         // Validate input token.
-        var (userId, tokenId, tokenValue) = await ValidateTokenAsync(
-            token: command.ResetPasswordToken,
+        var (userId, tokenValue) = await ValidateTokenAsync(
+            tokenValue: command.ResetPasswordToken,
             ct: ct
         );
 
@@ -93,7 +94,6 @@ public sealed class ResetPasswordHandler
         // Reset user password.
         var dbResult = await _unitOfWork.Value.ResetPasswordRepository.ResetPasswordCommandAsync(
             user: foundUser,
-            tokenId: tokenId,
             tokenValue: tokenValue,
             newPassword: command.NewPassword,
             userManager: _userManager.Value,
@@ -144,49 +144,44 @@ public sealed class ResetPasswordHandler
         return result.Succeeded;
     }
 
-    private async Task<(Guid, Guid, string)> ValidateTokenAsync(string token, CancellationToken ct)
+    private async Task<(Guid, string)> ValidateTokenAsync(string tokenValue, CancellationToken ct)
     {
-        token = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: token));
+        tokenValue = Encoding.UTF8.GetString(bytes: WebEncoders.Base64UrlDecode(input: tokenValue));
 
-        if (string.IsNullOrWhiteSpace(value: token))
+        if (string.IsNullOrWhiteSpace(value: tokenValue))
         {
-            return (Guid.Empty, Guid.Empty, string.Empty);
-        }
-
-        var tokens = token.Split(separator: CommonConstant.App.DefaultStringSeparator);
-
-        if (!tokens.Any())
-        {
-            return (Guid.Empty, Guid.Empty, string.Empty);
+            return (Guid.Empty, string.Empty);
         }
 
         var foundUserToken =
             await _unitOfWork.Value.ResetPasswordRepository.GetResetPasswordTokenByTokenIdQueryAsync(
-                tokenId: tokens[1],
+                tokenValue: tokenValue,
                 ct: ct
             );
 
         if (Equals(objA: foundUserToken, objB: default))
         {
-            return (Guid.Empty, Guid.Empty, string.Empty);
+            return (Guid.Empty, string.Empty);
         }
 
-        return (foundUserToken.UserId, Guid.Parse(input: tokens[1]), tokens[0]);
+        return (foundUserToken.UserId, tokenValue);
     }
 
-    private static async Task SendingUserResetPasswordSuccessfullyMailAsync(
+    private async Task SendingUserResetPasswordSuccessfullyMailAsync(
         string email,
         CancellationToken ct
     )
     {
         // Try to send mail.
-        var sendingAnyEmailCommand = new BackgroundJob.SendSuccessfullyUserResetPasswordEmailCommand
+        var sendingEmailCommand = new BackgroundJob.SendSuccessfullyUserResetPasswordEmailCommand
         {
             Email = email
         };
 
-        await sendingAnyEmailCommand.QueueJobAsync(
-            expireOn: DateTime.UtcNow.AddMinutes(value: 5),
+        await _queueHandler.Value.QueueAsync(
+            sendingEmailCommand,
+            executeAfter: null,
+            expireOn: DateTime.UtcNow.AddSeconds(value: 60),
             ct: ct
         );
     }

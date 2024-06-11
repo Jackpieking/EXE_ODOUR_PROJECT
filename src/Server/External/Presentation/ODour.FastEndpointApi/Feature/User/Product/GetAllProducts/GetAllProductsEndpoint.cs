@@ -17,6 +17,8 @@ internal sealed class GetAllProductsEndpoint
         AllowAnonymous();
         DontThrowIfValidationFails();
         PreProcessor<GetAllProductsValidationPreProcessor>();
+        PreProcessor<GetAllProductsCachingPreProcessor>();
+        PostProcessor<GetAllProductsCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
@@ -41,6 +43,9 @@ internal sealed class GetAllProductsEndpoint
         CancellationToken ct
     )
     {
+        // Normalize sort type.
+        req.SortType = req.SortType.ToLower();
+
         // Get app feature response.
         var appResponse = await req.ExecuteAsync(ct: ct);
 
@@ -62,6 +67,9 @@ internal sealed class GetAllProductsEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

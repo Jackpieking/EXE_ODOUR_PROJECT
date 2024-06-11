@@ -1,7 +1,7 @@
 namespace ODour.Application.Feature.User.Product.GetAllProducts;
 
 /// <summary>
-///     Extension method for login feature.
+///     Extension method for get all products feature.
 /// </summary>
 public static class ExtensionMethods
 {
@@ -17,6 +17,6 @@ public static class ExtensionMethods
     /// </returns>
     public static string ToAppCode(this GetAllProductsResponseStatusCode statusCode)
     {
-        return $"{nameof(Auth)}.{nameof(GetAllProducts)}.{statusCode}";
+        return $"{nameof(User)}.{nameof(Product)}.{nameof(GetAllProducts)}.{statusCode}";
     }
 }

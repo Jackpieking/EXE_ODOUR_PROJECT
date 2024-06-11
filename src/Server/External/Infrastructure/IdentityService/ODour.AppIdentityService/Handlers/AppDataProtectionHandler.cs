@@ -5,7 +5,7 @@ using ODour.Configuration.Presentation.WebApi.SecurityKey;
 
 namespace ODour.AppIdentityService.Handlers;
 
-internal sealed class AppDataProtectionHandler : IDataProtectionHandler
+public sealed class AppDataProtectionHandler : IDataProtectionHandler
 {
     private readonly IDataProtector _protector;
 

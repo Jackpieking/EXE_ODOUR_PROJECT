@@ -2,16 +2,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.User.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 using ODour.PostgresRelationalDb.Main.Auth;
+using ODour.PostgresRelationalDb.Main.User.Cart;
 using ODour.PostgresRelationalDb.Main.User.Product;
 
 namespace ODour.PostgresRelationalDb.Main;
 
-internal sealed class MainUnitOfWork : IMainUnitOfWork
+public sealed class MainUnitOfWork : IMainUnitOfWork
 {
     private IRegisterAsUserRepository _registerAsUserRepository;
-    private IRegisterAsAdminRepository _registerAsAdminRepository;
     private IResendUserConfirmationEmailRepository _resendUserConfirmationEmailRepository;
     private IConfirmUserEmailRepository _confirmUserEmailRepository;
     private IForgotPasswordRepository _forgotPasswordRepository;
@@ -20,6 +21,12 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
     private ILogoutRepository _logoutRepository;
     private IRefreshAccessTokenRepository _refreshAccessTokenRepository;
     private IGetAllProductsRepository _getAllProductsRepository;
+    private IGetProductDetailByProductIdRepository _getProductDetailByProductIdRepository;
+    private IGetRelatedProductsByCategoryIdRepository _getRelatedProductsByCategoryIdRepository;
+    private IGetProductsForHomePageRepository _getProductsForHomePageRepository;
+    private IGetCartDetailRepository _getCartDetailRepository;
+    private IAddToCartRepository _addToCartRepository;
+    private IRemoveFromCartRepository _removeFromCartRepository;
     private readonly Lazy<DbContext> _context;
 
     public MainUnitOfWork(Lazy<DbContext> context)
@@ -32,14 +39,6 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _registerAsUserRepository ??= new RegisterAsUserRepository(context: _context);
-        }
-    }
-
-    public IRegisterAsAdminRepository RegisterAsAdminRepository
-    {
-        get
-        {
-            return _registerAsAdminRepository ??= new RegisterAsAdminRepository(context: _context);
         }
     }
 
@@ -100,6 +99,52 @@ internal sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _getAllProductsRepository ??= new GetAllProductsRepository(context: _context);
+        }
+    }
+
+    public IGetProductDetailByProductIdRepository GetProductDetailByProductIdRepository
+    {
+        get
+        {
+            return _getProductDetailByProductIdRepository ??=
+                new GetProductDetailByProductIdRepository(context: _context);
+        }
+    }
+
+    public IGetRelatedProductsByCategoryIdRepository GetRelatedProductsByCategoryIdRepository
+    {
+        get
+        {
+            return _getRelatedProductsByCategoryIdRepository ??=
+                new GetRelatedProductsByCategoryIdRepository(context: _context);
+        }
+    }
+
+    public IGetProductsForHomePageRepository GetProductsForHomePageRepository
+    {
+        get
+        {
+            return _getProductsForHomePageRepository ??= new GetProductsForHomePageRepository(
+                context: _context
+            );
+        }
+    }
+
+    public IGetCartDetailRepository GetCartDetailRepository
+    {
+        get { return _getCartDetailRepository ??= new GetCartDetailRepository(context: _context); }
+    }
+
+    public IAddToCartRepository AddToCartRepository
+    {
+        get { return _addToCartRepository ??= new AddToCartRepository(context: _context); }
+    }
+
+    public IRemoveFromCartRepository RemoveFromCartRepository
+    {
+        get
+        {
+            return _removeFromCartRepository ??= new RemoveFromCartRepository(context: _context);
         }
     }
 }
