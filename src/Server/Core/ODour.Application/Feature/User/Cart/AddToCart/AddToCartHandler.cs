@@ -27,7 +27,10 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
             ct: ct
         );
 
-        if (Equals(objA: foundProduct, objB: default))
+        if (
+            Equals(objA: foundProduct, objB: default)
+            || command.Quantity > foundProduct.QuantityInStock
+        )
         {
             return new() { StatusCode = AddToCartResponseStatusCode.INPUT_VALIDATION_FAIL };
         }
@@ -64,12 +67,6 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
         }
         else
         {
-            // Bypass if quantity is zero
-            if (command.Quantity == default)
-            {
-                return new() { StatusCode = AddToCartResponseStatusCode.OPERATION_SUCCESS };
-            }
-
             // Update quantity
             dbResult = await _mainUnitOfWork.Value.AddToCartRepository.UpdateQuantityQueryAsync(
                 productId: command.ProductId,
