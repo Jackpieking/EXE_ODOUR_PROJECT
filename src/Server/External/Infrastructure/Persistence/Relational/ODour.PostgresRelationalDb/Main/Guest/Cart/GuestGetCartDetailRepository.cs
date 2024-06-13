@@ -13,7 +13,7 @@ internal sealed class GuestGetCartDetailRepository : IGuestGetCartDetailReposito
 {
     private readonly Lazy<DbContext> _context;
 
-    public GuestGetCartDetailRepository(Lazy<DbContext> context)
+    internal GuestGetCartDetailRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
@@ -33,12 +33,10 @@ internal sealed class GuestGetCartDetailRepository : IGuestGetCartDetailReposito
                 Name = product.Name,
                 UnitPrice = product.UnitPrice,
                 ProductMedias = product
-                    .ProductMedias.Select(media => new ProductMediaEntity
-                    {
-                        StorageUrl = media.StorageUrl
-                    })
+                    .ProductMedias.OrderBy(productMedia => productMedia.UploadOrder)
                     .Skip(default)
                     .Take(1)
+                    .Select(media => new ProductMediaEntity { StorageUrl = media.StorageUrl })
             })
             .ToListAsync(cancellationToken: ct);
     }

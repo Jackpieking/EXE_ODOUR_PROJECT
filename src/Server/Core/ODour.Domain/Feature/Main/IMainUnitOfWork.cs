@@ -47,5 +47,7 @@ public interface IMainUnitOfWork
     IGuestAddToCartRepository GuestAddToCartRepository { get; }
 
     IGuestGetCartDetailRepository GuestGetCartDetailRepository { get; }
+
+    ISyncGuestCartToUserCartRepository SyncGuestCartToUserCartRepository { get; }
     #endregion
 }

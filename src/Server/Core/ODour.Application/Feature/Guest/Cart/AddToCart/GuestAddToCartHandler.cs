@@ -16,6 +16,7 @@ internal sealed class GuestAddToCartHandler
 {
     private readonly Lazy<IMainUnitOfWork> _mainUnitOfWork;
     private readonly Lazy<IUserSession> _userSession;
+    private static readonly int MaxNumberOfCartItem = 10;
 
     public GuestAddToCartHandler(
         Lazy<IMainUnitOfWork> mainUnitOfWork,
@@ -69,23 +70,34 @@ internal sealed class GuestAddToCartHandler
             // Cart item is not found.
             if (Equals(objA: foundCartItem, objB: default))
             {
+                // Max number of cart item.
+                if (foundCartItems.Count >= MaxNumberOfCartItem)
+                {
+                    return new() { StatusCode = GuestAddToCartResponseStatusCode.CART_IS_FULL };
+                }
+
                 // Add new cart item.
                 foundCartItems.Add(
                     item: new() { ProductId = command.ProductId, Quantity = command.Quantity }
                 );
             }
-            // New quantity of cart item is greater than product quantity in stock.
-            else if (foundCartItem.Quantity + command.Quantity > foundProduct.QuantityInStock)
-            {
-                return new()
-                {
-                    StatusCode = GuestAddToCartResponseStatusCode.INPUT_VALIDATION_FAIL
-                };
-            }
-            // update cart item quantity.
             else
             {
-                foundCartItem.Quantity += command.Quantity;
+                var newCartItemQuantity = foundCartItem.Quantity + command.Quantity;
+
+                // New quantity of cart item is greater than product quantity in stock.
+                if (newCartItemQuantity > foundProduct.QuantityInStock)
+                {
+                    return new()
+                    {
+                        StatusCode = GuestAddToCartResponseStatusCode.CART_ITEM_QUANTITY_EXCEED
+                    };
+                }
+                // update cart item quantity.
+                else
+                {
+                    foundCartItem.Quantity = newCartItemQuantity;
+                }
             }
         }
         // Init new cart with cart item if cart is not found in session.

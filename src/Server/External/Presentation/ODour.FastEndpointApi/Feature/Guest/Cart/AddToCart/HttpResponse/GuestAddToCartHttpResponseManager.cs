@@ -35,6 +35,26 @@ internal static class GuestAddToCartHttpResponseManager
                     AppCode = response.StatusCode.ToAppCode()
                 }
         );
+
+        _dictionary.TryAdd(
+            key: GuestAddToCartResponseStatusCode.CART_IS_FULL,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status417ExpectationFailed,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
+
+        _dictionary.TryAdd(
+            key: GuestAddToCartResponseStatusCode.CART_ITEM_QUANTITY_EXCEED,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status417ExpectationFailed,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
     }
 
     internal static Func<

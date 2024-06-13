@@ -21,7 +21,11 @@ internal sealed class AddToCartEndpoint : Endpoint<AddToCartRequest, AddToCartHt
         PostProcessor<AddToCartCachingPostProcessor>();
         Description(builder: builder =>
         {
-            builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
+            builder.ClearDefaultProduces(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            );
         });
         Summary(endpointSummary: summary =>
         {

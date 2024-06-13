@@ -12,7 +12,7 @@ internal sealed class GuestAddToCartRepository : IGuestAddToCartRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    public GuestAddToCartRepository(Lazy<DbContext> context)
+    internal GuestAddToCartRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
@@ -21,6 +21,7 @@ internal sealed class GuestAddToCartRepository : IGuestAddToCartRepository
     {
         return _context
             .Value.Set<ProductEntity>()
+            .AsNoTracking()
             .Where(predicate: product => product.Id.Equals(productId))
             .Select(selector: product => new ProductEntity
             {

@@ -2,9 +2,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ODour.Domain\ODour.Domain.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Feature\Guest\Cart\SyncCartToUserStorage\" />
-  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>

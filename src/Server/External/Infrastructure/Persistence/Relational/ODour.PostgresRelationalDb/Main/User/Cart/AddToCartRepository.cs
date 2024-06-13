@@ -103,10 +103,7 @@ internal sealed class AddToCartRepository : IAddToCartRepository
                         )
                         .ExecuteUpdateAsync(
                             setPropertyCalls: update =>
-                                update.SetProperty(
-                                    entity => entity.Quantity,
-                                    entity => entity.Quantity + newQuantity
-                                ),
+                                update.SetProperty(entity => entity.Quantity, newQuantity),
                             cancellationToken: ct
                         );
 
@@ -127,6 +124,7 @@ internal sealed class AddToCartRepository : IAddToCartRepository
     {
         return _context
             .Value.Set<CartItemEntity>()
+            .AsNoTracking()
             .Where(predicate: cartItem => cartItem.ProductId.Equals(productId))
             .Select(selector: cartItem => new CartItemEntity { Quantity = cartItem.Quantity })
             .FirstOrDefaultAsync(cancellationToken: ct);
@@ -136,11 +134,19 @@ internal sealed class AddToCartRepository : IAddToCartRepository
     {
         return _context
             .Value.Set<ProductEntity>()
+            .AsNoTracking()
             .Where(predicate: product => product.Id.Equals(productId))
             .Select(selector: product => new ProductEntity
             {
                 QuantityInStock = product.QuantityInStock
             })
             .FirstOrDefaultAsync(cancellationToken: ct);
+    }
+
+    public Task<int> GetTotalNumberOfCartItemQueryAsync(Guid userId, CancellationToken ct)
+    {
+        return _context
+            .Value.Set<CartItemEntity>()
+            .CountAsync(cartItem => cartItem.UserId == userId, cancellationToken: ct);
     }
 }

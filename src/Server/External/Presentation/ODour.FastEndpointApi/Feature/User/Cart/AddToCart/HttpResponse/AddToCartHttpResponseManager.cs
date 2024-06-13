@@ -65,6 +65,26 @@ internal static class AddToCartHttpResponseManager
                     AppCode = response.StatusCode.ToAppCode()
                 }
         );
+
+        _dictionary.TryAdd(
+            key: AddToCartResponseStatusCode.CART_IS_FULL,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status417ExpectationFailed,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
+
+        _dictionary.TryAdd(
+            key: AddToCartResponseStatusCode.CART_ITEM_QUANTITY_EXCEED,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status417ExpectationFailed,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
     }
 
     internal static Func<AddToCartRequest, AddToCartResponse, AddToCartHttpResponse> Resolve(

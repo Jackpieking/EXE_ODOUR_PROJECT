@@ -67,12 +67,10 @@ internal sealed class GetCartDetailRepository : IGetCartDetailRepository
                     Name = entity.Product.Name,
                     UnitPrice = entity.Product.UnitPrice,
                     ProductMedias = entity
-                        .Product.ProductMedias.Select(media => new ProductMediaEntity
-                        {
-                            StorageUrl = media.StorageUrl
-                        })
+                        .Product.ProductMedias.OrderBy(productMedia => productMedia.UploadOrder)
                         .Skip(default)
                         .Take(1)
+                        .Select(media => new ProductMediaEntity { StorageUrl = media.StorageUrl })
                 }
             })
             .ToListAsync(cancellationToken: ct);

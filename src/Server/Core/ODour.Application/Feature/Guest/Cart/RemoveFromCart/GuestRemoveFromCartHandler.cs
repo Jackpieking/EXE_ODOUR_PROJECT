@@ -36,10 +36,7 @@ internal sealed class GuestRemoveFromCartHandler
         // User cart not found.
         if (Equals(objA: sessionModel, objB: AppSessionModel<List<CartItemEntity>>.NotFound))
         {
-            return new()
-            {
-                StatusCode = GuestRemoveFromCartResponseStatusCode.INPUT_VALIDATION_FAIL
-            };
+            return new() { StatusCode = GuestRemoveFromCartResponseStatusCode.OPERATION_SUCCESS };
         }
 
         // Validate cart item input.
@@ -57,7 +54,7 @@ internal sealed class GuestRemoveFromCartHandler
         }
         #endregion
 
-        // FInd cart item.
+        // Find cart item.
         var foundCartItem = sessionModel.Value.First(predicate: cartItem =>
             cartItem.ProductId.Equals(value: command.ProductId)
         );

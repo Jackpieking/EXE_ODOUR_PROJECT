@@ -1,24 +1,26 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Auth.Logout;
-using ODour.FastEndpointApi.Feature.Auth.Logout.Common;
-using ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
-using ODour.FastEndpointApi.Feature.Auth.Logout.Middlewares;
+using ODour.Application.Feature.Guest.Cart.SyncGuestCartToUserCart;
+using ODour.FastEndpointApi.Feature.Guest.Cart.SyncGuestCartToUserCart.Common;
+using ODour.FastEndpointApi.Feature.Guest.Cart.SyncGuestCartToUserCart.HttpResponse;
+using ODour.FastEndpointApi.Feature.Guest.Cart.SyncGuestCartToUserCart.Middlewares;
 
-namespace ODour.FastEndpointApi.Feature.Auth.Logout;
+namespace ODour.FastEndpointApi.Feature.Guest.Cart.SyncGuestCartToUserCart;
 
-internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse>
+internal sealed class SyncGuestCartToUserCartEndpoint
+    : Endpoint<EmptyRequest, SyncGuestCartToUserCartHttpResponse>
 {
     public override void Configure()
     {
-        Post(routePatterns: "auth/logout");
-        DontThrowIfValidationFails();
+        Get(routePatterns: "guest/cart/sync");
         AuthSchemes(authSchemeNames: JwtBearerDefaults.AuthenticationScheme);
-        PreProcessor<LogoutValidationPreProcessor>();
-        PreProcessor<LogoutAuthorizationPreProcessor>();
+        DontThrowIfValidationFails();
+        PreProcessor<SyncGuestCartToUserCartValidationPreProcessor>();
+        PreProcessor<SyncGuestCartToUserCartAuthorizationPreProcessor>();
+        PostProcessor<SyncGuestCartToUserCartCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(
@@ -29,30 +31,32 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
         });
         Summary(endpointSummary: summary =>
         {
-            summary.Summary = "Endpoint for user logout feature";
-            summary.Description = "This endpoint is used for user logout purpose.";
+            summary.Summary = "Endpoint for sync guest cart to user cart feature";
+            summary.Description = "This endpoint is used for sync guest cart to user cart purpose.";
             summary.ExampleRequest = new();
-            summary.Response<LogoutHttpResponse>(
+            summary.Response<SyncGuestCartToUserCartHttpResponse>(
                 description: "Represent successful operation response.",
-                example: new() { AppCode = LogoutResponseStatusCode.OPERATION_SUCCESS.ToAppCode() }
+                example: new()
+                {
+                    AppCode =
+                        SyncGuestCartToUserCartResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
+                }
             );
         });
     }
 
-    public override async Task<LogoutHttpResponse> ExecuteAsync(
+    public override async Task<SyncGuestCartToUserCartHttpResponse> ExecuteAsync(
         EmptyRequest req,
         CancellationToken ct
     )
     {
-        var stateBag = ProcessorState<LogoutStateBag>();
-
-        stateBag.AppRequest.SetRefreshToken(refreshToken: stateBag.FoundRefreshTokenValue);
+        var stateBag = ProcessorState<SyncGuestCartToUserCartStateBag>();
 
         // Get app feature response.
         var appResponse = await stateBag.AppRequest.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = LogoutHttpResponseManager
+        var httpResponse = SyncGuestCartToUserCartHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: stateBag.AppRequest, arg2: appResponse);
 
