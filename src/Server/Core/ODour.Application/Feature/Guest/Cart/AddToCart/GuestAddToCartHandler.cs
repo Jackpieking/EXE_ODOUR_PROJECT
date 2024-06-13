@@ -33,7 +33,7 @@ internal sealed class GuestAddToCartHandler
     {
         // find product.
         var foundProduct =
-            await _mainUnitOfWork.Value.GuestAddToCartRepository.GetProductQuantityInStockQueryAsync(
+            await _mainUnitOfWork.Value.GuestAddToCartRepository.FindProductQueryAsync(
                 productId: command.ProductId,
                 ct: ct
             );

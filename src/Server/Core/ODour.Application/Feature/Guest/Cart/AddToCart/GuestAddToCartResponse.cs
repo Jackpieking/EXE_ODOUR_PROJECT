@@ -4,5 +4,5 @@ namespace ODour.Application.Feature.Guest.Cart.AddToCart;
 
 public sealed class GuestAddToCartResponse : IFeatureResponse
 {
-    public GuestAddToCartResponseStatusCode StatusCode { get; set; }
+    public GuestAddToCartResponseStatusCode StatusCode { get; init; }
 }

@@ -5,29 +5,29 @@ namespace ODour.Application.Feature.Guest.Cart.GetCartDetail;
 
 public sealed class GuestGetCartDetailResponse : IFeatureResponse
 {
-    public GuestGetCartDetailResponseStatusCode StatusCode { get; set; }
+    public GuestGetCartDetailResponseStatusCode StatusCode { get; init; }
 
     public ResponseBody Body { get; init; }
 
     public sealed class ResponseBody
     {
-        public decimal CurrentOrderPrice { get; set; }
+        public decimal CurrentOrderPrice { get; init; }
 
-        public IEnumerable<Product> OrderItems { get; set; }
+        public IEnumerable<Product> OrderItems { get; init; }
 
         public sealed class Product
         {
-            public string Id { get; set; }
+            public string Id { get; init; }
 
-            public string Name { get; set; }
+            public string Name { get; init; }
 
-            public string FirstImage { get; set; }
+            public string FirstImage { get; init; }
 
-            public decimal UnitPrice { get; set; }
+            public decimal UnitPrice { get; init; }
 
-            public int Quantity { get; set; }
+            public int Quantity { get; init; }
 
-            public decimal TotalPrice { get; set; }
+            public decimal TotalPrice { get; init; }
         }
     }
 }

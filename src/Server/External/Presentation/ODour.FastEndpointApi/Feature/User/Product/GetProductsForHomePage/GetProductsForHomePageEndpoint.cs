@@ -17,6 +17,7 @@ internal sealed class GetProductsForHomePageEndpoint
         Get(routePatterns: "product/home");
         AllowAnonymous();
         DontThrowIfValidationFails();
+        PreProcessor<GetProductsForHomePageValidationPreProcessor>();
         PreProcessor<GetProductsForHomePageCachingPreProcessor>();
         PostProcessor<GetProductsForHomePageCachingPostProcessor>();
         Description(builder: builder =>

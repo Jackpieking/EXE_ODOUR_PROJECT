@@ -7,6 +7,6 @@ namespace ODour.Domain.Feature.Main.Repository.Guest.Cart;
 public interface IGuestAddToCartRepository
 {
     #region Query
-    Task<ProductEntity> GetProductQuantityInStockQueryAsync(string productId, CancellationToken ct);
+    Task<ProductEntity> FindProductQueryAsync(string productId, CancellationToken ct);
     #endregion
 }

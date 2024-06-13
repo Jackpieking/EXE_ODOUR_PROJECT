@@ -17,10 +17,7 @@ internal sealed class GuestAddToCartRepository : IGuestAddToCartRepository
         _context = context;
     }
 
-    public Task<ProductEntity> GetProductQuantityInStockQueryAsync(
-        string productId,
-        CancellationToken ct
-    )
+    public Task<ProductEntity> FindProductQueryAsync(string productId, CancellationToken ct)
     {
         return _context
             .Value.Set<ProductEntity>()

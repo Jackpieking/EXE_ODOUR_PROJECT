@@ -1,11 +1,11 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace ODour.Application.Feature.Guest.Cart.AddToCart;
+namespace ODour.Application.Feature.Guest.Cart.RemoveFromCart;
 
-public sealed class GuestAddToCartRequestValidator : Validator<GuestAddToCartRequest>
+public sealed class GuestRemoveFromCartRequestValidator : Validator<GuestRemoveFromCartRequest>
 {
-    public GuestAddToCartRequestValidator()
+    public GuestRemoveFromCartRequestValidator()
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
         ClassLevelCascadeMode = CascadeMode.Stop;

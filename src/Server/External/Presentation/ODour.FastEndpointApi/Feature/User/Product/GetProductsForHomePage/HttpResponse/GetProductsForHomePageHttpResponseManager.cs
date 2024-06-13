@@ -30,6 +30,16 @@ internal static class GetProductsForHomePageHttpResponseManager
                     Body = response.Body
                 }
         );
+
+        _dictionary.TryAdd(
+            key: GetProductsForHomePageResponseStatusCode.INPUT_VALIDATION_FAIL,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status400BadRequest,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
     }
 
     internal static Func<

@@ -4,7 +4,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Feature\Guest\Cart\SyncCartToUserStorage\" />
-    <Folder Include="Feature\Guest\Cart\RemoveFromCart\" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
