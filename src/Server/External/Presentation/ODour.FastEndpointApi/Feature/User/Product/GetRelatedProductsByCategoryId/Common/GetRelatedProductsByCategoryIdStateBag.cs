@@ -2,7 +2,7 @@ namespace ODour.FastEndpointApi.Feature.User.Product.GetRelatedProductsByCategor
 
 internal sealed class GetRelatedProductsByCategoryIdStateBag
 {
-    public string CacheKey { get; set; }
+    internal string CacheKey { get; set; }
 
-    public int CacheDurationInSeconds { get; } = 15;
+    internal int CacheDurationInSeconds { get; } = 15;
 }

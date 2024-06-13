@@ -1,10 +1,15 @@
 using System;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main;
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Product;
+using ODour.Domain.Share.Role.Entities;
+using ODour.Domain.Share.User.Entities;
 using ODour.PostgresRelationalDb.Main.Auth;
+using ODour.PostgresRelationalDb.Main.Guest.Cart;
 using ODour.PostgresRelationalDb.Main.User.Cart;
 using ODour.PostgresRelationalDb.Main.User.Product;
 
@@ -27,11 +32,27 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetCartDetailRepository _getCartDetailRepository;
     private IAddToCartRepository _addToCartRepository;
     private IRemoveFromCartRepository _removeFromCartRepository;
-    private readonly Lazy<DbContext> _context;
+    private IGuestAddToCartRepository _guestAddToCartRepository;
+    private IGuestGetCartDetailRepository _guestGetCartDetailRepository;
 
-    public MainUnitOfWork(Lazy<DbContext> context)
+    #region Dependencies
+    private readonly Lazy<DbContext> _context;
+    private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<SignInManager<UserEntity>> _signInManager;
+    private readonly Lazy<RoleManager<RoleEntity>> _roleManager;
+    #endregion
+
+    public MainUnitOfWork(
+        Lazy<DbContext> context,
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<SignInManager<UserEntity>> signInManager,
+        Lazy<RoleManager<RoleEntity>> roleManager
+    )
     {
         _context = context;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _roleManager = roleManager;
     }
 
     public IRegisterAsUserRepository RegisterAsUserRepository
@@ -145,6 +166,24 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _removeFromCartRepository ??= new RemoveFromCartRepository(context: _context);
+        }
+    }
+
+    public IGuestAddToCartRepository GuestAddToCartRepository
+    {
+        get
+        {
+            return _guestAddToCartRepository ??= new GuestAddToCartRepository(context: _context);
+        }
+    }
+
+    public IGuestGetCartDetailRepository GuestGetCartDetailRepository
+    {
+        get
+        {
+            return _guestGetCartDetailRepository ??= new GuestGetCartDetailRepository(
+                context: _context
+            );
         }
     }
 }

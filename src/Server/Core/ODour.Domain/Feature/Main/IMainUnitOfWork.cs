@@ -1,4 +1,5 @@
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 
@@ -40,5 +41,11 @@ public interface IMainUnitOfWork
     IAddToCartRepository AddToCartRepository { get; }
 
     IRemoveFromCartRepository RemoveFromCartRepository { get; }
+    #endregion
+
+    #region Guest.Cart
+    IGuestAddToCartRepository GuestAddToCartRepository { get; }
+
+    IGuestGetCartDetailRepository GuestGetCartDetailRepository { get; }
     #endregion
 }

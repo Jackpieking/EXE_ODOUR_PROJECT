@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using ODour.Application.Feature.User.Cart.GetCartDetail;
 using ODour.Application.Share.Caching;
 using ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.Common;
 using ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.HttpResponse;
@@ -30,7 +31,7 @@ internal sealed class GetCartDetailCachingPreProcessor
             return;
         }
 
-        state.CacheKey = $"{nameof(GetCartDetail)}__req__{state.AppRequest.GetUserId()}";
+        state.CacheKey = $"{nameof(GetCartDetailRequest)}__req__{state.AppRequest.GetUserId()}";
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 

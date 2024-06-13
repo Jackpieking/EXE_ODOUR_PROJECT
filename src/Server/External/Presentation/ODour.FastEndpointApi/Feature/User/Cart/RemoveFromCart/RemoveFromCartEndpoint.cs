@@ -68,6 +68,9 @@ internal sealed class RemoveFromCartEndpoint
             cancellation: ct
         );
 
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
+
         return httpResponse;
     }
 }

@@ -23,7 +23,7 @@ public static class RedisSessionStorageServiceConfig
             );
             options.Cookie.Name = redisSessionStorageOption.Cookie.Name;
             options.Cookie.HttpOnly = redisSessionStorageOption.Cookie.HttpOnly;
-            options.Cookie.IsEssential = redisSessionStorageOption.Cookie.HttpOnly;
+            options.Cookie.IsEssential = redisSessionStorageOption.Cookie.IsEssential;
             options.Cookie.SecurePolicy = (CookieSecurePolicy)
                 Enum.ToObject(
                     enumType: typeof(CookieSecurePolicy),

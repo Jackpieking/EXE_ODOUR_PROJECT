@@ -158,9 +158,7 @@ internal static class CustomServiceConfig
         services.MakeSingletonLazy<IHttpContextAccessor>();
 
         // ====
-        services
-            .AddSingleton<IUserSession, UserSessionHandler>()
-            .MakeSingletonLazy<IUserSession>();
+        services.AddScoped<IUserSession, UserSessionHandler>().MakeScopedLazy<IUserSession>();
         #endregion
 
         return services;

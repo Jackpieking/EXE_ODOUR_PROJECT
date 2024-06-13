@@ -33,7 +33,8 @@ internal sealed class GetProductDetailByProductIdCachingPreProcessor
             return;
         }
 
-        state.CacheKey = $"{nameof(GetProductDetailByProductId)}__req__{context.Request.ProductId}";
+        state.CacheKey =
+            $"{nameof(GetProductDetailByProductIdRequest)}__req__{context.Request.ProductId}";
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 

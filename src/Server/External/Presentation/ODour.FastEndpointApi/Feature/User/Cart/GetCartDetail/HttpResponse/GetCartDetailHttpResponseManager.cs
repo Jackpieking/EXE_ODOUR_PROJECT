@@ -5,7 +5,7 @@ using ODour.Application.Feature.User.Cart.GetCartDetail;
 
 namespace ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.HttpResponse;
 
-internal sealed class GetCartDetailHttpResponseManager
+internal static class GetCartDetailHttpResponseManager
 {
     private static ConcurrentDictionary<
         GetCartDetailResponseStatusCode,

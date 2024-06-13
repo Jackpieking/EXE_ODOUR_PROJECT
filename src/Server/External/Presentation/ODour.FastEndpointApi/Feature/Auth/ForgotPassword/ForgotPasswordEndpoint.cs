@@ -63,6 +63,9 @@ internal sealed class ForgotPasswordEndpoint
             cancellation: ct
         );
 
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
+
         return httpResponse;
     }
 }

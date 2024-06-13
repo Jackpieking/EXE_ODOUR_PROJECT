@@ -66,6 +66,9 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
             cancellation: ct
         );
 
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
+
         return httpResponse;
     }
 }
