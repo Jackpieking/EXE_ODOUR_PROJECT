@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ODour.Application.Share.Features;
@@ -46,7 +45,6 @@ internal sealed class GetCartDetailHandler
                 {
                     Id = cartItem.ProductId,
                     Name = cartItem.Product.Name,
-                    FirstImage = cartItem.Product.ProductMedias.First().StorageUrl,
                     UnitPrice = cartItem.Product.UnitPrice,
                     Quantity = cartItem.Quantity,
                     TotalPrice = productTotalPrice

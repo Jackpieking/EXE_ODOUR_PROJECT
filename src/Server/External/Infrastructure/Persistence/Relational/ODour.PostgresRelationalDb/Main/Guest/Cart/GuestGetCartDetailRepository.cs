@@ -31,12 +31,7 @@ internal sealed class GuestGetCartDetailRepository : IGuestGetCartDetailReposito
             {
                 Id = product.Id,
                 Name = product.Name,
-                UnitPrice = product.UnitPrice,
-                ProductMedias = product
-                    .ProductMedias.OrderBy(productMedia => productMedia.UploadOrder)
-                    .Skip(default)
-                    .Take(1)
-                    .Select(media => new ProductMediaEntity { StorageUrl = media.StorageUrl })
+                UnitPrice = product.UnitPrice
             })
             .ToListAsync(cancellationToken: ct);
     }

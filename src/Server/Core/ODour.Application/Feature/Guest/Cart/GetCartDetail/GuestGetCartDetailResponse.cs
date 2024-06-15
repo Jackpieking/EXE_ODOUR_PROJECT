@@ -21,8 +21,6 @@ public sealed class GuestGetCartDetailResponse : IFeatureResponse
 
             public string Name { get; init; }
 
-            public string FirstImage { get; init; }
-
             public decimal UnitPrice { get; init; }
 
             public int Quantity { get; init; }

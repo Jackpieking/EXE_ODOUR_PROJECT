@@ -5,12 +5,14 @@ using ODour.Domain.Feature.Main;
 using ODour.Domain.Feature.Main.Repository.Auth;
 using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
+using ODour.Domain.Feature.Main.Repository.User.Order;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
 using ODour.PostgresRelationalDb.Main.Auth;
 using ODour.PostgresRelationalDb.Main.Guest.Cart;
 using ODour.PostgresRelationalDb.Main.User.Cart;
+using ODour.PostgresRelationalDb.Main.User.Order;
 using ODour.PostgresRelationalDb.Main.User.Product;
 
 namespace ODour.PostgresRelationalDb.Main;
@@ -35,6 +37,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGuestAddToCartRepository _guestAddToCartRepository;
     private IGuestGetCartDetailRepository _guestGetCartDetailRepository;
     private ISyncGuestCartToUserCartRepository _syncGuestCartToUserCartRepository;
+    private IGetUserOrdersRepository _getUserOrdersRepository;
 
     #region Dependencies
     private readonly Lazy<DbContext> _context;
@@ -196,5 +199,10 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
                 context: _context
             );
         }
+    }
+
+    public IGetUserOrdersRepository GetUserOrdersRepository
+    {
+        get { return _getUserOrdersRepository ??= new GetUserOrdersRepository(context: _context); }
     }
 }

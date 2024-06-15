@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using ODour.Domain.Share.Base.Entities;
 using ODour.Domain.Share.Payment.Entities;
+using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Share.Order.Entities;
 
@@ -15,6 +16,8 @@ public sealed class OrderEntity : IEntity
 
     #region ForeignKeys
     public Guid OrderStatusId { get; set; }
+
+    public Guid UserId { get; set; }
 
     public Guid PaymentMethodId { get; set; }
     #endregion
@@ -31,6 +34,8 @@ public sealed class OrderEntity : IEntity
 
     #region NavigationProperties
     public PaymentMethodEntity PaymentMethod { get; set; }
+
+    public UserDetailEntity User { get; set; }
 
     public OrderStatusEntity OrderStatus { get; set; }
     #endregion

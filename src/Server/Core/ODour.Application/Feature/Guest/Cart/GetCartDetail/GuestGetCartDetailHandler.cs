@@ -82,7 +82,6 @@ internal sealed class GuestGetCartDetailHandler
                 {
                     Id = foundProduct.Id,
                     Name = foundProduct.Name,
-                    FirstImage = foundProduct.ProductMedias.First().StorageUrl,
                     UnitPrice = foundProduct.UnitPrice,
                     Quantity = cartItemWithTheSameProductId.Quantity,
                     TotalPrice = productTotalPrice

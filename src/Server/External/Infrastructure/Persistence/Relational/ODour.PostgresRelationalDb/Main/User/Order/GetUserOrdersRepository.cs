@@ -1,20 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using ODour.Domain.Feature.Main.Repository.User.Cart;
-using ODour.Domain.Share.Cart.Entities;
+using ODour.Domain.Feature.Main.Repository.User.Order;
+using ODour.Domain.Share.Order.Entities;
 using ODour.Domain.Share.User.Entities;
 
-namespace ODour.PostgresRelationalDb.Main.User.Cart;
+namespace ODour.PostgresRelationalDb.Main.User.Order;
 
-internal sealed class GetCartDetailRepository : IGetCartDetailRepository
+internal sealed class GetUserOrdersRepository : IGetUserOrdersRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    internal GetCartDetailRepository(Lazy<DbContext> context)
+    public GetUserOrdersRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
@@ -48,25 +48,31 @@ internal sealed class GetCartDetailRepository : IGetCartDetailRepository
             );
     }
 
-    public async Task<IEnumerable<CartItemEntity>> GetCartItemsOfUserQueryAsync(
+    public async Task<IEnumerable<OrderEntity>> GetAllOrderQueryAsync(
+        Guid orderStatusId,
         Guid userId,
         CancellationToken ct
     )
     {
         return await _context
-            .Value.Set<CartItemEntity>()
+            .Value.Set<OrderEntity>()
             .AsNoTracking()
-            .Where(predicate: entity => entity.UserId == userId)
-            .Select(selector: entity => new CartItemEntity
+            .Where(predicate: entity =>
+                entity.OrderStatusId == orderStatusId && entity.UserId == userId
+            )
+            .Select(selector: entity => new OrderEntity
             {
-                Quantity = entity.Quantity,
-                ProductId = entity.ProductId,
-                Product = new()
-                {
-                    Name = entity.Product.Name,
-                    UnitPrice = entity.Product.UnitPrice,
-                }
+                OrderCode = entity.OrderCode,
+                OrderStatus = new() { Name = entity.OrderStatus.Name },
+                TotalPrice = entity.TotalPrice
             })
             .ToListAsync(cancellationToken: ct);
+    }
+
+    public Task<bool> IsOrderStatusFoundQueryAsync(Guid id, CancellationToken ct)
+    {
+        return _context
+            .Value.Set<OrderStatusEntity>()
+            .AnyAsync(predicate: entity => entity.Id == id, cancellationToken: ct);
     }
 }

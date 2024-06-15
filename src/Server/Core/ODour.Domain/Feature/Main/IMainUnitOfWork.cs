@@ -1,6 +1,7 @@
 using ODour.Domain.Feature.Main.Repository.Auth;
 using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
+using ODour.Domain.Feature.Main.Repository.User.Order;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 
 namespace ODour.Domain.Feature.Main;
@@ -49,5 +50,9 @@ public interface IMainUnitOfWork
     IGuestGetCartDetailRepository GuestGetCartDetailRepository { get; }
 
     ISyncGuestCartToUserCartRepository SyncGuestCartToUserCartRepository { get; }
+    #endregion
+
+    #region User.Order
+    IGetUserOrdersRepository GetUserOrdersRepository { get; }
     #endregion
 }

@@ -29,6 +29,11 @@ public static class RedisSessionStorageServiceConfig
                     enumType: typeof(CookieSecurePolicy),
                     value: redisSessionStorageOption.Cookie.SecurePolicy
                 );
+            options.Cookie.SameSite = (SameSiteMode)
+                Enum.ToObject(
+                    enumType: typeof(SameSiteMode),
+                    value: redisSessionStorageOption.Cookie.SameSite
+                );
         });
     }
 }

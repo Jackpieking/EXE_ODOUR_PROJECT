@@ -304,11 +304,16 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderStatusId");
 
                     b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders", "main.order", t =>
                         {
@@ -1046,9 +1051,17 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserDetailEntity", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("OrderStatus");
 
                     b.Navigation("PaymentMethod");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderItemEntity", b =>
@@ -1352,6 +1365,8 @@ namespace ODour.PostgresRelationalDb.Migrations
             modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserDetailEntity", b =>
                 {
                     b.Navigation("CartItems");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("UserVouchers");
                 });
