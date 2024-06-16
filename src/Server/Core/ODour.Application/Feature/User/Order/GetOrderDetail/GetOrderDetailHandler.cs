@@ -64,7 +64,14 @@ internal sealed class GetOrderDetailHandler
                         Id = orderItem.ProductId,
                         Name = orderItem.Product.Name,
                         SellingPrice = orderItem.SellingPrice,
-                        SellingQuantity = orderItem.SellingQuantity
+                        SellingQuantity = orderItem.SellingQuantity,
+                        Total = orderItem.SellingPrice * orderItem.SellingQuantity,
+                        Image =
+                            orderItem
+                                .Product.ProductMedias.Select(productMedia =>
+                                    productMedia.StorageUrl
+                                )
+                                .FirstOrDefault() ?? string.Empty
                     }
                 )
             }

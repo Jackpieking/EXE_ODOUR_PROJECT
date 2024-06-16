@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main.Repository.User.Order;
 using ODour.Domain.Share.Order.Entities;
+using ODour.Domain.Share.Product.Entities;
 using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.User.Order;
@@ -66,6 +67,24 @@ internal sealed class GetUserOrdersRepository : IGetUserOrdersRepository
                 Id = entity.Id,
                 OrderStatus = new() { Name = entity.OrderStatus.Name },
                 TotalPrice = entity.TotalPrice,
+                OrderItems = entity.OrderItems.Select(orderItem => new OrderItemEntity
+                {
+                    ProductId = orderItem.ProductId,
+                    SellingPrice = orderItem.SellingPrice,
+                    SellingQuantity = orderItem.SellingQuantity,
+                    Product = new()
+                    {
+                        Name = orderItem.Product.Name,
+                        ProductMedias = orderItem
+                            .Product.ProductMedias.OrderBy(productMedia => productMedia.UploadOrder)
+                            .Skip(default)
+                            .Take(1)
+                            .Select(productMedia => new ProductMediaEntity
+                            {
+                                StorageUrl = productMedia.StorageUrl
+                            })
+                    }
+                })
             })
             .ToListAsync(cancellationToken: ct);
     }

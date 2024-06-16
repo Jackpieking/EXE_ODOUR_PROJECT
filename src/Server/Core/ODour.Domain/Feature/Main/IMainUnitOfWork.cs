@@ -1,3 +1,4 @@
+using ODour.Domain.Feature.Main.Repository.Admin.Order;
 using ODour.Domain.Feature.Main.Repository.Auth;
 using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
@@ -58,5 +59,9 @@ public interface IMainUnitOfWork
     ICreateNewOrderRepository CreateNewOrderRepository { get; }
 
     IGetOrderDetailRepository GetOrderDetailRepository { get; }
+    #endregion
+
+    #region Admin.Order
+    ISwitchOrderStatusRepository SwitchOrderStatusRepository { get; }
     #endregion
 }

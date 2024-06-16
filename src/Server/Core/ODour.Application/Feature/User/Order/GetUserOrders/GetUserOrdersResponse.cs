@@ -21,6 +21,23 @@ public sealed class GetUserOrdersResponse : IFeatureResponse
             public decimal Price { get; init; }
 
             public string Status { get; init; }
+
+            public Item FirstProduct { get; init; }
+
+            public sealed class Item
+            {
+                public string Id { get; init; }
+
+                public string Name { get; init; }
+
+                public decimal SellingPrice { get; init; }
+
+                public int SellingQuantity { get; init; }
+
+                public decimal Total { get; init; }
+
+                public string Image { get; init; }
+            }
         }
     }
 }

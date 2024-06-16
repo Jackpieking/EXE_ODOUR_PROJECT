@@ -39,6 +39,10 @@ public sealed class GetOrderDetailResponse : IFeatureResponse
             public decimal SellingPrice { get; init; }
 
             public int SellingQuantity { get; init; }
+
+            public decimal Total { get; init; }
+
+            public string Image { get; init; }
         }
     }
 }

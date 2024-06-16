@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main;
+using ODour.Domain.Feature.Main.Repository.Admin.Order;
 using ODour.Domain.Feature.Main.Repository.Auth;
 using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
@@ -9,6 +10,7 @@ using ODour.Domain.Feature.Main.Repository.User.Order;
 using ODour.Domain.Feature.Main.Repository.User.Product;
 using ODour.Domain.Share.Role.Entities;
 using ODour.Domain.Share.User.Entities;
+using ODour.PostgresRelationalDb.Main.Admin.Order;
 using ODour.PostgresRelationalDb.Main.Auth;
 using ODour.PostgresRelationalDb.Main.Guest.Cart;
 using ODour.PostgresRelationalDb.Main.User.Cart;
@@ -40,6 +42,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetUserOrdersRepository _getUserOrdersRepository;
     private ICreateNewOrderRepository _createNewOrderRepository;
     private IGetOrderDetailRepository _getOrderDetailRepository;
+    private ISwitchOrderStatusRepository _switchOrderStatusRepository;
 
     #region Dependencies
     private readonly Lazy<DbContext> _context;
@@ -221,6 +224,16 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _getOrderDetailRepository ??= new GetOrderDetailRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusRepository SwitchOrderStatusRepository
+    {
+        get
+        {
+            return _switchOrderStatusRepository ??= new SwitchOrderStatusRepository(
+                context: _context
+            );
         }
     }
 }

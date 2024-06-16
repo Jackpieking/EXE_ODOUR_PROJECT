@@ -54,7 +54,22 @@ internal sealed class GetUserOrdersHandler
                     {
                         Id = order.Id,
                         Status = order.OrderStatus.Name,
-                        Price = order.TotalPrice
+                        Price = order.TotalPrice,
+                        FirstProduct = order
+                            .OrderItems.Select(
+                                orderItem => new GetUserOrdersResponse.ResponseBody.Order.Item
+                                {
+                                    Id = orderItem.ProductId,
+                                    Name = orderItem.Product.Name,
+                                    SellingPrice = orderItem.SellingPrice,
+                                    SellingQuantity = orderItem.SellingQuantity,
+                                    Total = orderItem.SellingPrice * orderItem.SellingQuantity,
+                                    Image =
+                                        orderItem.Product.ProductMedias.FirstOrDefault().StorageUrl
+                                        ?? string.Empty
+                                }
+                            )
+                            .FirstOrDefault()
                     }
                 )
             }

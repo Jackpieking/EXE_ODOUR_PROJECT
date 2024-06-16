@@ -125,7 +125,7 @@ internal sealed class CreateNewOrderHandler
             PaymentMethodId = command.PaymentMethodId,
             OrderCode = OrderEntity.GenerateOrderCode(dateTime: DateTime.UtcNow),
             OrderNote = command.OrderNote,
-            TotalPrice = orderItems.Sum(selector: item => item.SellingPrice),
+            TotalPrice = orderItems.Sum(selector: item => item.SellingPrice * item.SellingQuantity),
             DeliveredAddress = command.DeliveredAddress,
             DeliveredAt = CommonConstant.App.MinTimeInUTC,
             OrderItems = orderItems

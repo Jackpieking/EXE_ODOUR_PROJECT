@@ -134,7 +134,7 @@ internal sealed class CreateNewOrderRepository : ICreateNewOrderRepository
                 .Select(selector: entity => new ProductEntity { UnitPrice = entity.UnitPrice })
                 .FirstOrDefaultAsync(cancellationToken: ct);
 
-            orderItem.SellingPrice = foundProduct.UnitPrice * orderItem.SellingQuantity;
+            orderItem.SellingPrice = foundProduct.UnitPrice;
         }
     }
 

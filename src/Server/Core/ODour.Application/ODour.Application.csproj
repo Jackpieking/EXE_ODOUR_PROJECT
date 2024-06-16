@@ -3,8 +3,9 @@
     <ProjectReference Include="..\ODour.Domain\ODour.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Feature\User\Order\SwitchOrderStatus\" />
-    <Folder Include="Feature\User\Payment\" />
+    <Folder Include="Feature\Admin\Order\GetAllOrder\" />
+    <Folder Include="Feature\User\Payment\PayOnline\" />
+    <Folder Include="Feature\User\Payment\PayByCash\" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
