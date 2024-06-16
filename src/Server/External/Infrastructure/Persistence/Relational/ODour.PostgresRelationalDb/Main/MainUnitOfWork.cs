@@ -38,6 +38,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGuestGetCartDetailRepository _guestGetCartDetailRepository;
     private ISyncGuestCartToUserCartRepository _syncGuestCartToUserCartRepository;
     private IGetUserOrdersRepository _getUserOrdersRepository;
+    private ICreateNewOrderRepository _createNewOrderRepository;
 
     #region Dependencies
     private readonly Lazy<DbContext> _context;
@@ -204,5 +205,13 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     public IGetUserOrdersRepository GetUserOrdersRepository
     {
         get { return _getUserOrdersRepository ??= new GetUserOrdersRepository(context: _context); }
+    }
+
+    public ICreateNewOrderRepository CreateNewOrderRepository
+    {
+        get
+        {
+            return _createNewOrderRepository ??= new CreateNewOrderRepository(context: _context);
+        }
     }
 }

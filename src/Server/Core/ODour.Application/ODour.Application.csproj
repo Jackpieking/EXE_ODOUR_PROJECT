@@ -3,6 +3,8 @@
     <ProjectReference Include="..\ODour.Domain\ODour.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Feature\User\Order\GetOrderDetail\" />
+    <Folder Include="Feature\User\Order\SwitchOrderStatus\" />
     <Folder Include="Feature\User\Payment\" />
   </ItemGroup>
   <PropertyGroup>

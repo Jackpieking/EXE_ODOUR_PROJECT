@@ -31,7 +31,8 @@ internal sealed class GetUserOrdersCachingPreProcessor
             return;
         }
 
-        state.CacheKey = $"{nameof(GetUserOrdersRequest)}__req__{context.Request.GetUserId()}";
+        state.CacheKey =
+            $"{nameof(GetUserOrdersRequest)}__req__{context.Request.GetUserId()}__{context.Request.OrderStatusId}";
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 

@@ -2,8 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ODour.PostgresRelationalDb.Data;
 
 #nullable disable
@@ -286,6 +284,11 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<DateTime>("DeliveredAt")
                         .HasColumnType("TIMESTAMPTZ");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<long>("OrderCode")
                         .HasColumnType("bigint");
 
@@ -299,6 +302,11 @@ namespace ODour.PostgresRelationalDb.Migrations
 
                     b.Property<Guid>("PaymentMethodId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(12, 2)

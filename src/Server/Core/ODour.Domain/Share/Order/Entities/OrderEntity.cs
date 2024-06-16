@@ -22,6 +22,10 @@ public sealed class OrderEntity : IEntity
     public Guid PaymentMethodId { get; set; }
     #endregion
 
+    public string FullName { get; set; }
+
+    public string PhoneNumber { get; set; }
+
     public long OrderCode { get; set; }
 
     public string OrderNote { get; set; }
@@ -61,6 +65,20 @@ public sealed class OrderEntity : IEntity
             public const int MinLength = 2;
 
             public const int MaxLength = 500;
+        }
+
+        public static class FullName
+        {
+            public const int MinLength = 2;
+
+            public const int MaxLength = 100;
+        }
+
+        public static class PhoneNumber
+        {
+            public const int MinLength = 2;
+
+            public const int MaxLength = 20;
         }
 
         public static class TotalPrice

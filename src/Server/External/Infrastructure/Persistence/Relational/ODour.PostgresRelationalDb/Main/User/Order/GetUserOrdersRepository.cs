@@ -64,8 +64,9 @@ internal sealed class GetUserOrdersRepository : IGetUserOrdersRepository
             {
                 OrderCode = entity.OrderCode,
                 OrderStatus = new() { Name = entity.OrderStatus.Name },
-                TotalPrice = entity.TotalPrice
+                TotalPrice = entity.TotalPrice,
             })
+            .OrderByDescending(keySelector: entity => entity.OrderCode)
             .ToListAsync(cancellationToken: ct);
     }
 

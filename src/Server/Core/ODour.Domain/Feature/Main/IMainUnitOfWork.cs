@@ -54,5 +54,7 @@ public interface IMainUnitOfWork
 
     #region User.Order
     IGetUserOrdersRepository GetUserOrdersRepository { get; }
+
+    ICreateNewOrderRepository CreateNewOrderRepository { get; }
     #endregion
 }

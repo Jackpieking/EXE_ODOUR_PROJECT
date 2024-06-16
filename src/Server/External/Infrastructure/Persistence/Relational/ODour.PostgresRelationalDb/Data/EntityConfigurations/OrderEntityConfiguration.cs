@@ -28,6 +28,20 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
         builder.Property(propertyExpression: builder => builder.UserId).IsRequired(required: true);
 
         builder
+            .Property(propertyExpression: builder => builder.FullName)
+            .HasMaxLength(maxLength: OrderEntity.MetaData.FullName.MaxLength)
+            .IsRequired(required: true);
+
+        builder
+            .Property(propertyExpression: builder => builder.PhoneNumber)
+            .HasMaxLength(maxLength: OrderEntity.MetaData.PhoneNumber.MaxLength)
+            .IsRequired(required: true);
+
+        builder
+            .Property(propertyExpression: builder => builder.OrderStatusId)
+            .IsRequired(required: true);
+
+        builder
             .Property(propertyExpression: builder => builder.OrderCode)
             .IsRequired(required: true);
 

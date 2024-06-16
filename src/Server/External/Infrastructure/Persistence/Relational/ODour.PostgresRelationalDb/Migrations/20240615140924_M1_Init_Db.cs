@@ -815,6 +815,16 @@ namespace ODour.PostgresRelationalDb.Migrations
                     OrderStatusId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     PaymentMethodId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FullName = table.Column<string>(
+                        type: "character varying(100)",
+                        maxLength: 100,
+                        nullable: false
+                    ),
+                    PhoneNumber = table.Column<string>(
+                        type: "character varying(20)",
+                        maxLength: 20,
+                        nullable: false
+                    ),
                     OrderCode = table.Column<long>(type: "bigint", nullable: false),
                     OrderNote = table.Column<string>(
                         type: "character varying(500)",
