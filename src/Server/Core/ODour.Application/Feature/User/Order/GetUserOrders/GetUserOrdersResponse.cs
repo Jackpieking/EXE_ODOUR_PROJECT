@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ODour.Application.Share.Features;
 
 namespace ODour.Application.Feature.User.Order.GetUserOrders;
@@ -15,11 +16,11 @@ public sealed class GetUserOrdersResponse : IFeatureResponse
 
         public sealed class Order
         {
-            public long OrderCode { get; init; }
+            public Guid Id { get; init; }
 
-            public decimal OrderPrice { get; init; }
+            public decimal Price { get; init; }
 
-            public string OrderStatusName { get; init; }
+            public string Status { get; init; }
         }
     }
 }

@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.User.Cart.GetCartDetail;
+using ODour.Application.Feature.User.Order.GetOrderDetail;
 
-namespace ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.HttpResponse;
+namespace ODour.FastEndpointApi.Feature.User.Order.GetOrderDetail.HttpResponse;
 
-internal static class GetCartDetailHttpResponseManager
+internal static class GetOrderDetailHttpResponseManager
 {
     private static ConcurrentDictionary<
-        GetCartDetailResponseStatusCode,
-        Func<GetCartDetailRequest, GetCartDetailResponse, GetCartDetailHttpResponse>
+        GetOrderDetailResponseStatusCode,
+        Func<GetOrderDetailRequest, GetOrderDetailResponse, GetOrderDetailHttpResponse>
     > _dictionary;
 
     private static void Init()
@@ -17,7 +17,7 @@ internal static class GetCartDetailHttpResponseManager
         _dictionary = new();
 
         _dictionary.TryAdd(
-            key: GetCartDetailResponseStatusCode.OPERATION_SUCCESS,
+            key: GetOrderDetailResponseStatusCode.OPERATION_SUCCESS,
             value: (_, response) =>
                 new()
                 {
@@ -28,7 +28,7 @@ internal static class GetCartDetailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: GetCartDetailResponseStatusCode.FORBIDDEN,
+            key: GetOrderDetailResponseStatusCode.FORBIDDEN,
             value: (_, response) =>
                 new()
                 {
@@ -38,7 +38,7 @@ internal static class GetCartDetailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: GetCartDetailResponseStatusCode.UN_AUTHORIZED,
+            key: GetOrderDetailResponseStatusCode.UN_AUTHORIZED,
             value: (_, response) =>
                 new()
                 {
@@ -48,7 +48,7 @@ internal static class GetCartDetailHttpResponseManager
         );
 
         _dictionary.TryAdd(
-            key: GetCartDetailResponseStatusCode.INPUT_VALIDATION_FAIL,
+            key: GetOrderDetailResponseStatusCode.INPUT_VALIDATION_FAIL,
             value: (_, response) =>
                 new()
                 {
@@ -56,13 +56,23 @@ internal static class GetCartDetailHttpResponseManager
                     AppCode = response.StatusCode.ToAppCode()
                 }
         );
+
+        _dictionary.TryAdd(
+            key: GetOrderDetailResponseStatusCode.ORDER_NOT_FOUND,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status404NotFound,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
     }
 
     internal static Func<
-        GetCartDetailRequest,
-        GetCartDetailResponse,
-        GetCartDetailHttpResponse
-    > Resolve(GetCartDetailResponseStatusCode statusCode)
+        GetOrderDetailRequest,
+        GetOrderDetailResponse,
+        GetOrderDetailHttpResponse
+    > Resolve(GetOrderDetailResponseStatusCode statusCode)
     {
         if (Equals(objA: _dictionary, objB: default))
         {

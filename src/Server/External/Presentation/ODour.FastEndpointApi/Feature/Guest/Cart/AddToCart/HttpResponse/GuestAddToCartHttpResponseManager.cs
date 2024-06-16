@@ -31,7 +31,7 @@ internal static class GuestAddToCartHttpResponseManager
             value: (_, response) =>
                 new()
                 {
-                    HttpCode = StatusCodes.Status404NotFound,
+                    HttpCode = StatusCodes.Status400BadRequest,
                     AppCode = response.StatusCode.ToAppCode()
                 }
         );

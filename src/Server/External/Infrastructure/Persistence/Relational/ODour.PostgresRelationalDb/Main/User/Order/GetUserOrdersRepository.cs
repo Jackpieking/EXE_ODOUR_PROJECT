@@ -60,13 +60,13 @@ internal sealed class GetUserOrdersRepository : IGetUserOrdersRepository
             .Where(predicate: entity =>
                 entity.OrderStatusId == orderStatusId && entity.UserId == userId
             )
+            .OrderByDescending(keySelector: entity => entity.OrderCode)
             .Select(selector: entity => new OrderEntity
             {
-                OrderCode = entity.OrderCode,
+                Id = entity.Id,
                 OrderStatus = new() { Name = entity.OrderStatus.Name },
                 TotalPrice = entity.TotalPrice,
             })
-            .OrderByDescending(keySelector: entity => entity.OrderCode)
             .ToListAsync(cancellationToken: ct);
     }
 

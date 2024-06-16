@@ -56,5 +56,7 @@ public interface IMainUnitOfWork
     IGetUserOrdersRepository GetUserOrdersRepository { get; }
 
     ICreateNewOrderRepository CreateNewOrderRepository { get; }
+
+    IGetOrderDetailRepository GetOrderDetailRepository { get; }
     #endregion
 }

@@ -52,9 +52,9 @@ internal sealed class GetUserOrdersHandler
                 Orders = userOrders.Select(
                     selector: order => new GetUserOrdersResponse.ResponseBody.Order
                     {
-                        OrderCode = order.OrderCode,
-                        OrderStatusName = order.OrderStatus.Name,
-                        OrderPrice = order.TotalPrice
+                        Id = order.Id,
+                        Status = order.OrderStatus.Name,
+                        Price = order.TotalPrice
                     }
                 )
             }
