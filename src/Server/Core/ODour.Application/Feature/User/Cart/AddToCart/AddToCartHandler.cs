@@ -39,6 +39,7 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
         // Is cart item found
         var foundCartItem = await _mainUnitOfWork.Value.AddToCartRepository.FindCartItemQueryAsync(
             productId: command.ProductId,
+            userId: command.GetUserId(),
             ct: ct
         );
 

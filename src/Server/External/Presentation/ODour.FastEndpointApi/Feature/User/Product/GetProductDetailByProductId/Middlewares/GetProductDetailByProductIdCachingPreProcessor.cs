@@ -33,6 +33,8 @@ internal sealed class GetProductDetailByProductIdCachingPreProcessor
             return;
         }
 
+        context.Request.ProductId = context.Request.ProductId.ToUpper();
+
         state.CacheKey =
             $"{nameof(GetProductDetailByProductIdRequest)}__req__{context.Request.ProductId}";
 

@@ -43,6 +43,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private ICreateNewOrderRepository _createNewOrderRepository;
     private IGetOrderDetailRepository _getOrderDetailRepository;
     private ISwitchOrderStatusRepository _switchOrderStatusRepository;
+    private ISwitchOrderStatusToProcessingRepository _switchOrderStatusToProcessingRepository;
 
     #region Dependencies
     private readonly Lazy<DbContext> _context;
@@ -234,6 +235,15 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
             return _switchOrderStatusRepository ??= new SwitchOrderStatusRepository(
                 context: _context
             );
+        }
+    }
+
+    public ISwitchOrderStatusToProcessingRepository SwitchOrderStatusToProcessingRepository
+    {
+        get
+        {
+            return _switchOrderStatusToProcessingRepository ??=
+                new SwitchOrderStatusToProcessingRepository(context: _context);
         }
     }
 }

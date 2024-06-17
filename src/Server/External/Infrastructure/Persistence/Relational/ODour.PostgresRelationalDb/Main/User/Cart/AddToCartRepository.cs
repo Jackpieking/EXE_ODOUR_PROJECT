@@ -120,12 +120,18 @@ internal sealed class AddToCartRepository : IAddToCartRepository
         return dbResult;
     }
 
-    public Task<CartItemEntity> FindCartItemQueryAsync(string productId, CancellationToken ct)
+    public Task<CartItemEntity> FindCartItemQueryAsync(
+        string productId,
+        Guid userId,
+        CancellationToken ct
+    )
     {
         return _context
             .Value.Set<CartItemEntity>()
             .AsNoTracking()
-            .Where(predicate: cartItem => cartItem.ProductId.Equals(productId))
+            .Where(predicate: cartItem =>
+                cartItem.ProductId.Equals(productId) && cartItem.UserId == userId
+            )
             .Select(selector: cartItem => new CartItemEntity { Quantity = cartItem.Quantity })
             .FirstOrDefaultAsync(cancellationToken: ct);
     }

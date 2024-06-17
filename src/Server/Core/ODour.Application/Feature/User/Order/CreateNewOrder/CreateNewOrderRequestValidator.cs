@@ -36,6 +36,6 @@ public sealed class CreateNewOrderRequestValidator : Validator<CreateNewOrderReq
 
         RuleForEach(expression: request => request.OrderItems)
             .NotEmpty()
-            .Must(predicate: childReq => childReq.Quantity > 1);
+            .Must(predicate: childReq => childReq.Quantity > default(int));
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ODour.Application.Feature.User.Cart.GetCartDetail;
 using ODour.Application.Feature.User.Order.CreateNewOrder;
 using ODour.Application.Feature.User.Order.GetUserOrders;
+using ODour.Application.Feature.User.Product.GetProductDetailByProductId;
 using ODour.Application.Share.Caching;
 using ODour.FastEndpointApi.Feature.User.Order.CreateNewOrder.Common;
 using ODour.FastEndpointApi.Feature.User.Order.CreateNewOrder.HttpResponse;
@@ -44,16 +46,35 @@ internal sealed class CreateNewOrderCachingPostProcessor
             )
         )
         {
-            await Task.WhenAll(
-                cacheHandler.Value.RemoveAsync(
-                    key: $"{nameof(GetUserOrdersRequest)}__req__{context.Request.GetUserId()}__{state.OrderStatusId}",
-                    cancellationToken: ct
-                ),
-                cacheHandler.Value.RemoveAsync(
-                    key: $"{nameof(GetCartDetailRequest)}__req__{context.Request.GetUserId()}",
-                    cancellationToken: ct
-                )
+            var removedCacheTasks = new List<Task>();
+
+            foreach (var orderItem in context.Request.OrderItems)
+            {
+                removedCacheTasks.Add(
+                    item: cacheHandler.Value.RemoveAsync(
+                        key: $"{nameof(GetProductDetailByProductIdRequest)}__req__{orderItem.ProductId}",
+                        cancellationToken: ct
+                    )
+                );
+            }
+
+            removedCacheTasks.AddRange(
+                collection: new List<Task>(capacity: 2)
+                {
+                    cacheHandler.Value.RemoveAsync(
+                        key: $"{nameof(GetUserOrdersRequest)}__req__{context.Request.GetUserId()}__{state.OrderStatusId}",
+                        cancellationToken: ct
+                    ),
+                    cacheHandler.Value.RemoveAsync(
+                        key: $"{nameof(GetCartDetailRequest)}__req__{context.Request.GetUserId()}",
+                        cancellationToken: ct
+                    )
+                }
             );
+
+            removedCacheTasks.TrimExcess();
+
+            await Task.WhenAll(tasks: removedCacheTasks);
         }
     }
 }

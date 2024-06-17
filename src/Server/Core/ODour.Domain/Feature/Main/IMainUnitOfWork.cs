@@ -63,5 +63,7 @@ public interface IMainUnitOfWork
 
     #region Admin.Order
     ISwitchOrderStatusRepository SwitchOrderStatusRepository { get; }
+
+    ISwitchOrderStatusToProcessingRepository SwitchOrderStatusToProcessingRepository { get; }
     #endregion
 }

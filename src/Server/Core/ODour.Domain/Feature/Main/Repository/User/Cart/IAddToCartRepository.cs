@@ -18,7 +18,11 @@ public interface IAddToCartRepository
 
     Task<bool> AddItemToCartQueryAsync(CartItemEntity cartItem, CancellationToken ct);
 
-    Task<CartItemEntity> FindCartItemQueryAsync(string productId, CancellationToken ct);
+    Task<CartItemEntity> FindCartItemQueryAsync(
+        string productId,
+        Guid userId,
+        CancellationToken ct
+    );
 
     Task<int> GetTotalNumberOfCartItemQueryAsync(Guid userId, CancellationToken ct);
 

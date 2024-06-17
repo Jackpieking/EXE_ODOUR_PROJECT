@@ -37,7 +37,8 @@ internal sealed class CreateNewOrderRepository : ICreateNewOrderRepository
                     predicate: cartItem =>
                         cartItem.UserId == userId
                         && cartItem.ProductId.Equals(orderItem.ProductId)
-                        && cartItem.Quantity >= orderItem.SellingQuantity,
+                        && cartItem.Quantity >= orderItem.SellingQuantity
+                        && cartItem.Quantity > default(int),
                     cancellationToken: ct
                 );
 
@@ -155,17 +156,32 @@ internal sealed class CreateNewOrderRepository : ICreateNewOrderRepository
                     // Update cart items
                     foreach (var orderItem in newOrder.OrderItems)
                     {
+                        // Remove quantity from cart.
                         await _context
                             .Value.Set<CartItemEntity>()
                             .Where(predicate: cartItem =>
                                 cartItem.UserId == newOrder.UserId
-                                && cartItem.ProductId == cartItem.ProductId
+                                && cartItem.ProductId == orderItem.ProductId
                             )
                             .ExecuteUpdateAsync(
                                 setPropertyCalls: builder =>
                                     builder.SetProperty(
                                         cartItem => cartItem.Quantity,
                                         cartItem => cartItem.Quantity - orderItem.SellingQuantity
+                                    ),
+                                cancellationToken: ct
+                            );
+
+                        // remove quantity from product.
+                        await _context
+                            .Value.Set<ProductEntity>()
+                            .Where(predicate: product => product.Id == orderItem.ProductId)
+                            .ExecuteUpdateAsync(
+                                setPropertyCalls: builder =>
+                                    builder.SetProperty(
+                                        product => product.QuantityInStock,
+                                        product =>
+                                            product.QuantityInStock - orderItem.SellingQuantity
                                     ),
                                 cancellationToken: ct
                             );
