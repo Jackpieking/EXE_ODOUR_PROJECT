@@ -4,7 +4,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Feature\Admin\Order\SwitchOrderStatusToCancelling\" />
-    <Folder Include="Feature\Admin\Order\SwitchOrderStatusToDeliveringSuccessfully\" />
     <Folder Include="Feature\Admin\Order\SwitchOrderStatusToDelivering\" />
     <Folder Include="Feature\User\Payment\PayOnline\" />
   </ItemGroup>

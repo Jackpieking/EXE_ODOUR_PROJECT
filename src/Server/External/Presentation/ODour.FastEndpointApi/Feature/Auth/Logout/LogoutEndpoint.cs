@@ -19,6 +19,7 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
         AuthSchemes(authSchemeNames: JwtBearerDefaults.AuthenticationScheme);
         PreProcessor<LogoutValidationPreProcessor>();
         PreProcessor<LogoutAuthorizationPreProcessor>();
+        PostProcessor<LogoutCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(
@@ -45,8 +46,6 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
     )
     {
         var stateBag = ProcessorState<LogoutStateBag>();
-
-        stateBag.AppRequest.SetRefreshToken(refreshToken: stateBag.FoundRefreshTokenValue);
 
         // Get app feature response.
         var appResponse = await stateBag.AppRequest.ExecuteAsync(ct: ct);

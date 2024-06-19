@@ -5,10 +5,10 @@ using ODour.Domain.Share.Order.Entities;
 
 namespace ODour.Domain.Feature.Main.Repository.Admin.Order;
 
-public interface ISwitchOrderStatusToProcessingRepository
+public interface ISwitchOrderStatusToDeliveringSuccessfullyRepository
 {
     #region Query
-    Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct);
+    Task<bool> IsRefreshTokenValidQueryAsync(string refreshTokenId, CancellationToken ct);
 
     Task<bool> IsOrderFoundQueryAsync(Guid orderId, CancellationToken ct);
 

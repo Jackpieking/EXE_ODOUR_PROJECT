@@ -15,7 +15,7 @@ internal sealed class SwitchOrderStatusToProcessingEndpoint
 {
     public override void Configure()
     {
-        Post(routePatterns: "admin/order/{orderId}/switch/status/processing");
+        Post(routePatterns: "admin/orders/{orderId}/status-changing/processing");
         AuthSchemes(authSchemeNames: JwtBearerDefaults.AuthenticationScheme);
         DontThrowIfValidationFails();
         PreProcessor<SwitchOrderStatusToProcessingValidationPreProcessor>();

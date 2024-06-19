@@ -4,9 +4,9 @@ namespace ODour.Application.Feature.Auth.Logout;
 
 public sealed class LogoutRequest : IFeatureRequest<LogoutResponse>
 {
-    private string _refreshToken;
+    private string _refreshTokenId;
 
-    public string GetRefreshToken() => _refreshToken;
+    public string GetRefreshTokenId() => _refreshTokenId;
 
-    public void SetRefreshToken(string refreshToken) => _refreshToken = refreshToken;
+    public void SetRefreshTokenId(string refreshTokenId) => _refreshTokenId = refreshTokenId;
 }

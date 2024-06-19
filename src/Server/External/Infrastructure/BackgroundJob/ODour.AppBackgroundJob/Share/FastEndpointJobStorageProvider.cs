@@ -52,7 +52,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
 
                 try
                 {
-                    var failureReasonseAsJson = JsonSerializer.Serialize(value: string.Empty);
+                    var failureReasonsAsJson = JsonSerializer.Serialize(value: string.Empty);
 
                     //if this is a recurring job command, reschedule the next execution like so:
                     if (r.Command is IRecurringJob cronJob)
@@ -69,7 +69,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                                         )
                                         .SetProperty(
                                             entity => entity.FailureReason,
-                                            failureReasonseAsJson
+                                            failureReasonsAsJson
                                         ),
                                 cancellationToken: ct
                             );
@@ -85,7 +85,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                                         .SetProperty(entity => entity.IsComplete, true)
                                         .SetProperty(
                                             entity => entity.FailureReason,
-                                            failureReasonseAsJson
+                                            failureReasonsAsJson
                                         ),
                                 cancellationToken: ct
                             );
@@ -144,7 +144,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                     }
                     else if (r.FailureCount < MaxRetryCount)
                     {
-                        var failureReasonseAsJson = JsonSerializer.Serialize(
+                        var failureReasonsAsJson = JsonSerializer.Serialize(
                             value: exception.Message
                         );
 
@@ -166,7 +166,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                                             )
                                             .SetProperty(
                                                 entity => entity.FailureReason,
-                                                failureReasonseAsJson
+                                                failureReasonsAsJson
                                             ),
                                     cancellationToken: ct
                                 );
@@ -181,7 +181,7 @@ public sealed class FastEndpointJobStorageProvider : IJobStorageProvider<JobReco
                                         builder
                                             .SetProperty(
                                                 entity => entity.FailureReason,
-                                                failureReasonseAsJson
+                                                failureReasonsAsJson
                                             )
                                             .SetProperty(
                                                 entity => entity.FailureCount,

@@ -57,21 +57,16 @@ internal sealed class GetOrderDetailRepository : IGetOrderDetailRepository
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshTokenId,
-        CancellationToken ct
-    )
+    public Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
-            .Where(predicate: token => token.LoginProvider.Equals(refreshTokenId))
-            .Select(token => new UserTokenEntity
-            {
-                Value = token.Value,
-                ExpiredAt = token.ExpiredAt
-            })
-            .FirstOrDefaultAsync(cancellationToken: ct);
+            .AnyAsync(
+                predicate: token =>
+                    token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,
+                cancellationToken: ct
+            );
     }
 
     public Task<bool> IsOrderFoundQueryAsync(Guid orderId, CancellationToken ct)
@@ -79,17 +74,5 @@ internal sealed class GetOrderDetailRepository : IGetOrderDetailRepository
         return _context
             .Value.Set<OrderEntity>()
             .AnyAsync(predicate: order => order.Id == orderId, cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
-            .AnyAsync(
-                predicate: user =>
-                    user.UserId == userId
-                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
-                cancellationToken: ct
-            );
     }
 }

@@ -61,8 +61,8 @@ internal sealed class RefreshAccessTokenRepository : IRefreshAccessTokenReposito
     }
 
     public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshToken,
         string refreshTokenId,
+        string refreshTokenValue,
         CancellationToken ct
     )
     {
@@ -70,21 +70,11 @@ internal sealed class RefreshAccessTokenRepository : IRefreshAccessTokenReposito
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
             .Where(predicate: token =>
-                token.LoginProvider.Equals(refreshTokenId) && token.Value.Equals(refreshToken)
+                token.LoginProvider.Equals(refreshTokenId)
+                && token.ExpiredAt > DateTime.UtcNow
+                && token.Value.Equals(refreshTokenValue)
             )
-            .Select(token => new UserTokenEntity { ExpiredAt = token.ExpiredAt })
+            .Select(token => new UserTokenEntity { Value = token.Value })
             .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
-            .AnyAsync(
-                predicate: user =>
-                    user.UserId == userId
-                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
-                cancellationToken: ct
-            );
     }
 }

@@ -42,7 +42,7 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetUserOrdersRepository _getUserOrdersRepository;
     private ICreateNewOrderRepository _createNewOrderRepository;
     private IGetOrderDetailRepository _getOrderDetailRepository;
-    private ISwitchOrderStatusRepository _switchOrderStatusRepository;
+    private ISwitchOrderStatusToDeliveringSuccessfullyRepository _switchOrderStatusToDeliveringSuccessfullyRepository;
     private ISwitchOrderStatusToProcessingRepository _switchOrderStatusToProcessingRepository;
 
     #region Dependencies
@@ -228,22 +228,21 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         }
     }
 
-    public ISwitchOrderStatusRepository SwitchOrderStatusRepository
-    {
-        get
-        {
-            return _switchOrderStatusRepository ??= new SwitchOrderStatusRepository(
-                context: _context
-            );
-        }
-    }
-
     public ISwitchOrderStatusToProcessingRepository SwitchOrderStatusToProcessingRepository
     {
         get
         {
             return _switchOrderStatusToProcessingRepository ??=
                 new SwitchOrderStatusToProcessingRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToDeliveringSuccessfullyRepository SwitchOrderStatusToDeliveringSuccessfullyRepository
+    {
+        get
+        {
+            return _switchOrderStatusToDeliveringSuccessfullyRepository ??=
+                new SwitchOrderStatusToDeliveringSuccessfullyRepository(context: _context);
         }
     }
 }

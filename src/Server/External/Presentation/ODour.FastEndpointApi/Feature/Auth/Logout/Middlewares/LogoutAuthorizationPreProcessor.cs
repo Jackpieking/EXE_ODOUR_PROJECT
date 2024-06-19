@@ -4,13 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using ODour.Application.Feature.Auth.Logout;
 using ODour.Domain.Feature.Main;
-using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi.Feature.Auth.Logout.Common;
 using ODour.FastEndpointApi.Feature.Auth.Logout.HttpResponse;
 
@@ -42,9 +40,7 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
             return;
         }
 
-        // Set new app request.
-        state.AppRequest = new();
-
+        #region PreValidateAccessToken
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -55,15 +51,11 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
             validationParameters: _tokenValidationParameters.Value
         );
 
+        // Extract and convert access token expire time.
+        var tokenExpireTime = ExtractUtcTimeFromToken(context: context.HttpContext);
+
         // Validate access token.
-        if (
-            !validateTokenResult.IsValid
-            || !CheckAccessTokenIsValid(
-                expClaim: context.HttpContext.User.FindFirstValue(
-                    claimType: JwtRegisteredClaimNames.Exp
-                )
-            )
-        )
+        if (!validateTokenResult.IsValid || tokenExpireTime <= DateTime.UtcNow)
         {
             await SendResponseAsync(
                 statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
@@ -74,26 +66,27 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
 
             return;
         }
+        #endregion
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
-
         var unitOfWork = scope.Resolve<Lazy<IMainUnitOfWork>>();
-        var userManager = scope.Resolve<Lazy<UserManager<UserEntity>>>();
 
-        #region Part1
-        // Get refresh token.
-        var refreshToken = await unitOfWork.Value.LogoutRepository.GetRefreshTokenQueryAsync(
-            refreshTokenId: Guid.Parse(
-                    input: context.HttpContext.User.FindFirstValue(
-                        claimType: JwtRegisteredClaimNames.Jti
-                    )
+        var accessTokenId = Guid.Parse(
+                input: context.HttpContext.User.FindFirstValue(
+                    claimType: JwtRegisteredClaimNames.Jti
                 )
-                .ToString(),
-            ct: ct
-        );
+            )
+            .ToString();
+
+        // Is refresh token found.
+        var isRefreshTokenFound =
+            await unitOfWork.Value.LogoutRepository.IsRefreshTokenFoundQueryAsync(
+                refreshTokenId: accessTokenId,
+                ct: ct
+            );
 
         // Refresh token is not found.
-        if (Equals(objA: refreshToken, objB: default))
+        if (!isRefreshTokenFound)
         {
             await SendResponseAsync(
                 statusCode: LogoutResponseStatusCode.FORBIDDEN,
@@ -104,91 +97,9 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
 
             return;
         }
-
-        // Refresh token is expired.
-        if (refreshToken.ExpiredAt < DateTime.UtcNow)
-        {
-            await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.UN_AUTHORIZED,
-                appRequest: state.AppRequest,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part2
-        // Find user by user id.
-        var foundUser = await userManager.Value.FindByIdAsync(
-            userId: Guid.Parse(
-                    input: context.HttpContext.User.FindFirstValue(
-                        claimType: JwtRegisteredClaimNames.Sub
-                    )
-                )
-                .ToString()
-        );
-
-        // User is not found
-        if (Equals(objA: foundUser, objB: default))
-        {
-            await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                appRequest: state.AppRequest,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part3
-        // Is user temporarily removed.
-        var isUserTemporarilyRemoved =
-            await unitOfWork.Value.LogoutRepository.IsUserBannedQueryAsync(
-                userId: foundUser.Id,
-                ct: ct
-            );
-
-        // User is temporarily removed.
-        if (isUserTemporarilyRemoved)
-        {
-            await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                appRequest: state.AppRequest,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part4
-        // Is user in role.
-        var isUserInRole = await userManager.Value.IsInRoleAsync(
-            user: foundUser,
-            role: context.HttpContext.User.FindFirstValue(claimType: "role")
-        );
-
-        // User is not in role.
-        if (!isUserInRole)
-        {
-            await SendResponseAsync(
-                statusCode: LogoutResponseStatusCode.FORBIDDEN,
-                appRequest: state.AppRequest,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
 
         // Set new found refresh token value.
-        state.FoundRefreshTokenValue = refreshToken.Value;
+        state.AppRequest.SetRefreshTokenId(refreshTokenId: accessTokenId);
     }
 
     private static Task SendResponseAsync(
@@ -216,9 +127,14 @@ internal sealed class LogoutAuthorizationPreProcessor : PreProcessor<EmptyReques
         );
     }
 
-    private static bool CheckAccessTokenIsValid(string expClaim)
+    private static DateTime ExtractUtcTimeFromToken(HttpContext context)
     {
-        return DateTimeOffset.FromUnixTimeSeconds(seconds: long.Parse(s: expClaim)).UtcDateTime
-            >= DateTime.UtcNow;
+        return DateTimeOffset
+            .FromUnixTimeSeconds(
+                seconds: long.Parse(
+                    s: context.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Exp)
+                )
+            )
+            .UtcDateTime;
     }
 }

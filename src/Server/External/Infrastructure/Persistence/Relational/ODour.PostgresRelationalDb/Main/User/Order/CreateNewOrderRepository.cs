@@ -51,64 +51,16 @@ internal sealed class CreateNewOrderRepository : ICreateNewOrderRepository
         return true;
     }
 
-    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshTokenId,
-        CancellationToken ct
-    )
+    public Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
-            .Where(predicate: token => token.LoginProvider.Equals(refreshTokenId))
-            .Select(token => new UserTokenEntity
-            {
-                Value = token.Value,
-                ExpiredAt = token.ExpiredAt
-            })
-            .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user =>
-                    user.UserId == userId
-                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
+                predicate: token =>
+                    token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,
                 cancellationToken: ct
             );
-    }
-
-    public async Task<OrderStatusEntity> GetOrderStatusBasedOnPaymentMethodQueryAsync(
-        Guid paymentMethodId,
-        CancellationToken ct
-    )
-    {
-        var isPayWhenReceived = await _context
-            .Value.Set<PaymentMethodEntity>()
-            .AnyAsync(
-                predicate: entity =>
-                    entity.Id == paymentMethodId && entity.Name.Equals("Thanh toán khi nhận hàng"),
-                cancellationToken: ct
-            );
-
-        if (isPayWhenReceived)
-        {
-            return await _context
-                .Value.Set<OrderStatusEntity>()
-                .AsNoTracking()
-                .Where(predicate: entity => entity.Name.Equals("Chờ xử lý"))
-                .Select(selector: entity => new OrderStatusEntity { Id = entity.Id })
-                .FirstOrDefaultAsync(cancellationToken: ct);
-        }
-
-        return await _context
-            .Value.Set<OrderStatusEntity>()
-            .AsNoTracking()
-            .Where(predicate: entity => entity.Name.Equals("Chờ thanh toán"))
-            .Select(selector: entity => new OrderStatusEntity { Id = entity.Id })
-            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
     public Task<bool> IsPaymentMethodValidQueryAsync(Guid paymentMethodId, CancellationToken ct)

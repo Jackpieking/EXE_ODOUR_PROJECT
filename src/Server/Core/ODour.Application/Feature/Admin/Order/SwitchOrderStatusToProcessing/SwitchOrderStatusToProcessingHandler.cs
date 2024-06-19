@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ODour.Application.Feature.Admin.Order.SwitchOrderStatusToProcessing;
 using ODour.Application.Share.Features;
 using ODour.Domain.Feature.Main;
 
-namespace ODour.Application.Feature.Admin.Order.SwitchOrderStatusToProcessingToProcessing;
+namespace ODour.Application.Feature.Admin.Order.SwitchOrderStatusToProcessing;
 
 internal sealed class SwitchOrderStatusToProcessingHandler
     : IFeatureHandler<SwitchOrderStatusToProcessingRequest, SwitchOrderStatusToProcessingResponse>
@@ -24,7 +23,7 @@ internal sealed class SwitchOrderStatusToProcessingHandler
     {
         // Is order find by id.
         var isOrderFound =
-            await _mainUnitOfWork.Value.SwitchOrderStatusRepository.IsOrderFoundQueryAsync(
+            await _mainUnitOfWork.Value.SwitchOrderStatusToProcessingRepository.IsOrderFoundQueryAsync(
                 orderId: command.OrderId,
                 ct: ct
             );

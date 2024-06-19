@@ -19,31 +19,14 @@ internal sealed class SwitchOrderStatusToProcessingRepository
         _context = context;
     }
 
-    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshTokenId,
-        CancellationToken ct
-    )
+    public Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
-            .Where(predicate: token => token.LoginProvider.Equals(refreshTokenId))
-            .Select(token => new UserTokenEntity
-            {
-                Value = token.Value,
-                ExpiredAt = token.ExpiredAt
-            })
-            .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user =>
-                    user.UserId == userId
-                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
+                predicate: token =>
+                    token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,
                 cancellationToken: ct
             );
     }

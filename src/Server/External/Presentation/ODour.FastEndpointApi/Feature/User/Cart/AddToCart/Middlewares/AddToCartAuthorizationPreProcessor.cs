@@ -4,13 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using ODour.Application.Feature.User.Cart.AddToCart;
+using ODour.Application.Share.Caching;
 using ODour.Domain.Feature.Main;
-using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi.Feature.User.Cart.AddToCart.Common;
 using ODour.FastEndpointApi.Feature.User.Cart.AddToCart.HttpResponse;
 
@@ -43,6 +42,7 @@ internal sealed class AddToCartAuthorizationPreProcessor
             return;
         }
 
+        #region PreValidateAccessToken
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -53,15 +53,13 @@ internal sealed class AddToCartAuthorizationPreProcessor
             validationParameters: _tokenValidationParameters.Value
         );
 
+        // Extract and convert access token expire time.
+        var tokenExpireTime = ExtractUtcTimeFromToken(context: context.HttpContext);
+
+        var dateTimeUtcNow = DateTime.UtcNow;
+
         // Validate access token.
-        if (
-            !validateTokenResult.IsValid
-            || !CheckAccessTokenIsValid(
-                expClaim: context.HttpContext.User.FindFirstValue(
-                    claimType: JwtRegisteredClaimNames.Exp
-                )
-            )
-        )
+        if (!validateTokenResult.IsValid || tokenExpireTime <= DateTime.UtcNow)
         {
             await SendResponseAsync(
                 statusCode: AddToCartResponseStatusCode.UN_AUTHORIZED,
@@ -72,117 +70,72 @@ internal sealed class AddToCartAuthorizationPreProcessor
 
             return;
         }
+        #endregion
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
-
+        var cacheHandler = scope.Resolve<Lazy<ICacheHandler>>();
         var unitOfWork = scope.Resolve<Lazy<IMainUnitOfWork>>();
-        var userManager = scope.Resolve<Lazy<UserManager<UserEntity>>>();
 
-        #region Part1
-        // Get refresh token.
-        var refreshToken = await unitOfWork.Value.AddToCartRepository.GetRefreshTokenQueryAsync(
-            refreshTokenId: Guid.Parse(
-                    input: context.HttpContext.User.FindFirstValue(
-                        claimType: JwtRegisteredClaimNames.Jti
-                    )
+        // Get id from access token.
+        var accessTokenId = Guid.Parse(
+                input: context.HttpContext.User.FindFirstValue(
+                    claimType: JwtRegisteredClaimNames.Jti
                 )
-                .ToString(),
-            ct: ct
+            )
+            .ToString();
+
+        var cacheKey = $"{nameof(AddToCartRequest)}__AUTHORIZATION_CHECK__{accessTokenId}";
+
+        // Get authorized access token id from cache.
+        var foundAuthorizedAccessToken = await cacheHandler.Value.GetAsync<bool>(
+            key: cacheKey,
+            cancellationToken: ct
         );
 
-        // Refresh token is not found.
-        if (Equals(objA: refreshToken, objB: default))
+        // Authorized access token id is found.
+        if (Equals(objA: foundAuthorizedAccessToken, objB: AppCacheModel<bool>.NotFound))
         {
-            await SendResponseAsync(
-                statusCode: AddToCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
+            // Is refresh token found.
+            var isRefreshTokenFound =
+                await unitOfWork.Value.AddToCartRepository.IsRefreshTokenFoundQueryAsync(
+                    refreshTokenId: accessTokenId,
+                    ct: ct
+                );
 
-            return;
+            // Refresh token is not found.
+            if (!isRefreshTokenFound)
+            {
+                await SendResponseAsync(
+                    statusCode: AddToCartResponseStatusCode.FORBIDDEN,
+                    appRequest: context.Request,
+                    context: context.HttpContext,
+                    ct: ct
+                );
+
+                return;
+            }
+
+            var cacheExpiredTime = tokenExpireTime - dateTimeUtcNow - TimeSpan.FromSeconds(15);
+
+            // Caching the authorized access token id for faster authorization.
+            // Let the cache expire sooner than 15 seconds from
+            // the access token expire time.
+            await cacheHandler.Value.SetAsync(
+                key: cacheKey,
+                value: true,
+                new() { AbsoluteExpiration = dateTimeUtcNow.Add(value: cacheExpiredTime) },
+                cancellationToken: ct
+            );
         }
-
-        // Refresh token is expired.
-        if (refreshToken.ExpiredAt < DateTime.UtcNow)
-        {
-            await SendResponseAsync(
-                statusCode: AddToCartResponseStatusCode.UN_AUTHORIZED,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part2
-        var foundUserId = Guid.Parse(
-            input: context.HttpContext.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Sub)
-        );
-
-        // Find user by user id.
-        var foundUser = await userManager.Value.FindByIdAsync(userId: foundUserId.ToString());
-
-        // User is not found
-        if (Equals(objA: foundUser, objB: default))
-        {
-            await SendResponseAsync(
-                statusCode: AddToCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part3
-        // Is user temporarily removed.
-        var isUserTemporarilyRemoved =
-            await unitOfWork.Value.AddToCartRepository.IsUserBannedQueryAsync(
-                userId: foundUser.Id,
-                ct: ct
-            );
-
-        // User is temporarily removed.
-        if (isUserTemporarilyRemoved)
-        {
-            await SendResponseAsync(
-                statusCode: AddToCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part4
-        var roleClaim = context.HttpContext.User.FindFirstValue(claimType: "role");
-
-        // Is user in role
-        if (
-            !roleClaim.Equals(value: "user")
-            || !(await userManager.Value.IsInRoleAsync(user: foundUser, role: roleClaim))
-        )
-        {
-            await SendResponseAsync(
-                statusCode: AddToCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
 
         // Set user id.
-        context.Request.SetUserId(userId: foundUser.Id);
+        context.Request.SetUserId(
+            userId: Guid.Parse(
+                input: context.HttpContext.User.FindFirstValue(
+                    claimType: JwtRegisteredClaimNames.Sub
+                )
+            )
+        );
     }
 
     private static Task SendResponseAsync(
@@ -210,9 +163,14 @@ internal sealed class AddToCartAuthorizationPreProcessor
         );
     }
 
-    private static bool CheckAccessTokenIsValid(string expClaim)
+    private static DateTime ExtractUtcTimeFromToken(HttpContext context)
     {
-        return DateTimeOffset.FromUnixTimeSeconds(seconds: long.Parse(s: expClaim)).UtcDateTime
-            >= DateTime.UtcNow;
+        return DateTimeOffset
+            .FromUnixTimeSeconds(
+                seconds: long.Parse(
+                    s: context.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Exp)
+                )
+            )
+            .UtcDateTime;
     }
 }

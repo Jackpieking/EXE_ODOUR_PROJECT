@@ -9,40 +9,24 @@ using ODour.Domain.Share.User.Entities;
 
 namespace ODour.PostgresRelationalDb.Main.Admin.Order;
 
-internal sealed class SwitchOrderStatusRepository : ISwitchOrderStatusRepository
+internal sealed class SwitchOrderStatusToDeliveringSuccessfullyRepository
+    : ISwitchOrderStatusToDeliveringSuccessfullyRepository
 {
     private readonly Lazy<DbContext> _context;
 
-    public SwitchOrderStatusRepository(Lazy<DbContext> context)
+    public SwitchOrderStatusToDeliveringSuccessfullyRepository(Lazy<DbContext> context)
     {
         _context = context;
     }
 
-    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshTokenId,
-        CancellationToken ct
-    )
+    public Task<bool> IsRefreshTokenValidQueryAsync(string refreshTokenId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserTokenEntity>()
             .AsNoTracking()
-            .Where(predicate: token => token.LoginProvider.Equals(refreshTokenId))
-            .Select(token => new UserTokenEntity
-            {
-                Value = token.Value,
-                ExpiredAt = token.ExpiredAt
-            })
-            .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user =>
-                    user.UserId == userId
-                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
+                predicate: token =>
+                    token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,
                 cancellationToken: ct
             );
     }
@@ -54,21 +38,7 @@ internal sealed class SwitchOrderStatusRepository : ISwitchOrderStatusRepository
             .AnyAsync(predicate: order => order.Id == orderId, cancellationToken: ct);
     }
 
-    public Task<bool> IsOrderStatusFoundQueryAsync(Guid orderStatusId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<OrderStatusEntity>()
-            .AnyAsync(
-                predicate: orderStatus => orderStatus.Id == orderStatusId,
-                cancellationToken: ct
-            );
-    }
-
-    public async Task<bool> SwitchOrderStatusCommandAsync(
-        Guid newOrderStatusId,
-        Guid orderId,
-        CancellationToken ct
-    )
+    public async Task<bool> SwitchOrderStatusCommandAsync(Guid orderId, CancellationToken ct)
     {
         var dbResult = false;
 
@@ -82,12 +52,19 @@ internal sealed class SwitchOrderStatusRepository : ISwitchOrderStatusRepository
 
                 try
                 {
+                    var processingOrderStatusId = Guid.Parse(
+                        input: "37eb8293-c17a-45a6-89ab-ba640d4001ff"
+                    );
+
                     await _context
                         .Value.Set<OrderEntity>()
                         .Where(predicate: order => order.Id == orderId)
                         .ExecuteUpdateAsync(
                             setPropertyCalls: builder =>
-                                builder.SetProperty(order => order.OrderStatusId, newOrderStatusId),
+                                builder.SetProperty(
+                                    order => order.OrderStatusId,
+                                    processingOrderStatusId
+                                ),
                             cancellationToken: ct
                         );
 

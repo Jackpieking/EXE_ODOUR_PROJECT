@@ -98,12 +98,24 @@ internal sealed class CreateNewOrderHandler
         CancellationToken ct
     )
     {
-        // Get order status.
-        var orderStatus =
-            await _mainUnitOfWork.Value.CreateNewOrderRepository.GetOrderStatusBasedOnPaymentMethodQueryAsync(
-                paymentMethodId: command.PaymentMethodId,
-                ct: ct
-            );
+        var PayWhenReceivingPaymentMethodId = Guid.Parse(
+            input: "845e7be4-b3e3-4483-9fde-65694ee2d9b9"
+        );
+
+        var WaitForProcessingOrderStatusId = Guid.Parse(
+            input: "f86e2f2a-5dcc-4546-a4de-ea297ee22dc5"
+        );
+
+        var WaitForPaymentOrderStatusId = Guid.Parse(input: "0e696741-97f6-444a-b265-025c8c394fc9");
+
+        var orderStatusId = WaitForPaymentOrderStatusId;
+
+        // if payment method is pay when receiving.
+        if (command.PaymentMethodId == PayWhenReceivingPaymentMethodId)
+        {
+            // set order status to wait for processing.
+            orderStatusId = WaitForProcessingOrderStatusId;
+        }
 
         // Init new order id.
         var orderId = Guid.NewGuid();
@@ -118,7 +130,7 @@ internal sealed class CreateNewOrderHandler
         return new OrderEntity
         {
             Id = orderId,
-            OrderStatusId = orderStatus.Id,
+            OrderStatusId = orderStatusId,
             FullName = command.FullName,
             PhoneNumber = command.PhoneNumber,
             UserId = command.GetUserId(),

@@ -4,13 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using ODour.Application.Feature.User.Cart.RemoveFromCart;
+using ODour.Application.Share.Caching;
 using ODour.Domain.Feature.Main;
-using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi.Feature.User.Cart.RemoveFromCart.Common;
 using ODour.FastEndpointApi.Feature.User.Cart.RemoveFromCart.HttpResponse;
 
@@ -37,11 +36,13 @@ internal sealed class RemoveFromCartAuthorizationPreProcessor
         CancellationToken ct
     )
     {
+        // Bypass if response has started.
         if (context.HttpContext.ResponseStarted())
         {
             return;
         }
 
+        #region PreValidateAccessToken
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -52,15 +53,13 @@ internal sealed class RemoveFromCartAuthorizationPreProcessor
             validationParameters: _tokenValidationParameters.Value
         );
 
+        // Extract and convert access token expire time.
+        var tokenExpireTime = ExtractUtcTimeFromToken(context: context.HttpContext);
+
+        var dateTimeUtcNow = DateTime.UtcNow;
+
         // Validate access token.
-        if (
-            !validateTokenResult.IsValid
-            || !CheckAccessTokenIsValid(
-                expClaim: context.HttpContext.User.FindFirstValue(
-                    claimType: JwtRegisteredClaimNames.Exp
-                )
-            )
-        )
+        if (!validateTokenResult.IsValid || tokenExpireTime <= dateTimeUtcNow)
         {
             await SendResponseAsync(
                 statusCode: RemoveFromCartResponseStatusCode.UN_AUTHORIZED,
@@ -71,118 +70,72 @@ internal sealed class RemoveFromCartAuthorizationPreProcessor
 
             return;
         }
+        #endregion
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
-
+        var cacheHandler = scope.Resolve<Lazy<ICacheHandler>>();
         var unitOfWork = scope.Resolve<Lazy<IMainUnitOfWork>>();
-        var userManager = scope.Resolve<Lazy<UserManager<UserEntity>>>();
 
-        #region Part1
-        // Get refresh token.
-        var refreshToken =
-            await unitOfWork.Value.RemoveFromCartRepository.GetRefreshTokenQueryAsync(
-                refreshTokenId: Guid.Parse(
-                        input: context.HttpContext.User.FindFirstValue(
-                            claimType: JwtRegisteredClaimNames.Jti
-                        )
-                    )
-                    .ToString(),
-                ct: ct
-            );
+        // Get id from access token.
+        var accessTokenId = Guid.Parse(
+                input: context.HttpContext.User.FindFirstValue(
+                    claimType: JwtRegisteredClaimNames.Jti
+                )
+            )
+            .ToString();
 
-        // Refresh token is not found.
-        if (Equals(objA: refreshToken, objB: default))
-        {
-            await SendResponseAsync(
-                statusCode: RemoveFromCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
+        var cacheKey = $"{nameof(RemoveFromCartRequest)}__AUTHORIZATION_CHECK__{accessTokenId}";
 
-            return;
-        }
-
-        // Refresh token is expired.
-        if (refreshToken.ExpiredAt < DateTime.UtcNow)
-        {
-            await SendResponseAsync(
-                statusCode: RemoveFromCartResponseStatusCode.UN_AUTHORIZED,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part2
-        var foundUserId = Guid.Parse(
-            input: context.HttpContext.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Sub)
+        // Get authorized access token id from cache.
+        var foundAuthorizedAccessToken = await cacheHandler.Value.GetAsync<bool>(
+            key: cacheKey,
+            cancellationToken: ct
         );
 
-        // Find user by user id.
-        var foundUser = await userManager.Value.FindByIdAsync(userId: foundUserId.ToString());
-
-        // User is not found
-        if (Equals(objA: foundUser, objB: default))
+        // Authorized access token id is found.
+        if (Equals(objA: foundAuthorizedAccessToken, objB: AppCacheModel<bool>.NotFound))
         {
-            await SendResponseAsync(
-                statusCode: RemoveFromCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
+            // Is refresh token found.
+            var isRefreshTokenFound =
+                await unitOfWork.Value.RemoveFromCartRepository.IsRefreshTokenFoundQueryAsync(
+                    refreshTokenId: accessTokenId,
+                    ct: ct
+                );
 
-            return;
+            // Refresh token is not found.
+            if (!isRefreshTokenFound)
+            {
+                await SendResponseAsync(
+                    statusCode: RemoveFromCartResponseStatusCode.FORBIDDEN,
+                    appRequest: context.Request,
+                    context: context.HttpContext,
+                    ct: ct
+                );
+
+                return;
+            }
+
+            var cacheExpiredTime = tokenExpireTime - dateTimeUtcNow - TimeSpan.FromSeconds(15);
+
+            // Caching the authorized access token id for faster authorization.
+            // Let the cache expire sooner than 15 seconds from
+            // the access token expire time.
+            await cacheHandler.Value.SetAsync(
+                key: cacheKey,
+                value: true,
+                new() { AbsoluteExpiration = dateTimeUtcNow.Add(value: cacheExpiredTime) },
+                cancellationToken: ct
+            );
         }
-        #endregion
-
-        #region Part3
-        // Is user temporarily removed.
-        var isUserTemporarilyRemoved =
-            await unitOfWork.Value.RemoveFromCartRepository.IsUserBannedQueryAsync(
-                userId: foundUser.Id,
-                ct: ct
-            );
-
-        // User is temporarily removed.
-        if (isUserTemporarilyRemoved)
-        {
-            await SendResponseAsync(
-                statusCode: RemoveFromCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part4
-        var roleClaim = context.HttpContext.User.FindFirstValue(claimType: "role");
-
-        // Is user in role
-        if (
-            !roleClaim.Equals(value: "user")
-            || !(await userManager.Value.IsInRoleAsync(user: foundUser, role: roleClaim))
-        )
-        {
-            await SendResponseAsync(
-                statusCode: RemoveFromCartResponseStatusCode.FORBIDDEN,
-                appRequest: context.Request,
-                context: context.HttpContext,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
 
         // Set user id.
-        context.Request.SetUserId(userId: foundUser.Id);
+        context.Request.SetUserId(
+            userId: Guid.Parse(
+                input: context.HttpContext.User.FindFirstValue(
+                    claimType: JwtRegisteredClaimNames.Sub
+                )
+            )
+        );
     }
 
     private static Task SendResponseAsync(
@@ -210,9 +163,14 @@ internal sealed class RemoveFromCartAuthorizationPreProcessor
         );
     }
 
-    private static bool CheckAccessTokenIsValid(string expClaim)
+    private static DateTime ExtractUtcTimeFromToken(HttpContext context)
     {
-        return DateTimeOffset.FromUnixTimeSeconds(seconds: long.Parse(s: expClaim)).UtcDateTime
-            >= DateTime.UtcNow;
+        return DateTimeOffset
+            .FromUnixTimeSeconds(
+                seconds: long.Parse(
+                    s: context.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Exp)
+                )
+            )
+            .UtcDateTime;
     }
 }
