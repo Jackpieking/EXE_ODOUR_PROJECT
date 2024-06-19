@@ -19,11 +19,10 @@ internal sealed class SwitchOrderStatusToDeliveringSuccessfullyRepository
         _context = context;
     }
 
-    public Task<bool> IsRefreshTokenValidQueryAsync(string refreshTokenId, CancellationToken ct)
+    public Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AsNoTracking()
             .AnyAsync(
                 predicate: token =>
                     token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,

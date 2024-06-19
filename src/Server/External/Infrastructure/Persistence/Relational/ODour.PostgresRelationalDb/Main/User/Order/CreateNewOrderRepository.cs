@@ -55,7 +55,6 @@ internal sealed class CreateNewOrderRepository : ICreateNewOrderRepository
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AsNoTracking()
             .AnyAsync(
                 predicate: token =>
                     token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,

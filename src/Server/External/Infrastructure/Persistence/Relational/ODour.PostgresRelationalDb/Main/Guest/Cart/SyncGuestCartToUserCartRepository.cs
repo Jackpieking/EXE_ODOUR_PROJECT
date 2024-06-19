@@ -41,7 +41,6 @@ internal sealed class SyncGuestCartToUserCartRepository : ISyncGuestCartToUserCa
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AsNoTracking()
             .AnyAsync(
                 predicate: token =>
                     token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,

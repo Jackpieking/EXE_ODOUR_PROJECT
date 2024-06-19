@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using ODour.Application.Feature.Admin.Order.SwitchOrderStatusToDeliveringSuccessfully;
 using ODour.Application.Feature.Admin.Order.SwitchOrderStatusToProcessing;
 using ODour.Application.Feature.Auth.Logout;
 using ODour.Application.Feature.Guest.Cart.SyncGuestCartToUserCart;
@@ -81,6 +82,10 @@ internal sealed class LogoutCachingPostProcessor
                 ),
                 cacheHandler.Value.RemoveAsync(
                     key: $"{nameof(SwitchOrderStatusToProcessingRequest)}__AUTHORIZATION_CHECK__{state.AppRequest.GetRefreshTokenId()}",
+                    cancellationToken: ct
+                ),
+                cacheHandler.Value.RemoveAsync(
+                    key: $"{nameof(SwitchOrderStatusToDeliveringSuccessfullyRequest)}__AUTHORIZATION_CHECK__{state.AppRequest.GetRefreshTokenId()}",
                     cancellationToken: ct
                 )
             );

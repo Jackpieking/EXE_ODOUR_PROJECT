@@ -8,7 +8,7 @@ namespace ODour.Domain.Feature.Main.Repository.Admin.Order;
 public interface ISwitchOrderStatusToDeliveringSuccessfullyRepository
 {
     #region Query
-    Task<bool> IsRefreshTokenValidQueryAsync(string refreshTokenId, CancellationToken ct);
+    Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct);
 
     Task<bool> IsOrderFoundQueryAsync(Guid orderId, CancellationToken ct);
 

@@ -14,9 +14,6 @@
     </PackageReference>
     <PackageReference Include="FastEndpoints.Swagger" Version="5.25.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Feature\Admin\SwitchOrderStatusToDeliveringSuccessfully\" />
-  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>disable</Nullable>

@@ -23,7 +23,6 @@ internal sealed class SwitchOrderStatusToProcessingRepository
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AsNoTracking()
             .AnyAsync(
                 predicate: token =>
                     token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,
