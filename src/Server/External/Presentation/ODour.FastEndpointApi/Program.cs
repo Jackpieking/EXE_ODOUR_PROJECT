@@ -101,4 +101,4 @@ app.UseAppExceptionHandler()
 // Clear all current allocations.
 GC.Collect();
 
-await app.RunAsync();
+app.Run();

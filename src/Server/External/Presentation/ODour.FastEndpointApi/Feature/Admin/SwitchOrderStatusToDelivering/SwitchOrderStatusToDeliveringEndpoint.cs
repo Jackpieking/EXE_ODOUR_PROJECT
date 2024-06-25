@@ -4,27 +4,24 @@ using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using ODour.Application.Feature.Admin.Order.SwitchOrderStatusToDeliveringSuccessfully;
-using ODour.FastEndpointApi.Feature.Admin.SwitchOrderStatusToDeliveringSuccessfully.HttpResponse;
-using ODour.FastEndpointApi.Feature.Admin.SwitchOrderStatusToDeliveringSuccessfully.Middlewares;
+using ODour.Application.Feature.Admin.Order.SwitchOrderStatusToDelivering;
+using ODour.FastEndpointApi.Feature.Admin.SwitchOrderStatusToDelivering.HttpResponse;
+using ODour.FastEndpointApi.Feature.Admin.SwitchOrderStatusToDelivering.Middlewares;
 
-namespace ODour.FastEndpointApi.Feature.Admin.SwitchOrderStatusToDeliveringSuccessfully;
+namespace ODour.FastEndpointApi.Feature.Admin.SwitchOrderStatusToDelivering;
 
-internal sealed class SwitchOrderStatusToDeliveringSuccessfullyEndpoint
-    : Endpoint<
-        SwitchOrderStatusToDeliveringSuccessfullyRequest,
-        SwitchOrderStatusToDeliveringSuccessfullyHttpResponse
-    >
+internal sealed class SwitchOrderStatusToDeliveringEndpoint
+    : Endpoint<SwitchOrderStatusToDeliveringRequest, SwitchOrderStatusToDeliveringHttpResponse>
 {
     public override void Configure()
     {
-        Post(routePatterns: "admin/orders/{orderId}/status-changing/delivering-successfully");
+        Post(routePatterns: "admin/orders/{orderId}/status-changing/delivering");
         AuthSchemes(authSchemeNames: JwtBearerDefaults.AuthenticationScheme);
         DontThrowIfValidationFails();
-        PreProcessor<SwitchOrderStatusToDeliveringSuccessfullyValidationPreProcessor>();
-        PreProcessor<SwitchOrderStatusToDeliveringSuccessfullyAuthorizationPreProcessor>();
-        PreProcessor<SwitchOrderStatusToDeliveringSuccessfullyCachingPreProcessor>();
-        PostProcessor<SwitchOrderStatusToDeliveringSuccessfullyCachingPostProcessor>();
+        PreProcessor<SwitchOrderStatusToDeliveringValidationPreProcessor>();
+        PreProcessor<SwitchOrderStatusToDeliveringAuthorizationPreProcessor>();
+        PreProcessor<SwitchOrderStatusToDeliveringCachingPreProcessor>();
+        PostProcessor<SwitchOrderStatusToDeliveringCachingPostProcessor>();
         Description(builder: builder =>
         {
             builder.ClearDefaultProduces(
@@ -35,26 +32,26 @@ internal sealed class SwitchOrderStatusToDeliveringSuccessfullyEndpoint
         });
         Summary(endpointSummary: summary =>
         {
-            summary.Summary = "Endpoint for switch order status to delivering successfully feature";
+            summary.Summary = "Endpoint for switch order status to delivering feature";
             summary.Description =
-                "This endpoint is used for switch order status to delivering successfully purpose.";
-            summary.ExampleRequest = new SwitchOrderStatusToDeliveringSuccessfullyRequest
+                "This endpoint is used for switch order status to delivering purpose.";
+            summary.ExampleRequest = new SwitchOrderStatusToDeliveringRequest
             {
                 OrderId = Guid.Empty,
             };
-            summary.Response<SwitchOrderStatusToDeliveringSuccessfullyHttpResponse>(
+            summary.Response<SwitchOrderStatusToDeliveringHttpResponse>(
                 description: "Represent successful operation response.",
                 example: new()
                 {
                     AppCode =
-                        SwitchOrderStatusToDeliveringSuccessfullyResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
+                        SwitchOrderStatusToDeliveringResponseStatusCode.OPERATION_SUCCESS.ToAppCode()
                 }
             );
         });
     }
 
-    public override async Task<SwitchOrderStatusToDeliveringSuccessfullyHttpResponse> ExecuteAsync(
-        SwitchOrderStatusToDeliveringSuccessfullyRequest req,
+    public override async Task<SwitchOrderStatusToDeliveringHttpResponse> ExecuteAsync(
+        SwitchOrderStatusToDeliveringRequest req,
         CancellationToken ct
     )
     {
@@ -62,7 +59,7 @@ internal sealed class SwitchOrderStatusToDeliveringSuccessfullyEndpoint
         var appResponse = await req.ExecuteAsync(ct: ct);
 
         // Convert to http response.
-        var httpResponse = SwitchOrderStatusToDeliveringSuccessfullyHttpResponseManager
+        var httpResponse = SwitchOrderStatusToDeliveringHttpResponseManager
             .Resolve(statusCode: appResponse.StatusCode)
             .Invoke(arg1: req, arg2: appResponse);
 

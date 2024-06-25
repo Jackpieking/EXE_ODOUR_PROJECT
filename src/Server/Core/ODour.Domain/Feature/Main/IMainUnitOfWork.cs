@@ -65,5 +65,9 @@ public interface IMainUnitOfWork
     ISwitchOrderStatusToProcessingRepository SwitchOrderStatusToProcessingRepository { get; }
 
     ISwitchOrderStatusToDeliveringSuccessfullyRepository SwitchOrderStatusToDeliveringSuccessfullyRepository { get; }
+
+    ISwitchOrderStatusToDeliveringRepository SwitchOrderStatusToDeliveringRepository { get; }
+
+    ISwitchOrderStatusToCancellingRepository SwitchOrderStatusToCancellingRepository { get; }
     #endregion
 }

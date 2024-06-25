@@ -44,6 +44,8 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetOrderDetailRepository _getOrderDetailRepository;
     private ISwitchOrderStatusToDeliveringSuccessfullyRepository _switchOrderStatusToDeliveringSuccessfullyRepository;
     private ISwitchOrderStatusToProcessingRepository _switchOrderStatusToProcessingRepository;
+    private ISwitchOrderStatusToDeliveringRepository _switchOrderStatusToDeliveringRepository;
+    private ISwitchOrderStatusToCancellingRepository _switchOrderStatusToCancellingRepository;
 
     #region Dependencies
     private readonly Lazy<DbContext> _context;
@@ -243,6 +245,24 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         {
             return _switchOrderStatusToDeliveringSuccessfullyRepository ??=
                 new SwitchOrderStatusToDeliveringSuccessfullyRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToDeliveringRepository SwitchOrderStatusToDeliveringRepository
+    {
+        get
+        {
+            return _switchOrderStatusToDeliveringRepository ??=
+                new SwitchOrderStatusToDeliveringRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToCancellingRepository SwitchOrderStatusToCancellingRepository
+    {
+        get
+        {
+            return _switchOrderStatusToCancellingRepository ??=
+                new SwitchOrderStatusToCancellingRepository(context: _context);
         }
     }
 }
