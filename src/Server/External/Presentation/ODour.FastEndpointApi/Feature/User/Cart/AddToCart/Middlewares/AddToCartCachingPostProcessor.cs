@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using ODour.Application.Feature.User.Cart.AddToCart;
+using ODour.Application.Feature.User.Cart.GetCartDetail;
 using ODour.Application.Share.Caching;
 using ODour.FastEndpointApi.Feature.User.Cart.AddToCart.Common;
 using ODour.FastEndpointApi.Feature.User.Cart.AddToCart.HttpResponse;
@@ -44,7 +45,7 @@ internal sealed class AddToCartCachingPostProcessor
         {
             // Caching the return value.
             await cacheHandler.Value.RemoveAsync(
-                key: $"{nameof(GetCartDetail)}__req__{context.Request.GetUserId()}",
+                key: $"{nameof(GetCartDetailRequest)}__req__{context.Request.GetUserId()}",
                 cancellationToken: ct
             );
         }

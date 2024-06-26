@@ -3,8 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ODour.PostgresRelationalDb.Data;
 
 #nullable disable
@@ -12,7 +10,7 @@ using ODour.PostgresRelationalDb.Data;
 namespace ODour.PostgresRelationalDb.Migrations
 {
     [DbContext(typeof(ODourContext))]
-    [Migration("20240609050645_M1_Init_Db")]
+    [Migration("20240615140924_M1_Init_Db")]
     partial class M1_Init_Db
     {
         /// <inheritdoc />
@@ -289,6 +287,11 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<DateTime>("DeliveredAt")
                         .HasColumnType("TIMESTAMPTZ");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<long>("OrderCode")
                         .HasColumnType("bigint");
 
@@ -303,15 +306,25 @@ namespace ODour.PostgresRelationalDb.Migrations
                     b.Property<Guid>("PaymentMethodId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderStatusId");
 
                     b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders", "main.order", t =>
                         {
@@ -1049,9 +1062,17 @@ namespace ODour.PostgresRelationalDb.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("ODour.Domain.Share.User.Entities.UserDetailEntity", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("OrderStatus");
 
                     b.Navigation("PaymentMethod");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ODour.Domain.Share.Order.Entities.OrderItemEntity", b =>
@@ -1355,6 +1376,8 @@ namespace ODour.PostgresRelationalDb.Migrations
             modelBuilder.Entity("ODour.Domain.Share.User.Entities.UserDetailEntity", b =>
                 {
                     b.Navigation("CartItems");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("UserVouchers");
                 });

@@ -1,11 +1,20 @@
 using System;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ODour.Domain.Feature.Main;
+using ODour.Domain.Feature.Main.Repository.Admin.Order;
 using ODour.Domain.Feature.Main.Repository.Auth;
+using ODour.Domain.Feature.Main.Repository.Guest.Cart;
 using ODour.Domain.Feature.Main.Repository.User.Cart;
+using ODour.Domain.Feature.Main.Repository.User.Order;
 using ODour.Domain.Feature.Main.Repository.User.Product;
+using ODour.Domain.Share.Role.Entities;
+using ODour.Domain.Share.User.Entities;
+using ODour.PostgresRelationalDb.Main.Admin.Order;
 using ODour.PostgresRelationalDb.Main.Auth;
+using ODour.PostgresRelationalDb.Main.Guest.Cart;
 using ODour.PostgresRelationalDb.Main.User.Cart;
+using ODour.PostgresRelationalDb.Main.User.Order;
 using ODour.PostgresRelationalDb.Main.User.Product;
 
 namespace ODour.PostgresRelationalDb.Main;
@@ -27,11 +36,35 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
     private IGetCartDetailRepository _getCartDetailRepository;
     private IAddToCartRepository _addToCartRepository;
     private IRemoveFromCartRepository _removeFromCartRepository;
-    private readonly Lazy<DbContext> _context;
+    private IGuestAddToCartRepository _guestAddToCartRepository;
+    private IGuestGetCartDetailRepository _guestGetCartDetailRepository;
+    private ISyncGuestCartToUserCartRepository _syncGuestCartToUserCartRepository;
+    private IGetUserOrdersRepository _getUserOrdersRepository;
+    private ICreateNewOrderRepository _createNewOrderRepository;
+    private IGetOrderDetailRepository _getOrderDetailRepository;
+    private ISwitchOrderStatusToDeliveringSuccessfullyRepository _switchOrderStatusToDeliveringSuccessfullyRepository;
+    private ISwitchOrderStatusToProcessingRepository _switchOrderStatusToProcessingRepository;
+    private ISwitchOrderStatusToDeliveringRepository _switchOrderStatusToDeliveringRepository;
+    private ISwitchOrderStatusToCancellingRepository _switchOrderStatusToCancellingRepository;
 
-    public MainUnitOfWork(Lazy<DbContext> context)
+    #region Dependencies
+    private readonly Lazy<DbContext> _context;
+    private readonly Lazy<UserManager<UserEntity>> _userManager;
+    private readonly Lazy<SignInManager<UserEntity>> _signInManager;
+    private readonly Lazy<RoleManager<RoleEntity>> _roleManager;
+    #endregion
+
+    public MainUnitOfWork(
+        Lazy<DbContext> context,
+        Lazy<UserManager<UserEntity>> userManager,
+        Lazy<SignInManager<UserEntity>> signInManager,
+        Lazy<RoleManager<RoleEntity>> roleManager
+    )
     {
         _context = context;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _roleManager = roleManager;
     }
 
     public IRegisterAsUserRepository RegisterAsUserRepository
@@ -145,6 +178,91 @@ public sealed class MainUnitOfWork : IMainUnitOfWork
         get
         {
             return _removeFromCartRepository ??= new RemoveFromCartRepository(context: _context);
+        }
+    }
+
+    public IGuestAddToCartRepository GuestAddToCartRepository
+    {
+        get
+        {
+            return _guestAddToCartRepository ??= new GuestAddToCartRepository(context: _context);
+        }
+    }
+
+    public IGuestGetCartDetailRepository GuestGetCartDetailRepository
+    {
+        get
+        {
+            return _guestGetCartDetailRepository ??= new GuestGetCartDetailRepository(
+                context: _context
+            );
+        }
+    }
+
+    public ISyncGuestCartToUserCartRepository SyncGuestCartToUserCartRepository
+    {
+        get
+        {
+            return _syncGuestCartToUserCartRepository ??= new SyncGuestCartToUserCartRepository(
+                context: _context
+            );
+        }
+    }
+
+    public IGetUserOrdersRepository GetUserOrdersRepository
+    {
+        get { return _getUserOrdersRepository ??= new GetUserOrdersRepository(context: _context); }
+    }
+
+    public ICreateNewOrderRepository CreateNewOrderRepository
+    {
+        get
+        {
+            return _createNewOrderRepository ??= new CreateNewOrderRepository(context: _context);
+        }
+    }
+
+    public IGetOrderDetailRepository GetOrderDetailRepository
+    {
+        get
+        {
+            return _getOrderDetailRepository ??= new GetOrderDetailRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToProcessingRepository SwitchOrderStatusToProcessingRepository
+    {
+        get
+        {
+            return _switchOrderStatusToProcessingRepository ??=
+                new SwitchOrderStatusToProcessingRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToDeliveringSuccessfullyRepository SwitchOrderStatusToDeliveringSuccessfullyRepository
+    {
+        get
+        {
+            return _switchOrderStatusToDeliveringSuccessfullyRepository ??=
+                new SwitchOrderStatusToDeliveringSuccessfullyRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToDeliveringRepository SwitchOrderStatusToDeliveringRepository
+    {
+        get
+        {
+            return _switchOrderStatusToDeliveringRepository ??=
+                new SwitchOrderStatusToDeliveringRepository(context: _context);
+        }
+    }
+
+    public ISwitchOrderStatusToCancellingRepository SwitchOrderStatusToCancellingRepository
+    {
+        get
+        {
+            return _switchOrderStatusToCancellingRepository ??=
+                new SwitchOrderStatusToCancellingRepository(context: _context);
         }
     }
 }

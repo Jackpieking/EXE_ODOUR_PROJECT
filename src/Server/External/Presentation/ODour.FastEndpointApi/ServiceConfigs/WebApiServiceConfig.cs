@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using ODour.Configuration.Presentation.WebApi.Authentication;
+using ODour.Configuration.Presentation.WebApi.CORS;
 using ODour.Configuration.Presentation.WebApi.Swagger;
 
 namespace ODour.FastEndpointApi.ServiceConfigs;
@@ -58,11 +59,50 @@ internal static class WebApiServiceConfig
         services.AddAuthorization();
 
         // ====
+        var corsOption = configuration
+            .GetRequiredSection("Cors")
+            .GetRequiredSection("Default")
+            .Get<CORSOption>();
+
         services.AddCors(setupAction: config =>
         {
             config.AddDefaultPolicy(configurePolicy: policy =>
             {
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                // Origins.
+                if (corsOption.Origins.Length == default)
+                {
+                    policy = policy.AllowAnyOrigin();
+                }
+                else
+                {
+                    policy = policy.WithOrigins(origins: corsOption.Origins);
+                }
+
+                // Headers.
+                if (corsOption.Headers.Length == default)
+                {
+                    policy = policy.AllowAnyHeader();
+                }
+                else
+                {
+                    policy = policy.WithHeaders(headers: corsOption.Headers);
+                }
+
+                // Methods
+                if (corsOption.Methods.Length == default)
+                {
+                    policy = policy.AllowAnyMethod();
+                }
+                else
+                {
+                    policy = policy.WithMethods(methods: corsOption.Methods);
+                }
+
+                // Allow credentials.
+                if (corsOption.AreCredentialsAllowed)
+                {
+                    policy = policy.AllowCredentials();
+                }
             });
         });
 

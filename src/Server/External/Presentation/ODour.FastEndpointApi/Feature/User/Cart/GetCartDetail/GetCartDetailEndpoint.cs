@@ -23,7 +23,11 @@ internal sealed class GetCartDetailEndpoint : Endpoint<EmptyRequest, GetCartDeta
         PostProcessor<GetCartDetailCachingPostProcessor>();
         Description(builder: builder =>
         {
-            builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
+            builder.ClearDefaultProduces(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            );
         });
         Summary(endpointSummary: summary =>
         {

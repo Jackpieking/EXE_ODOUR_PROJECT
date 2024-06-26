@@ -24,7 +24,7 @@ public sealed class UserSessionHandler : IUserSession
         _httpContextAccessor.Value.HttpContext.Session.Remove(key: key);
     }
 
-    public async Task AddAsync<TSource>(string key, TSource value, CancellationToken ct)
+    public async Task SetAsync<TSource>(string key, TSource value, CancellationToken ct)
     {
         await _httpContextAccessor.Value.HttpContext.Session.LoadAsync(cancellationToken: ct);
 

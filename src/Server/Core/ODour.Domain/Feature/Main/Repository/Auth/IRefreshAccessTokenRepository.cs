@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ODour.Domain.Share.User.Entities;
@@ -9,12 +8,10 @@ public interface IRefreshAccessTokenRepository
 {
     #region Quries
     Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshToken,
         string refreshTokenId,
+        string refreshTokenValue,
         CancellationToken ct
     );
-
-    Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct);
     #endregion
 
     #region Commands

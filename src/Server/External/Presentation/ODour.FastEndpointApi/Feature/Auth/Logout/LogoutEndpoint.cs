@@ -19,9 +19,14 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
         AuthSchemes(authSchemeNames: JwtBearerDefaults.AuthenticationScheme);
         PreProcessor<LogoutValidationPreProcessor>();
         PreProcessor<LogoutAuthorizationPreProcessor>();
+        PostProcessor<LogoutCachingPostProcessor>();
         Description(builder: builder =>
         {
-            builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
+            builder.ClearDefaultProduces(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            );
         });
         Summary(endpointSummary: summary =>
         {
@@ -41,8 +46,6 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
     )
     {
         var stateBag = ProcessorState<LogoutStateBag>();
-
-        stateBag.AppRequest.SetRefreshToken(refreshToken: stateBag.FoundRefreshTokenValue);
 
         // Get app feature response.
         var appResponse = await stateBag.AppRequest.ExecuteAsync(ct: ct);
@@ -65,6 +68,9 @@ internal sealed class LogoutEndpoint : Endpoint<EmptyRequest, LogoutHttpResponse
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

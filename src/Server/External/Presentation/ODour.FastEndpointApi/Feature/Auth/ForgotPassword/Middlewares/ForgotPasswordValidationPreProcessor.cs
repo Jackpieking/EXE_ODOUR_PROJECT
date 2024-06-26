@@ -38,8 +38,6 @@ internal sealed class ForgotPasswordValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

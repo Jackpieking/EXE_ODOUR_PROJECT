@@ -22,7 +22,11 @@ internal sealed class RemoveFromCartEndpoint
         PostProcessor<RemoveFromCartCachingPostProcessor>();
         Description(builder: builder =>
         {
-            builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
+            builder.ClearDefaultProduces(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            );
         });
         Summary(endpointSummary: summary =>
         {
@@ -67,6 +71,9 @@ internal sealed class RemoveFromCartEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

@@ -38,8 +38,6 @@ internal sealed class GetAllProductsValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

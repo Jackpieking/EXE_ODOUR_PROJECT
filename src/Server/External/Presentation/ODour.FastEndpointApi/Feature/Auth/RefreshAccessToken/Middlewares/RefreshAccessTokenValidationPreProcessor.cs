@@ -38,8 +38,6 @@ internal sealed class RefreshAccessTokenValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

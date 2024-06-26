@@ -5,7 +5,7 @@ using ODour.Application.Feature.User.Cart.GetCartDetail;
 
 namespace ODour.FastEndpointApi.Feature.User.Cart.GetCartDetail.HttpResponse;
 
-internal sealed class GetCartDetailHttpResponseManager
+internal static class GetCartDetailHttpResponseManager
 {
     private static ConcurrentDictionary<
         GetCartDetailResponseStatusCode,
@@ -52,7 +52,7 @@ internal sealed class GetCartDetailHttpResponseManager
             value: (_, response) =>
                 new()
                 {
-                    HttpCode = StatusCodes.Status404NotFound,
+                    HttpCode = StatusCodes.Status400BadRequest,
                     AppCode = response.StatusCode.ToAppCode()
                 }
         );

@@ -34,7 +34,7 @@ internal sealed class GetRelatedProductsByCategoryIdCachingPreProcessor
         }
 
         state.CacheKey =
-            $"{nameof(GetRelatedProductsByCategoryId)}__req__{context.Request.CategoryId}";
+            $"{nameof(GetRelatedProductsByCategoryIdRequest)}__req__{context.Request.CategoryId}";
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 
@@ -61,8 +61,6 @@ internal sealed class GetRelatedProductsByCategoryIdCachingPreProcessor
                 statusCode: httpCode,
                 cancellation: ct
             );
-
-            context.HttpContext.MarkResponseStart();
 
             return;
         }

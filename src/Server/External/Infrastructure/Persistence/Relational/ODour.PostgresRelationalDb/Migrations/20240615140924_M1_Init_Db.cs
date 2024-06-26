@@ -379,54 +379,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "Orders",
-                schema: "main.order",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OrderStatusId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PaymentMethodId = table.Column<Guid>(type: "uuid", nullable: false),
-                    OrderCode = table.Column<long>(type: "bigint", nullable: false),
-                    OrderNote = table.Column<string>(
-                        type: "character varying(500)",
-                        maxLength: 500,
-                        nullable: false
-                    ),
-                    TotalPrice = table.Column<decimal>(
-                        type: "numeric(12,2)",
-                        precision: 12,
-                        scale: 2,
-                        nullable: false
-                    ),
-                    DeliveredAddress = table.Column<string>(
-                        type: "character varying(500)",
-                        maxLength: 500,
-                        nullable: false
-                    ),
-                    DeliveredAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_OrderStatuses_OrderStatusId",
-                        column: x => x.OrderStatusId,
-                        principalSchema: "main.order",
-                        principalTable: "OrderStatuses",
-                        principalColumn: "Id"
-                    );
-                    table.ForeignKey(
-                        name: "FK_Orders_PaymentMethods_PaymentMethodId",
-                        column: x => x.PaymentMethodId,
-                        principalSchema: "main.payment",
-                        principalTable: "PaymentMethods",
-                        principalColumn: "Id"
-                    );
-                },
-                comment: "Contain orders."
-            );
-
-            migrationBuilder.CreateTable(
                 name: "Products",
                 schema: "main.product",
                 columns: table => new
@@ -792,48 +744,6 @@ namespace ODour.PostgresRelationalDb.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "OrderItems",
-                schema: "main.order",
-                columns: table => new
-                {
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<string>(
-                        type: "character varying(10)",
-                        maxLength: 10,
-                        nullable: false
-                    ),
-                    SellingPrice = table.Column<decimal>(
-                        type: "numeric(12,2)",
-                        precision: 12,
-                        scale: 2,
-                        nullable: false
-                    ),
-                    SellingQuantity = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderItems", x => new { x.OrderId, x.ProductId });
-                    table.ForeignKey(
-                        name: "FK_OrderItems_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalSchema: "main.order",
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_OrderItems_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalSchema: "main.product",
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                },
-                comment: "Contain order items."
-            );
-
-            migrationBuilder.CreateTable(
                 name: "ProductMedias",
                 schema: "main.product",
                 columns: table => new
@@ -894,6 +804,72 @@ namespace ODour.PostgresRelationalDb.Migrations
                     );
                 },
                 comment: "Contain cart items."
+            );
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                schema: "main.order",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderStatusId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PaymentMethodId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FullName = table.Column<string>(
+                        type: "character varying(100)",
+                        maxLength: 100,
+                        nullable: false
+                    ),
+                    PhoneNumber = table.Column<string>(
+                        type: "character varying(20)",
+                        maxLength: 20,
+                        nullable: false
+                    ),
+                    OrderCode = table.Column<long>(type: "bigint", nullable: false),
+                    OrderNote = table.Column<string>(
+                        type: "character varying(500)",
+                        maxLength: 500,
+                        nullable: false
+                    ),
+                    TotalPrice = table.Column<decimal>(
+                        type: "numeric(12,2)",
+                        precision: 12,
+                        scale: 2,
+                        nullable: false
+                    ),
+                    DeliveredAddress = table.Column<string>(
+                        type: "character varying(500)",
+                        maxLength: 500,
+                        nullable: false
+                    ),
+                    DeliveredAt = table.Column<DateTime>(type: "TIMESTAMPTZ", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_OrderStatuses_OrderStatusId",
+                        column: x => x.OrderStatusId,
+                        principalSchema: "main.order",
+                        principalTable: "OrderStatuses",
+                        principalColumn: "Id"
+                    );
+                    table.ForeignKey(
+                        name: "FK_Orders_PaymentMethods_PaymentMethodId",
+                        column: x => x.PaymentMethodId,
+                        principalSchema: "main.payment",
+                        principalTable: "PaymentMethods",
+                        principalColumn: "Id"
+                    );
+                    table.ForeignKey(
+                        name: "FK_Orders_UserDetails_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "main.user",
+                        principalTable: "UserDetails",
+                        principalColumn: "UserId"
+                    );
+                },
+                comment: "Contain orders."
             );
 
             migrationBuilder.CreateTable(
@@ -966,6 +942,48 @@ namespace ODour.PostgresRelationalDb.Migrations
                 comment: "Contain user vouchers."
             );
 
+            migrationBuilder.CreateTable(
+                name: "OrderItems",
+                schema: "main.order",
+                columns: table => new
+                {
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductId = table.Column<string>(
+                        type: "character varying(10)",
+                        maxLength: 10,
+                        nullable: false
+                    ),
+                    SellingPrice = table.Column<decimal>(
+                        type: "numeric(12,2)",
+                        precision: 12,
+                        scale: 2,
+                        nullable: false
+                    ),
+                    SellingQuantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => new { x.OrderId, x.ProductId });
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalSchema: "main.order",
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalSchema: "main.product",
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                },
+                comment: "Contain order items."
+            );
+
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_UserId",
                 schema: "main.order",
@@ -992,6 +1010,13 @@ namespace ODour.PostgresRelationalDb.Migrations
                 schema: "main.order",
                 table: "Orders",
                 column: "PaymentMethodId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_UserId",
+                schema: "main.order",
+                table: "Orders",
+                column: "UserId"
             );
 
             migrationBuilder.CreateIndex(
@@ -1165,23 +1190,23 @@ namespace ODour.PostgresRelationalDb.Migrations
 
             migrationBuilder.DropTable(name: "Roles");
 
-            migrationBuilder.DropTable(name: "UserDetails", schema: "main.user");
-
             migrationBuilder.DropTable(name: "Vouchers", schema: "main.voucher");
 
             migrationBuilder.DropTable(name: "OrderStatuses", schema: "main.order");
 
             migrationBuilder.DropTable(name: "PaymentMethods", schema: "main.payment");
 
+            migrationBuilder.DropTable(name: "UserDetails", schema: "main.user");
+
             migrationBuilder.DropTable(name: "Categories", schema: "main.category");
 
             migrationBuilder.DropTable(name: "ProductStatuses", schema: "main.product");
 
+            migrationBuilder.DropTable(name: "VoucherTypes", schema: "main.voucher");
+
             migrationBuilder.DropTable(name: "AccountStatuses", schema: "main.account_status");
 
             migrationBuilder.DropTable(name: "Users");
-
-            migrationBuilder.DropTable(name: "VoucherTypes", schema: "main.voucher");
         }
     }
 }

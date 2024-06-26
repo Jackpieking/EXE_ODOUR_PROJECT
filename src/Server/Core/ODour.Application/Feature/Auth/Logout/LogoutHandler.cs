@@ -18,11 +18,10 @@ internal sealed class LogoutHandler : IFeatureHandler<LogoutRequest, LogoutRespo
     public async Task<LogoutResponse> ExecuteAsync(LogoutRequest command, CancellationToken ct)
     {
         // Attempt to remove refresh token by its value.
-        var dbResult =
-            await _unitOfWork.Value.LogoutRepository.RemoveRefreshTokenByItsValueCommandAsync(
-                refreshToken: command.GetRefreshToken(),
-                ct: ct
-            );
+        var dbResult = await _unitOfWork.Value.LogoutRepository.RemoveRefreshTokenCommandAsync(
+            refreshTokenId: command.GetRefreshTokenId(),
+            ct: ct
+        );
 
         if (!dbResult)
         {

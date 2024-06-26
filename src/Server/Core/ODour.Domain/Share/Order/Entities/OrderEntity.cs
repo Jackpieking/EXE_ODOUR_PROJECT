@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using ODour.Domain.Share.Base.Entities;
 using ODour.Domain.Share.Payment.Entities;
+using ODour.Domain.Share.User.Entities;
 
 namespace ODour.Domain.Share.Order.Entities;
 
@@ -16,8 +17,14 @@ public sealed class OrderEntity : IEntity
     #region ForeignKeys
     public Guid OrderStatusId { get; set; }
 
+    public Guid UserId { get; set; }
+
     public Guid PaymentMethodId { get; set; }
     #endregion
+
+    public string FullName { get; set; }
+
+    public string PhoneNumber { get; set; }
 
     public long OrderCode { get; set; }
 
@@ -31,6 +38,8 @@ public sealed class OrderEntity : IEntity
 
     #region NavigationProperties
     public PaymentMethodEntity PaymentMethod { get; set; }
+
+    public UserDetailEntity User { get; set; }
 
     public OrderStatusEntity OrderStatus { get; set; }
     #endregion
@@ -56,6 +65,20 @@ public sealed class OrderEntity : IEntity
             public const int MinLength = 2;
 
             public const int MaxLength = 500;
+        }
+
+        public static class FullName
+        {
+            public const int MinLength = 2;
+
+            public const int MaxLength = 100;
+        }
+
+        public static class PhoneNumber
+        {
+            public const int MinLength = 2;
+
+            public const int MaxLength = 20;
         }
 
         public static class TotalPrice

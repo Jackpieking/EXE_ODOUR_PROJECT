@@ -33,7 +33,10 @@ internal sealed class GetProductDetailByProductIdCachingPreProcessor
             return;
         }
 
-        state.CacheKey = $"{nameof(GetProductDetailByProductId)}__req__{context.Request.ProductId}";
+        context.Request.ProductId = context.Request.ProductId.ToUpper();
+
+        state.CacheKey =
+            $"{nameof(GetProductDetailByProductIdRequest)}__req__{context.Request.ProductId}";
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 
@@ -59,8 +62,6 @@ internal sealed class GetProductDetailByProductIdCachingPreProcessor
                 statusCode: httpCode,
                 cancellation: ct
             );
-
-            context.HttpContext.MarkResponseStart();
 
             return;
         }

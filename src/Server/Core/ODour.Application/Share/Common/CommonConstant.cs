@@ -27,6 +27,6 @@ public static class CommonConstant
 
         public const string DefaultStringSeparator = "<APP_TK>";
 
-        public const string AppCartSessionKey = "AppCart";
+        public const string AppCartSessionKey = "APP_CART_SESSION_KEY";
     }
 }

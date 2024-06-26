@@ -2,5 +2,6 @@ namespace ODour.Application.Feature.User.Product.GetProductsForHomePage;
 
 public enum GetProductsForHomePageResponseStatusCode
 {
-    OPERATION_SUCCESS
+    OPERATION_SUCCESS,
+    INPUT_VALIDATION_FAIL
 }

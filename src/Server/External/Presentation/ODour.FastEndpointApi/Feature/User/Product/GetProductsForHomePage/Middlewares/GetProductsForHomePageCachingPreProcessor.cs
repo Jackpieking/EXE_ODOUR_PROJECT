@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using ODour.Application.Feature.User.Product.GetProductsForHomePage;
 using ODour.Application.Share.Caching;
 using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.Common;
 using ODour.FastEndpointApi.Feature.User.Product.GetProductsForHomePage.HttpResponse;
@@ -30,7 +31,7 @@ internal sealed class GetProductsForHomePageCachingPreProcessor
             return;
         }
 
-        state.CacheKey = nameof(GetProductsForHomePage);
+        state.CacheKey = nameof(GetProductsForHomePageRequest);
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
 
@@ -56,8 +57,6 @@ internal sealed class GetProductsForHomePageCachingPreProcessor
                 statusCode: httpCode,
                 cancellation: ct
             );
-
-            context.HttpContext.MarkResponseStart();
 
             return;
         }

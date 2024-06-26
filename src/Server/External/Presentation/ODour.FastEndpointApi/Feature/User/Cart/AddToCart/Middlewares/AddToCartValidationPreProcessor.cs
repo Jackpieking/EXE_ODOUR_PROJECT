@@ -35,8 +35,6 @@ internal sealed class AddToCartValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

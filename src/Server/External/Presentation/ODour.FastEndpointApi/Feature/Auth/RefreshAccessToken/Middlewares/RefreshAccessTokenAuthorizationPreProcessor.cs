@@ -3,13 +3,12 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using ODour.Application.Feature.Auth.RefreshAccessToken;
 using ODour.Domain.Feature.Main;
-using ODour.Domain.Share.User.Entities;
 using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.Common;
 using ODour.FastEndpointApi.Feature.Auth.RefreshAccessToken.HttpResponse;
 
@@ -36,6 +35,12 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         CancellationToken ct
     )
     {
+        // Bypass if response has started.
+        if (context.HttpContext.ResponseStarted())
+        {
+            return;
+        }
+
         JsonWebTokenHandler jsonWebTokenHandler = new();
 
         // Validate access token.
@@ -58,14 +63,11 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
             return;
         }
 
+        // Extract and convert access token expire time.
+        var tokenExpireTime = ExtractUtcTimeFromToken(context: context.HttpContext);
+
         // Token is not expired.
-        if (
-            CheckAccessTokenIsValid(
-                expClaim: context.HttpContext.User.FindFirstValue(
-                    claimType: JwtRegisteredClaimNames.Exp
-                )
-            )
-        )
+        if (tokenExpireTime > DateTime.UtcNow)
         {
             await SendResponseAsync(
                 statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
@@ -77,25 +79,23 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         }
 
         await using var scope = _serviceScopeFactory.Value.CreateAsyncScope();
-
         var unitOfWork = scope.Resolve<Lazy<IMainUnitOfWork>>();
-        var userManager = scope.Resolve<Lazy<UserManager<UserEntity>>>();
 
-        #region Part1
-        var foundAccessTokenId = Guid.Parse(
+        // Get id from access token.
+        var accessTokenId = Guid.Parse(
             input: context.HttpContext.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Jti)
         );
 
         // Get refresh token.
-        var refreshToken =
+        var foundRefreshToken =
             await unitOfWork.Value.RefreshAccessTokenRepository.GetRefreshTokenQueryAsync(
-                refreshToken: context.Request.RefreshToken,
-                refreshTokenId: foundAccessTokenId.ToString(),
+                refreshTokenId: accessTokenId.ToString(),
+                refreshTokenValue: context.Request.RefreshToken,
                 ct: ct
             );
 
         // Refresh token is not found.
-        if (Equals(objA: refreshToken, objB: default))
+        if (Equals(objA: foundRefreshToken, objB: default))
         {
             await SendResponseAsync(
                 statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
@@ -105,88 +105,12 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
 
             return;
         }
-
-        // Refresh token is expired.
-        if (refreshToken.ExpiredAt < DateTime.UtcNow)
-        {
-            await SendResponseAsync(
-                statusCode: RefreshAccessTokenResponseStatusCode.UN_AUTHORIZED,
-                context: context,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part2
-        // Find user by user id.
-        var foundUser = await userManager.Value.FindByIdAsync(
-            userId: Guid.Parse(
-                    input: context.HttpContext.User.FindFirstValue(
-                        claimType: JwtRegisteredClaimNames.Sub
-                    )
-                )
-                .ToString()
-        );
-
-        // User is not found
-        if (Equals(objA: foundUser, objB: default))
-        {
-            await SendResponseAsync(
-                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                context: context,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part3
-        // Is user temporarily removed.
-        var isUserTemporarilyRemoved =
-            await unitOfWork.Value.RefreshAccessTokenRepository.IsUserBannedQueryAsync(
-                userId: foundUser.Id,
-                ct: ct
-            );
-
-        // User is temporarily removed.
-        if (isUserTemporarilyRemoved)
-        {
-            await SendResponseAsync(
-                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                context: context,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
-
-        #region Part4
-        // Is user in role.
-        var isUserInRole = await userManager.Value.IsInRoleAsync(
-            user: foundUser,
-            role: context.HttpContext.User.FindFirstValue(claimType: "role")
-        );
-
-        // User is not in role.
-        if (!isUserInRole)
-        {
-            await SendResponseAsync(
-                statusCode: RefreshAccessTokenResponseStatusCode.FORBIDDEN,
-                context: context,
-                ct: ct
-            );
-
-            return;
-        }
-        #endregion
 
         // State some changes.
-        state.FoundUserId = foundUser.Id;
-        state.FoundAccessTokenId = foundAccessTokenId;
+        state.FoundUserId = Guid.Parse(
+            input: context.HttpContext.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Sub)
+        );
+        state.FoundAccessTokenId = accessTokenId;
     }
 
     private static Task SendResponseAsync(
@@ -198,8 +122,6 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         var httpResponse = RefreshAccessTokenHttpResponseManager
             .Resolve(statusCode: statusCode)
             .Invoke(arg1: context.Request, arg2: new() { StatusCode = statusCode });
-
-        context.HttpContext.MarkResponseStart();
 
         /*
         * Store the real http code of http response into a temporary variable.
@@ -215,9 +137,14 @@ internal sealed class RefreshAccessTokenAuthorizationPreProcessor
         );
     }
 
-    private static bool CheckAccessTokenIsValid(string expClaim)
+    private static DateTime ExtractUtcTimeFromToken(HttpContext context)
     {
-        return DateTimeOffset.FromUnixTimeSeconds(seconds: long.Parse(s: expClaim)).UtcDateTime
-            >= DateTime.UtcNow;
+        return DateTimeOffset
+            .FromUnixTimeSeconds(
+                seconds: long.Parse(
+                    s: context.User.FindFirstValue(claimType: JwtRegisteredClaimNames.Exp)
+                )
+            )
+            .UtcDateTime;
     }
 }

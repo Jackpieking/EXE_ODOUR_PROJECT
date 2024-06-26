@@ -36,12 +36,6 @@ internal sealed class RemoveFromCartHandler
         }
         #endregion
 
-        // Bypass if quantity is zero
-        if (command.Quantity == default)
-        {
-            return new() { StatusCode = RemoveFromCartResponseStatusCode.OPERATION_SUCCESS };
-        }
-
         // Update quantity again
         var dbResult =
             await _mainUnitOfWork.Value.RemoveFromCartRepository.UpdateQuantityQueryAsync(

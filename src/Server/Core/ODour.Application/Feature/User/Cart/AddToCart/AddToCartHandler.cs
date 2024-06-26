@@ -9,6 +9,7 @@ namespace ODour.Application.Feature.User.Cart.AddToCart;
 internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddToCartResponse>
 {
     private readonly Lazy<IMainUnitOfWork> _mainUnitOfWork;
+    private static readonly int MaxNumberOfCartItem = 10;
 
     public AddToCartHandler(Lazy<IMainUnitOfWork> mainUnitOfWork)
     {
@@ -27,7 +28,10 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
             ct: ct
         );
 
-        if (Equals(objA: foundProduct, objB: default))
+        if (
+            Equals(objA: foundProduct, objB: default)
+            || command.Quantity > foundProduct.QuantityInStock
+        )
         {
             return new() { StatusCode = AddToCartResponseStatusCode.INPUT_VALIDATION_FAIL };
         }
@@ -35,6 +39,7 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
         // Is cart item found
         var foundCartItem = await _mainUnitOfWork.Value.AddToCartRepository.FindCartItemQueryAsync(
             productId: command.ProductId,
+            userId: command.GetUserId(),
             ct: ct
         );
 
@@ -43,7 +48,7 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
             && foundCartItem.Quantity + command.Quantity > foundProduct.QuantityInStock
         )
         {
-            return new() { StatusCode = AddToCartResponseStatusCode.INPUT_VALIDATION_FAIL };
+            return new() { StatusCode = AddToCartResponseStatusCode.CART_ITEM_QUANTITY_EXCEED };
         }
         #endregion
 
@@ -51,6 +56,18 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
 
         if (Equals(objA: foundCartItem, objB: default))
         {
+            // Max number of product in cart reached
+            var totalNumberOfProductInCart =
+                await _mainUnitOfWork.Value.AddToCartRepository.GetTotalNumberOfCartItemQueryAsync(
+                    userId: command.GetUserId(),
+                    ct: ct
+                );
+
+            if (totalNumberOfProductInCart >= MaxNumberOfCartItem)
+            {
+                return new() { StatusCode = AddToCartResponseStatusCode.CART_IS_FULL };
+            }
+
             // Add to cart
             dbResult = await _mainUnitOfWork.Value.AddToCartRepository.AddItemToCartQueryAsync(
                 cartItem: new()
@@ -64,16 +81,10 @@ internal sealed class AddToCartHandler : IFeatureHandler<AddToCartRequest, AddTo
         }
         else
         {
-            // Bypass if quantity is zero
-            if (command.Quantity == default)
-            {
-                return new() { StatusCode = AddToCartResponseStatusCode.OPERATION_SUCCESS };
-            }
-
             // Update quantity
             dbResult = await _mainUnitOfWork.Value.AddToCartRepository.UpdateQuantityQueryAsync(
                 productId: command.ProductId,
-                newQuantity: command.Quantity,
+                newQuantity: foundCartItem.Quantity + command.Quantity,
                 userId: command.GetUserId(),
                 ct: ct
             );

@@ -38,8 +38,6 @@ internal sealed class RemoveFromCartValidationPreProcessor
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

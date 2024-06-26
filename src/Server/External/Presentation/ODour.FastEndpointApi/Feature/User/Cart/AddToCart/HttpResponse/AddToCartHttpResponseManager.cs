@@ -61,7 +61,27 @@ internal static class AddToCartHttpResponseManager
             value: (_, response) =>
                 new()
                 {
-                    HttpCode = StatusCodes.Status404NotFound,
+                    HttpCode = StatusCodes.Status400BadRequest,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
+
+        _dictionary.TryAdd(
+            key: AddToCartResponseStatusCode.CART_IS_FULL,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status417ExpectationFailed,
+                    AppCode = response.StatusCode.ToAppCode()
+                }
+        );
+
+        _dictionary.TryAdd(
+            key: AddToCartResponseStatusCode.CART_ITEM_QUANTITY_EXCEED,
+            value: (_, response) =>
+                new()
+                {
+                    HttpCode = StatusCodes.Status417ExpectationFailed,
                     AppCode = response.StatusCode.ToAppCode()
                 }
         );

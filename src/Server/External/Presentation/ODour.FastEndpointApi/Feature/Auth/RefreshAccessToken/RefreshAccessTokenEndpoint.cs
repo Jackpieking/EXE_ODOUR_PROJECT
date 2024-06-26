@@ -22,7 +22,11 @@ internal sealed class RefreshAccessTokenEndpoint
         PreProcessor<RefreshAccessTokenAuthorizationPreProcessor>();
         Description(builder: builder =>
         {
-            builder.ClearDefaultProduces(statusCodes: StatusCodes.Status400BadRequest);
+            builder.ClearDefaultProduces(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            );
         });
         Summary(endpointSummary: summary =>
         {
@@ -71,6 +75,9 @@ internal sealed class RefreshAccessTokenEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

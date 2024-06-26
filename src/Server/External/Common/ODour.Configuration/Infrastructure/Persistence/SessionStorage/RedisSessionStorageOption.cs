@@ -15,5 +15,7 @@ public sealed class RedisSessionStorageOption
         public bool IsEssential { get; set; }
 
         public int SecurePolicy { get; set; }
+
+        public int SameSite { get; set; }
     }
 }

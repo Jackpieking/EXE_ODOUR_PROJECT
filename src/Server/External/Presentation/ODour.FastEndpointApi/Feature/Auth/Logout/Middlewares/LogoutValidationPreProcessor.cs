@@ -34,8 +34,6 @@ internal sealed class LogoutValidationPreProcessor : PreProcessor<EmptyRequest, 
                 cancellation: ct
             );
 
-            context.HttpContext.MarkResponseStart();
-
             return;
         }
     }

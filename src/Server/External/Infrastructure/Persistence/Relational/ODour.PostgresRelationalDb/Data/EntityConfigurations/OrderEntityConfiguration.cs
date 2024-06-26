@@ -25,6 +25,22 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
             .Property(propertyExpression: builder => builder.PaymentMethodId)
             .IsRequired(required: true);
 
+        builder.Property(propertyExpression: builder => builder.UserId).IsRequired(required: true);
+
+        builder
+            .Property(propertyExpression: builder => builder.FullName)
+            .HasMaxLength(maxLength: OrderEntity.MetaData.FullName.MaxLength)
+            .IsRequired(required: true);
+
+        builder
+            .Property(propertyExpression: builder => builder.PhoneNumber)
+            .HasMaxLength(maxLength: OrderEntity.MetaData.PhoneNumber.MaxLength)
+            .IsRequired(required: true);
+
+        builder
+            .Property(propertyExpression: builder => builder.OrderStatusId)
+            .IsRequired(required: true);
+
         builder
             .Property(propertyExpression: builder => builder.OrderCode)
             .IsRequired(required: true);
@@ -63,6 +79,12 @@ internal sealed class OrderEntityConfiguration : IEntityTypeConfiguration<OrderE
             .HasOne(navigationExpression: order => order.OrderStatus)
             .WithMany(navigationExpression: orderStatus => orderStatus.Orders)
             .HasForeignKey(foreignKeyExpression: order => order.OrderStatusId)
+            .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+
+        builder
+            .HasOne(navigationExpression: order => order.User)
+            .WithMany(navigationExpression: user => user.Orders)
+            .HasForeignKey(foreignKeyExpression: order => order.UserId)
             .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
         #endregion
     }

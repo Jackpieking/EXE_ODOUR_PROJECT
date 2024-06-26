@@ -4,7 +4,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using ODour.Application.Feature.Auth.RegisterAsUser;
 using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.HttpResponse;
-using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.Middlewares.Validation;
+using ODour.FastEndpointApi.Feature.Auth.RegisterAsUser.Middlewares;
 
 namespace ODour.FastEndpointApi.Feature.Auth.RegisterAsUser;
 
@@ -62,6 +62,9 @@ internal sealed class RegisterAsUserEndpoint
             statusCode: httpResponseStatusCode,
             cancellation: ct
         );
+
+        // Set the http code of http response back.
+        httpResponse.HttpCode = httpResponseStatusCode;
 
         return httpResponse;
     }

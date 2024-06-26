@@ -19,31 +19,13 @@ internal sealed class AddToCartRepository : IAddToCartRepository
         _context = context;
     }
 
-    public Task<UserTokenEntity> GetRefreshTokenQueryAsync(
-        string refreshTokenId,
-        CancellationToken ct
-    )
+    public Task<bool> IsRefreshTokenFoundQueryAsync(string refreshTokenId, CancellationToken ct)
     {
         return _context
             .Value.Set<UserTokenEntity>()
-            .AsNoTracking()
-            .Where(predicate: token => token.LoginProvider.Equals(refreshTokenId))
-            .Select(token => new UserTokenEntity
-            {
-                Value = token.Value,
-                ExpiredAt = token.ExpiredAt
-            })
-            .FirstOrDefaultAsync(cancellationToken: ct);
-    }
-
-    public Task<bool> IsUserBannedQueryAsync(Guid userId, CancellationToken ct)
-    {
-        return _context
-            .Value.Set<UserDetailEntity>()
             .AnyAsync(
-                predicate: user =>
-                    user.UserId == userId
-                    && user.AccountStatus.Name.Equals("Bị cấm trong hệ thống"),
+                predicate: token =>
+                    token.LoginProvider.Equals(refreshTokenId) && token.ExpiredAt > DateTime.UtcNow,
                 cancellationToken: ct
             );
     }
@@ -103,10 +85,7 @@ internal sealed class AddToCartRepository : IAddToCartRepository
                         )
                         .ExecuteUpdateAsync(
                             setPropertyCalls: update =>
-                                update.SetProperty(
-                                    entity => entity.Quantity,
-                                    entity => entity.Quantity + newQuantity
-                                ),
+                                update.SetProperty(entity => entity.Quantity, newQuantity),
                             cancellationToken: ct
                         );
 
@@ -123,11 +102,18 @@ internal sealed class AddToCartRepository : IAddToCartRepository
         return dbResult;
     }
 
-    public Task<CartItemEntity> FindCartItemQueryAsync(string productId, CancellationToken ct)
+    public Task<CartItemEntity> FindCartItemQueryAsync(
+        string productId,
+        Guid userId,
+        CancellationToken ct
+    )
     {
         return _context
             .Value.Set<CartItemEntity>()
-            .Where(predicate: cartItem => cartItem.ProductId.Equals(productId))
+            .AsNoTracking()
+            .Where(predicate: cartItem =>
+                cartItem.ProductId.Equals(productId) && cartItem.UserId == userId
+            )
             .Select(selector: cartItem => new CartItemEntity { Quantity = cartItem.Quantity })
             .FirstOrDefaultAsync(cancellationToken: ct);
     }
@@ -136,11 +122,19 @@ internal sealed class AddToCartRepository : IAddToCartRepository
     {
         return _context
             .Value.Set<ProductEntity>()
+            .AsNoTracking()
             .Where(predicate: product => product.Id.Equals(productId))
             .Select(selector: product => new ProductEntity
             {
                 QuantityInStock = product.QuantityInStock
             })
             .FirstOrDefaultAsync(cancellationToken: ct);
+    }
+
+    public Task<int> GetTotalNumberOfCartItemQueryAsync(Guid userId, CancellationToken ct)
+    {
+        return _context
+            .Value.Set<CartItemEntity>()
+            .CountAsync(cartItem => cartItem.UserId == userId, cancellationToken: ct);
     }
 }
